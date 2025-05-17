@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузчик Музыки с YouTube</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Импорт шрифта Inter. Обычно рекомендуется делать это через <link> в <head>, 
+           но @import в <style> также является валидным способом. */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        /* Стили для анимации загрузчика */
+        .loader {
+            border-top-color: #3498db; /* Цвет верхней границы для анимации вращения */
+            animation: spin 1s linear infinite; /* Анимация вращения */
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); } /* Конечное состояние анимации вращения */
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-slate-900 to-slate-700 text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="bg-slate-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-lg">
+        <div class="text-center mb-6 sm:mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-sky-400">Загрузчик Музыки 🎶</h1>
+            <p class="text-slate-400 mt-2">Вставьте ссылку на YouTube видео или плейлист</p>
+        </div>
+
+        <form id="downloadForm" class="space-y-6">  
+            <div>
+                <label for="youtube_url" class="block text-sm font-medium text-slate-300 mb-1">Ссылка YouTube:</label>
+                <input type="url" id="youtube_url" name="youtube_url" required
+                       class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-sky-500 focus:border-sky-500 transition duration-150"
+                       placeholder="https://www.youtube.com/watch?v=...">
+            </div>
+            
+            <div>
+                <label for="format_choice" class="block text-sm font-medium text-slate-300 mb-1">Выберите формат:</label>
+                <select id="format_choice" name="format_choice"
+                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-sky-500 focus:border-sky-500 transition duration-150">
+                    <option value="mp3" selected>MP3 (рекомендуется)</option>
+                    <option value="wav">WAV (без сжатия, больше размер)</option>
+                </select>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50">
+                Скачать Аудио
+            </button>
+        </form>
+
+        <div id="statusArea" class="mt-6 text-center">
+            </div>
+    </div>
+
+    <footer class="text-center mt-8 text-slate-500 text-sm">
+        <p>© <span id="year"></span> YouTube Music downloader. Site made by BitSamurai..</p>
+    </footer>
+
+    <script>
+        // Установка текущего года в футере
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Получение ссылок на элементы DOM
+        const downloadForm = document.getElementById('downloadForm');
+        const statusArea = document.getElementById('statusArea');
+        const youtubeUrlInput = document.getElementById('youtube_url');
+        const formatChoiceSelect = document.getElementById('format_choice');
+
+        // Обработчик события отправки формы
+        downloadForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Предотвращение стандартной отправки формы
+            const url = youtubeUrlInput.value;
+            const format = formatChoiceSelect.value;
+
+            // Проверка, введен ли URL
+            if (!url) {
+                statusArea.innerHTML = `<p class="text-red-400">Пожалуйста, введите URL.</p>`;
+                return;
+            }
+
+            // Отображение индикатора загрузки
+            statusArea.innerHTML = `
+                <div class="flex justify-center items-center space-x-2 text-sky-400">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-600 h-6 w-6"></div>
+                    <span>Обработка ссылки... Пожалуйста, подождите.</span>
+                </div>`;
+            
+            // Блокировка кнопки отправки на время запроса
+            let submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+            try {
+                // Асинхронный запрос к API для скачивания аудио
+                const response = await fetch('/api/download_audio', { // Новый API эндпоинт
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // Отправляем данные в формате JSON
+                    },
+                    body: JSON.stringify({ url: url, format: format }), // Тело запроса с URL и форматом
+                });
+
+                const data = await response.json(); // Парсинг JSON ответа от сервера
+
+                if (response.ok && data.status === 'success') {
+                    // Если запрос успешен и сервер вернул статус 'success'
+                    statusArea.innerHTML = `
+                        <p class="text-green-400 mb-2">Готово! Файл(ы) скачан(ы):</p>
+                        <ul class="space-y-2">
+                            ${data.files.map(fileInfo => `
+                                <li class="bg-slate-700 p-3 rounded-md">
+                                    <span class="text-slate-300 block truncate" title="${fileInfo.title}">${fileInfo.title}</span>
+                                    <a href="${fileInfo.download_url}" 
+                                       target="_blank" rel="noopener noreferrer"
+                                       download="${fileInfo.filename || ''}" /* Атрибут download для имени файла */
+                                       class="inline-block mt-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md text-sm transition duration-150">
+                                       Скачать ${fileInfo.filename ? fileInfo.filename.split('.').pop().toUpperCase() : format.toUpperCase()}
+                                    </a>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <p class="text-xs text-slate-500 mt-3">Если загрузка не началась, проверьте настройки браузера или попробуйте кликнуть правой кнопкой мыши и "Сохранить ссылку как...".</p>
+                    `;
+                } else {
+                    // Если сервер вернул ошибку или статус не 'success'
+                    statusArea.innerHTML = `<p class="text-red-400">Ошибка: ${data.message || 'Не удалось скачать аудио.'}</p>`;
+                }
+            } catch (error) {
+                // Обработка сетевых ошибок или ошибок при парсинге JSON
+                console.error('Fetch error:', error);
+                statusArea.innerHTML = `<p class="text-red-400">Произошла сетевая ошибка. Пожалуйста, попробуйте еще раз.</p>`;
+            } finally {
+                // Разблокировка кнопки отправки после завершения запроса
+                submitButton.disabled = false;
+                submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+    </script>
+</body>
+</html>
