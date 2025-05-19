@@ -1,146 +1,394 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Загрузчик Музыки с YouTube</title>
+    <title>YouTube Music Downloader</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Импорт шрифта Inter. Обычно рекомендуется делать это через <link> в <head>, 
-           но @import в <style> также является валидным способом. */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        /* Стили для анимации загрузчика */
+        /* Apply Tajawal font for Arabic */
+        body:lang(ar) {
+            font-family: 'Tajawal', sans-serif;
+        }
         .loader {
-            border-top-color: #3498db; /* Цвет верхней границы для анимации вращения */
-            animation: spin 1s linear infinite; /* Анимация вращения */
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
         }
         @keyframes spin {
-            to { transform: rotate(360deg); } /* Конечное состояние анимации вращения */
+            to { transform: rotate(360deg); }
+        }
+        /* Basic styling for the language switcher */
+        .lang-switcher-container {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
+        .lang-switcher-container select {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem; /* rounded-md */
+            border: 1px solid #4A5568; /* slate-600 for consistency */
+            background-color: #2D3748; /* slate-700 */
+            color: white;
+            font-size: 0.875rem; /* text-sm */
+        }
+         /* Custom scrollbar for status area if needed */
+        #statusArea ul::-webkit-scrollbar {
+            width: 8px;
+        }
+        #statusArea ul::-webkit-scrollbar-track {
+            background: #2D3748; /* slate-700 */
+            border-radius: 10px;
+        }
+        #statusArea ul::-webkit-scrollbar-thumb {
+            background: #4A5568; /* slate-600 */
+            border-radius: 10px;
+        }
+        #statusArea ul::-webkit-scrollbar-thumb:hover {
+            background: #718096; /* slate-500 */
         }
     </style>
 </head>
-<body class="bg-gradient-to-r from-slate-900 to-slate-700 text-white min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-gradient-to-r from-slate-900 to-slate-700 text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-sky-500 selection:text-white">
+
+    <div class="lang-switcher-container">
+        <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Language:</label>
+        <select id="languageSelector" title="Select Language">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+            <option value="es">Español</option>
+            <option value="az">Azərbaycanca</option>
+            <option value="tr">Türkçe</option>
+            <option value="ar">العربية</option>
+        </select>
+    </div>
 
     <div class="bg-slate-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-lg">
         <div class="text-center mb-6 sm:mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-sky-400">Загрузчик Музыки 🎶</h1>
-            <p class="text-slate-400 mt-2">Вставьте ссылку на YouTube видео или плейлист</p>
+            <h1 data-translate-key="headerH1" class="text-3xl sm:text-4xl font-bold text-sky-400">Music Downloader 🎶</h1>
+            <p data-translate-key="headerP" class="text-slate-400 mt-2">Paste a YouTube video or playlist link</p>
         </div>
 
-        <form id="downloadForm" class="space-y-6">  
+        <form id="downloadForm" class="space-y-6">
             <div>
-                <label for="youtube_url" class="block text-sm font-medium text-slate-300 mb-1">Ссылка YouTube:</label>
+                <label for="youtube_url" data-translate-key="urlLabel" class="block text-sm font-medium text-slate-300 mb-1">YouTube Link:</label>
                 <input type="url" id="youtube_url" name="youtube_url" required
                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-sky-500 focus:border-sky-500 transition duration-150"
+                       data-translate-placeholder="urlPlaceholder"
                        placeholder="https://www.youtube.com/watch?v=...">
             </div>
-            
+
             <div>
-                <label for="format_choice" class="block text-sm font-medium text-slate-300 mb-1">Выберите формат:</label>
+                <label for="format_choice" data-translate-key="formatLabel" class="block text-sm font-medium text-slate-300 mb-1">Select format:</label>
                 <select id="format_choice" name="format_choice"
                         class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-sky-500 focus:border-sky-500 transition duration-150">
-                    <option value="mp3" selected>MP3 (рекомендуется)</option>
-                    <option value="wav">WAV (без сжатия, больше размер)</option>
+                    <option value="mp3" selected data-translate-key="formatMp3">MP3 (recommended)</option>
+                    <option value="wav" data-translate-key="formatWav">WAV (uncompressed, larger size)</option>
                 </select>
             </div>
 
-            <button type="submit"
+            <button type="submit" data-translate-key="submitButton"
                     class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50">
-                Скачать Аудио
+                Download Audio
             </button>
         </form>
 
-        <div id="statusArea" class="mt-6 text-center">
+        <div id="statusArea" class="mt-6 text-center min-h-[50px]">
             </div>
     </div>
 
     <footer class="text-center mt-8 text-slate-500 text-sm">
-        <p>© <span id="year"></span> YouTube Music downloader. Site made by BitSamurai..</p>
+        <p>© <span id="year"></span> <span data-translate-key="footerCopyrightText">YouTube Music downloader. Site made by BitSamurai.</span></p>
     </footer>
 
     <script>
-        // Установка текущего года в футере
-        document.getElementById('year').textContent = new Date().getFullYear();
+        // --- Translations ---
+        const translations = {
+            en: {
+                pageTitle: "YouTube Music Downloader",
+                headerH1: "Music Downloader 🎶",
+                headerP: "Paste a YouTube video or playlist link",
+                urlLabel: "YouTube Link:",
+                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                formatLabel: "Select format:",
+                formatMp3: "MP3 (recommended)",
+                formatWav: "WAV (uncompressed, larger size)",
+                submitButton: "Download Audio",
+                footerCopyrightText: "YouTube Music downloader. Site made by BitSamurai.",
+                statusErrorUrl: "Please enter a URL.",
+                statusProcessing: "Processing link... Please wait.",
+                statusSuccessHeader: "Done! File(s) ready:",
+                statusDownloadButton: "Download {FORMAT}",
+                statusPostDownloadHint: "If the download didn't start, check your browser settings or try right-clicking and 'Save link as...'.",
+                statusErrorGeneric: "Error: {MESSAGE}",
+                statusNetworkError: "A network error occurred. Please try again.",
+                languageLabel: "Language:" // For screen readers, label for language selector
+            },
+            ru: {
+                pageTitle: "Загрузчик Музыки с YouTube",
+                headerH1: "Загрузчик Музыки 🎶",
+                headerP: "Вставьте ссылку на YouTube видео или плейлист",
+                urlLabel: "Ссылка YouTube:",
+                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                formatLabel: "Выберите формат:",
+                formatMp3: "MP3 (рекомендуется)",
+                formatWav: "WAV (без сжатия, больше размер)",
+                submitButton: "Скачать Аудио",
+                footerCopyrightText: "Загрузчик музыки YouTube. Сайт сделан BitSamurai.",
+                statusErrorUrl: "Пожалуйста, введите URL.",
+                statusProcessing: "Обработка ссылки... Пожалуйста, подождите.",
+                statusSuccessHeader: "Готово! Файл(ы) для скачивания:",
+                statusDownloadButton: "Скачать {FORMAT}",
+                statusPostDownloadHint: "Если загрузка не началась, проверьте настройки браузера или попробуйте кликнуть правой кнопкой мыши и \"Сохранить ссылку как...\".",
+                statusErrorGeneric: "Ошибка: {MESSAGE}",
+                statusNetworkError: "Произошла сетевая ошибка. Пожалуйста, попробуйте еще раз.",
+                languageLabel: "Язык:"
+            },
+            es: {
+                pageTitle: "Descargador de Música de YouTube",
+                headerH1: "Descargador de Música 🎶",
+                headerP: "Pega un enlace de video o lista de reproducción de YouTube",
+                urlLabel: "Enlace de YouTube:",
+                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                formatLabel: "Seleccionar formato:",
+                formatMp3: "MP3 (recomendado)",
+                formatWav: "WAV (sin comprimir, tamaño mayor)",
+                submitButton: "Descargar Audio",
+                footerCopyrightText: "Descargador de música de YouTube. Sitio hecho por BitSamurai.",
+                statusErrorUrl: "Por favor, introduce una URL.",
+                statusProcessing: "Procesando enlace... Por favor, espera.",
+                statusSuccessHeader: "¡Listo! Archivo(s) listo(s):",
+                statusDownloadButton: "Descargar {FORMAT}",
+                statusPostDownloadHint: "Si la descarga no comenzó, revisa la configuración de tu navegador o intenta hacer clic derecho y 'Guardar enlace como...'.",
+                statusErrorGeneric: "Error: {MESSAGE}",
+                statusNetworkError: "Ocurrió un error de red. Por favor, inténtalo de nuevo.",
+                languageLabel: "Idioma:"
+            },
+            az: {
+                pageTitle: "YouTube Musiqi Yükləyicisi",
+                headerH1: "Musiqi Yükləyicisi 🎶",
+                headerP: "YouTube video və ya pleylist keçidini daxil edin",
+                urlLabel: "YouTube Keçidi:",
+                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                formatLabel: "Format seçin:",
+                formatMp3: "MP3 (tövsiyə olunur)",
+                formatWav: "WAV (sıxılmamış, daha böyük ölçü)",
+                submitButton: "Audio Yüklə",
+                footerCopyrightText: "YouTube musiqi yükləyicisi. Sayt BitSamurai tərəfindən hazırlanıb.",
+                statusErrorUrl: "Zəhmət olmasa, URL daxil edin.",
+                statusProcessing: "Keçid emal olunur... Zəhmət olmasa, gözləyin.",
+                statusSuccessHeader: "Hazırdır! Fayl(lar) yüklənməyə hazırdır:",
+                statusDownloadButton: "{FORMAT} Yüklə",
+                statusPostDownloadHint: "Əgər yükləmə başlamadısa, brauzerinizin parametrlərini yoxlayın və ya sağ klikləyib 'Linki fərqli saxla...' seçin.",
+                statusErrorGeneric: "Xəta: {MESSAGE}",
+                statusNetworkError: "Şəbəkə xətası baş verdi. Zəhmət olmasa, yenidən cəhd edin.",
+                languageLabel: "Dil:"
+            },
+            tr: {
+                pageTitle: "YouTube Müzik İndirici",
+                headerH1: "Müzik İndirici 🎶",
+                headerP: "Bir YouTube video veya oynatma listesi bağlantısı yapıştırın",
+                urlLabel: "YouTube Bağlantısı:",
+                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                formatLabel: "Format seçin:",
+                formatMp3: "MP3 (önerilir)",
+                formatWav: "WAV (sıkıştırılmamış, daha büyük boyut)",
+                submitButton: "Sesi İndir",
+                footerCopyrightText: "YouTube müzik indiricisi. Site BitSamurai tarafından yapıldı.",
+                statusErrorUrl: "Lütfen bir URL girin.",
+                statusProcessing: "Bağlantı işleniyor... Lütfen bekleyin.",
+                statusSuccessHeader: "Tamamlandı! Dosya(lar) hazır:",
+                statusDownloadButton: "{FORMAT} İndir",
+                statusPostDownloadHint: "İndirme başlamadıysa, tarayıcı ayarlarınızı kontrol edin veya sağ tıklayıp 'Bağlantıyı farklı kaydet...' seçeneğini deneyin.",
+                statusErrorGeneric: "Hata: {MESSAGE}",
+                statusNetworkError: "Bir ağ hatası oluştu. Lütfen tekrar deneyin.",
+                languageLabel: "Dil:"
+            },
+            ar: {
+                pageTitle: "محمل موسيقى يوتيوب",
+                headerH1: "محمل الموسيقى 🎶",
+                headerP: "الصق رابط فيديو يوتيوب أو قائمة تشغيل",
+                urlLabel: "رابط يوتيوب:",
+                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                formatLabel: "اختر الصيغة:",
+                formatMp3: "MP3 (موصى به)",
+                formatWav: "WAV (غير مضغوط، حجم أكبر)",
+                submitButton: "تحميل الصوت",
+                footerCopyrightText: "محمل موسيقى يوتيوب. الموقع من صنع BitSamurai.",
+                statusErrorUrl: "الرجاء إدخال عنوان URL.",
+                statusProcessing: "جاري معالجة الرابط... يرجى الانتظار.",
+                statusSuccessHeader: "اكتمل! الملف (الملفات) جاهز:",
+                statusDownloadButton: "تحميل {FORMAT}",
+                statusPostDownloadHint: "إذا لم يبدأ التنزيل، تحقق من إعدادات المتصفح أو حاول النقر بزر الماوس الأيمن واختيار 'حفظ الرابط باسم...'.",
+                statusErrorGeneric: "خطأ: {MESSAGE}",
+                statusNetworkError: "حدث خطأ في الشبكة. الرجاء معاودة المحاولة.",
+                languageLabel: "اللغة:"
+            }
+        };
 
-        // Получение ссылок на элементы DOM
+        // --- Language Functions ---
+        let currentLanguage = 'ru'; // Default language
+
+        function applyTranslations(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('preferredLanguage', lang); // Save preference
+
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.title = translations[lang].pageTitle;
+
+            document.querySelectorAll('[data-translate-key]').forEach(element => {
+                const key = element.getAttribute('data-translate-key');
+                if (translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                 if (translations[lang][key]) {
+                    element.placeholder = translations[lang][key];
+                }
+            });
+             // Update language selector to current language
+            const langSelector = document.getElementById('languageSelector');
+            if (langSelector) {
+                langSelector.value = lang;
+            }
+        }
+
+        function getTranslation(key, lang = currentLanguage, replacements = {}) {
+            let text = translations[lang]?.[key] || key; // Fallback to key if translation not found
+            for (const placeholder in replacements) {
+                text = text.replace(`{${placeholder}}`, replacements[placeholder]);
+            }
+            return text;
+        }
+
+
+        // --- DOM Elements ---
+        document.getElementById('year').textContent = new Date().getFullYear();
         const downloadForm = document.getElementById('downloadForm');
         const statusArea = document.getElementById('statusArea');
         const youtubeUrlInput = document.getElementById('youtube_url');
         const formatChoiceSelect = document.getElementById('format_choice');
+        const languageSelector = document.getElementById('languageSelector');
 
-        // Обработчик события отправки формы
+        // --- Event Listeners ---
+        languageSelector.addEventListener('change', (event) => {
+            applyTranslations(event.target.value);
+        });
+
         downloadForm.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Предотвращение стандартной отправки формы
-            const url = youtubeUrlInput.value;
+            event.preventDefault();
+            const url = youtubeUrlInput.value.trim();
             const format = formatChoiceSelect.value;
 
-            // Проверка, введен ли URL
             if (!url) {
-                statusArea.innerHTML = `<p class="text-red-400">Пожалуйста, введите URL.</p>`;
+                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorUrl')}</p>`;
+                return;
+            }
+             try {
+                new URL(url);
+                // Basic check for YouTube link pattern, can be made more robust
+                if (!url.includes('youtube.com/') && !url.includes('youtu.be/') && !url.includes('m.youtube.com') && !url.includes('youtu.be')) {
+                    // console.warn("URL doesn't match typical YouTube patterns, but proceeding.");
+                }
+            } catch (_) {
+                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorUrl')}</p>`; // Or a more specific "invalid URL" message
                 return;
             }
 
-            // Отображение индикатора загрузки
+
             statusArea.innerHTML = `
-                <div class="flex justify-center items-center space-x-2 text-sky-400">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-600 h-6 w-6"></div>
-                    <span>Обработка ссылки... Пожалуйста, подождите.</span>
+                <div class="flex flex-col justify-center items-center space-y-2 text-sky-400 p-3">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-600 h-8 w-8 mb-2"></div>
+                    <span>${getTranslation('statusProcessing')}</span>
                 </div>`;
-            
-            // Блокировка кнопки отправки на время запроса
-            let submitButton = this.querySelector('button[type="submit"]');
+
+            const submitButton = this.querySelector('button[type="submit"]');
             submitButton.disabled = true;
             submitButton.classList.add('opacity-50', 'cursor-not-allowed');
 
             try {
-                // Асинхронный запрос к API для скачивания аудио
-                const response = await fetch('/api/download_audio', { // Новый API эндпоинт
+                const response = await fetch('/api/download_audio', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json', // Отправляем данные в формате JSON
-                    },
-                    body: JSON.stringify({ url: url, format: format }), // Тело запроса с URL и форматом
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, format: format }),
                 });
 
-                const data = await response.json(); // Парсинг JSON ответа от сервера
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    const errorText = await response.text();
+                    throw new Error(`Server returned an unexpected response: ${response.status} ${response.statusText}. ${errorText.substring(0,100)}`);
+                }
+                const data = await response.json();
 
-                if (response.ok && data.status === 'success') {
-                    // Если запрос успешен и сервер вернул статус 'success'
+                if (response.ok && data.status === 'success' && data.files && data.files.length > 0) {
+                    let filesHtml = data.files.map(fileInfo => `
+                        <li class="bg-slate-700 p-3 rounded-md shadow hover:shadow-md transition-shadow duration-150">
+                            <span class="text-slate-300 block truncate" title="${fileInfo.title || ''}">${fileInfo.title || 'Untitled'}</span>
+                            <a href="${fileInfo.download_url}"
+                               target="_blank" rel="noopener noreferrer"
+                               download="${fileInfo.filename || ''}"
+                               class="inline-block mt-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md text-sm transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                               ${getTranslation('statusDownloadButton', currentLanguage, {FORMAT: (fileInfo.filename ? fileInfo.filename.split('.').pop().toUpperCase() : format.toUpperCase())})}
+                            </a>
+                        </li>
+                    `).join('');
+
                     statusArea.innerHTML = `
-                        <p class="text-green-400 mb-2">Готово! Файл(ы) скачан(ы):</p>
-                        <ul class="space-y-2">
-                            ${data.files.map(fileInfo => `
-                                <li class="bg-slate-700 p-3 rounded-md">
-                                    <span class="text-slate-300 block truncate" title="${fileInfo.title}">${fileInfo.title}</span>
-                                    <a href="${fileInfo.download_url}" 
-                                       target="_blank" rel="noopener noreferrer"
-                                       download="${fileInfo.filename || ''}" /* Атрибут download для имени файла */
-                                       class="inline-block mt-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md text-sm transition duration-150">
-                                       Скачать ${fileInfo.filename ? fileInfo.filename.split('.').pop().toUpperCase() : format.toUpperCase()}
-                                    </a>
-                                </li>
-                            `).join('')}
-                        </ul>
-                        <p class="text-xs text-slate-500 mt-3">Если загрузка не началась, проверьте настройки браузера или попробуйте кликнуть правой кнопкой мыши и "Сохранить ссылку как...".</p>
+                        <p class="text-green-400 mb-3 text-lg">${getTranslation('statusSuccessHeader')}</p>
+                        <ul class="space-y-3 text-left max-h-60 overflow-y-auto">${filesHtml}</ul>
+                        <p class="text-xs text-slate-500 mt-4">${getTranslation('statusPostDownloadHint')}</p>
                     `;
+                    // Auto-download logic (from previous version, if desired)
+                    // This part is for automatic download triggering.
+                    // If you prefer users to click the links, remove or comment out the auto-download part.
+                    (async () => {
+                        for (let i = 0; i < data.files.length; i++) {
+                            const fileInfo = data.files[i];
+                            const link = document.createElement('a');
+                            link.href = fileInfo.download_url;
+                            link.download = fileInfo.filename || `audio_download.${fileInfo.download_url.split('.').pop()}`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            if (i < data.files.length - 1) {
+                                await new Promise(resolve => setTimeout(resolve, 1000)); // Delay between downloads
+                            }
+                        }
+                    })();
+
+
                 } else {
-                    // Если сервер вернул ошибку или статус не 'success'
-                    statusArea.innerHTML = `<p class="text-red-400">Ошибка: ${data.message || 'Не удалось скачать аудио.'}</p>`;
+                    statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorGeneric', currentLanguage, {MESSAGE: (data.message || 'Could not download audio.')})}</p>`;
                 }
             } catch (error) {
-                // Обработка сетевых ошибок или ошибок при парсинге JSON
                 console.error('Fetch error:', error);
-                statusArea.innerHTML = `<p class="text-red-400">Произошла сетевая ошибка. Пожалуйста, попробуйте еще раз.</p>`;
+                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusNetworkError')} (${error.message})</p>`;
             } finally {
-                // Разблокировка кнопки отправки после завершения запроса
                 submitButton.disabled = false;
                 submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         });
+
+        // --- Initial Language Setup ---
+        const preferredLang = localStorage.getItem('preferredLanguage');
+        const browserLang = navigator.language.split('-')[0]; // Get 'en' from 'en-US'
+
+        if (preferredLang && translations[preferredLang]) {
+            applyTranslations(preferredLang);
+        } else if (translations[browserLang]) {
+            applyTranslations(browserLang);
+        } else {
+            applyTranslations('ru'); // Default to Russian if no preference or browser lang match
+        }
+
     </script>
 </body>
 </html>
