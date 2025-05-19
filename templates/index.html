@@ -11,7 +11,6 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-     
         body:lang(ar) {
             font-family: 'Tajawal', sans-serif;
         }
@@ -22,7 +21,6 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
         .lang-switcher-container {
             position: absolute;
             top: 1rem;
@@ -31,26 +29,25 @@
         }
         .lang-switcher-container select {
             padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem; 
-            border: 1px solid #4A5568; 
-            background-color: #2D3748; 
+            border-radius: 0.375rem;
+            border: 1px solid #4A5568;
+            background-color: #2D3748;
             color: white;
-            font-size: 0.875rem; 
+            font-size: 0.875rem;
         }
-         
         #statusArea ul::-webkit-scrollbar {
             width: 8px;
-        
+        }
         #statusArea ul::-webkit-scrollbar-track {
             background: #2D3748;
             border-radius: 10px;
         }
         #statusArea ul::-webkit-scrollbar-thumb {
-            background: #4A5568; 
+            background: #4A5568;
             border-radius: 10px;
         }
         #statusArea ul::-webkit-scrollbar-thumb:hover {
-            background: #718096; 
+            background: #718096;
         }
     </style>
 </head>
@@ -107,7 +104,6 @@
     </footer>
 
     <script>
-       
         const translations = {
             en: {
                 pageTitle: "YouTube Music Downloader",
@@ -127,7 +123,7 @@
                 statusPostDownloadHint: "If the download didn't start, check your browser settings or try right-clicking and 'Save link as...'.",
                 statusErrorGeneric: "Error: {MESSAGE}",
                 statusNetworkError: "A network error occurred. Please try again.",
-                languageLabel: "Language:" 
+                languageLabel: "Language:"
             },
             ru: {
                 pageTitle: "Загрузчик Музыки с YouTube",
@@ -231,7 +227,6 @@
             }
         };
 
-        
         let currentLanguage = 'ru'; 
 
         function applyTranslations(lang) {
@@ -254,7 +249,6 @@
                     element.placeholder = translations[lang][key];
                 }
             });
-             
             const langSelector = document.getElementById('languageSelector');
             if (langSelector) {
                 langSelector.value = lang;
@@ -269,8 +263,6 @@
             return text;
         }
 
-
-       
         document.getElementById('year').textContent = new Date().getFullYear();
         const downloadForm = document.getElementById('downloadForm');
         const statusArea = document.getElementById('statusArea');
@@ -278,7 +270,6 @@
         const formatChoiceSelect = document.getElementById('format_choice');
         const languageSelector = document.getElementById('languageSelector');
 
-     
         languageSelector.addEventListener('change', (event) => {
             applyTranslations(event.target.value);
         });
@@ -294,15 +285,12 @@
             }
              try {
                 new URL(url);
-                
                 if (!url.includes('youtube.com/') && !url.includes('youtu.be/') && !url.includes('m.youtube.com') && !url.includes('youtu.be')) {
-                    
                 }
             } catch (_) {
-                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorUrl')}</p>`; 
+                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorUrl')}</p>`;
                 return;
             }
-
 
             statusArea.innerHTML = `
                 <div class="flex flex-col justify-center items-center space-y-2 text-sky-400 p-3">
@@ -346,7 +334,6 @@
                         <ul class="space-y-3 text-left max-h-60 overflow-y-auto">${filesHtml}</ul>
                         <p class="text-xs text-slate-500 mt-4">${getTranslation('statusPostDownloadHint')}</p>
                     `;
-                    
                     (async () => {
                         for (let i = 0; i < data.files.length; i++) {
                             const fileInfo = data.files[i];
@@ -362,7 +349,6 @@
                         }
                     })();
 
-
                 } else {
                     statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorGeneric', currentLanguage, {MESSAGE: (data.message || 'Could not download audio.')})}</p>`;
                 }
@@ -375,7 +361,6 @@
             }
         });
 
-        // --- Initial Language Setup ---
         const preferredLang = localStorage.getItem('preferredLanguage');
         const browserLang = navigator.language.split('-')[0]; 
 
@@ -386,7 +371,6 @@
         } else {
             applyTranslations('ru'); 
         }
-
     </script>
 </body>
 </html>
