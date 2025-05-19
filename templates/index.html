@@ -11,7 +11,7 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Apply Tajawal font for Arabic */
+     
         body:lang(ar) {
             font-family: 'Tajawal', sans-serif;
         }
@@ -22,7 +22,7 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        /* Basic styling for the language switcher */
+        
         .lang-switcher-container {
             position: absolute;
             top: 1rem;
@@ -31,26 +31,26 @@
         }
         .lang-switcher-container select {
             padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem; /* rounded-md */
-            border: 1px solid #4A5568; /* slate-600 for consistency */
-            background-color: #2D3748; /* slate-700 */
+            border-radius: 0.375rem; 
+            border: 1px solid #4A5568; 
+            background-color: #2D3748; 
             color: white;
-            font-size: 0.875rem; /* text-sm */
+            font-size: 0.875rem; 
         }
-         /* Custom scrollbar for status area if needed */
+         
         #statusArea ul::-webkit-scrollbar {
             width: 8px;
-        }
+        
         #statusArea ul::-webkit-scrollbar-track {
-            background: #2D3748; /* slate-700 */
+            background: #2D3748;
             border-radius: 10px;
         }
         #statusArea ul::-webkit-scrollbar-thumb {
-            background: #4A5568; /* slate-600 */
+            background: #4A5568; 
             border-radius: 10px;
         }
         #statusArea ul::-webkit-scrollbar-thumb:hover {
-            background: #718096; /* slate-500 */
+            background: #718096; 
         }
     </style>
 </head>
@@ -107,7 +107,7 @@
     </footer>
 
     <script>
-        // --- Translations ---
+       
         const translations = {
             en: {
                 pageTitle: "YouTube Music Downloader",
@@ -127,7 +127,7 @@
                 statusPostDownloadHint: "If the download didn't start, check your browser settings or try right-clicking and 'Save link as...'.",
                 statusErrorGeneric: "Error: {MESSAGE}",
                 statusNetworkError: "A network error occurred. Please try again.",
-                languageLabel: "Language:" // For screen readers, label for language selector
+                languageLabel: "Language:" 
             },
             ru: {
                 pageTitle: "Загрузчик Музыки с YouTube",
@@ -231,12 +231,12 @@
             }
         };
 
-        // --- Language Functions ---
-        let currentLanguage = 'ru'; // Default language
+        
+        let currentLanguage = 'ru'; 
 
         function applyTranslations(lang) {
             currentLanguage = lang;
-            localStorage.setItem('preferredLanguage', lang); // Save preference
+            localStorage.setItem('preferredLanguage', lang); 
 
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -254,7 +254,7 @@
                     element.placeholder = translations[lang][key];
                 }
             });
-             // Update language selector to current language
+             
             const langSelector = document.getElementById('languageSelector');
             if (langSelector) {
                 langSelector.value = lang;
@@ -262,7 +262,7 @@
         }
 
         function getTranslation(key, lang = currentLanguage, replacements = {}) {
-            let text = translations[lang]?.[key] || key; // Fallback to key if translation not found
+            let text = translations[lang]?.[key] || key; 
             for (const placeholder in replacements) {
                 text = text.replace(`{${placeholder}}`, replacements[placeholder]);
             }
@@ -270,7 +270,7 @@
         }
 
 
-        // --- DOM Elements ---
+       
         document.getElementById('year').textContent = new Date().getFullYear();
         const downloadForm = document.getElementById('downloadForm');
         const statusArea = document.getElementById('statusArea');
@@ -278,7 +278,7 @@
         const formatChoiceSelect = document.getElementById('format_choice');
         const languageSelector = document.getElementById('languageSelector');
 
-        // --- Event Listeners ---
+     
         languageSelector.addEventListener('change', (event) => {
             applyTranslations(event.target.value);
         });
@@ -294,12 +294,12 @@
             }
              try {
                 new URL(url);
-                // Basic check for YouTube link pattern, can be made more robust
+                
                 if (!url.includes('youtube.com/') && !url.includes('youtu.be/') && !url.includes('m.youtube.com') && !url.includes('youtu.be')) {
-                    // console.warn("URL doesn't match typical YouTube patterns, but proceeding.");
+                    
                 }
             } catch (_) {
-                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorUrl')}</p>`; // Or a more specific "invalid URL" message
+                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorUrl')}</p>`; 
                 return;
             }
 
@@ -346,9 +346,7 @@
                         <ul class="space-y-3 text-left max-h-60 overflow-y-auto">${filesHtml}</ul>
                         <p class="text-xs text-slate-500 mt-4">${getTranslation('statusPostDownloadHint')}</p>
                     `;
-                    // Auto-download logic (from previous version, if desired)
-                    // This part is for automatic download triggering.
-                    // If you prefer users to click the links, remove or comment out the auto-download part.
+                    
                     (async () => {
                         for (let i = 0; i < data.files.length; i++) {
                             const fileInfo = data.files[i];
@@ -359,7 +357,7 @@
                             link.click();
                             document.body.removeChild(link);
                             if (i < data.files.length - 1) {
-                                await new Promise(resolve => setTimeout(resolve, 1000)); // Delay between downloads
+                                await new Promise(resolve => setTimeout(resolve, 1000)); 
                             }
                         }
                     })();
@@ -379,14 +377,14 @@
 
         // --- Initial Language Setup ---
         const preferredLang = localStorage.getItem('preferredLanguage');
-        const browserLang = navigator.language.split('-')[0]; // Get 'en' from 'en-US'
+        const browserLang = navigator.language.split('-')[0]; 
 
         if (preferredLang && translations[preferredLang]) {
             applyTranslations(preferredLang);
         } else if (translations[browserLang]) {
             applyTranslations(browserLang);
         } else {
-            applyTranslations('ru'); // Default to Russian if no preference or browser lang match
+            applyTranslations('ru'); 
         }
 
     </script>
