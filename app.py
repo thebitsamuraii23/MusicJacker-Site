@@ -120,20 +120,18 @@ def download_audio_route():
     if requested_format == "mp3":
         if FFMPEG_IS_AVAILABLE:
             logger.info("FFmpeg доступен. Конвертация в MP3 с метаданными.")
-            metadata_watermark_text = "Made by YourSite.com" # Для метаданных
-            ydl_opts['format'] = 'bestaudio/best' # Сначала выбираем лучшее аудио
-            # Явно определяем постпроцессор для извлечения аудио и добавления метаданных
+            metadata_watermark_text = "Made by YourSite.com" 
+            ydl_opts['format'] = 'bestaudio/best'
             ydl_opts['postprocessors'] = [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
-                'preferredquality': '192', # 192 kbps - хорошее качество для MP3
+                'preferredquality': '192', 
             }]
-            # Аргументы для ffmpeg передаются через postprocessor_args на верхнем уровне ydl_opts
-            # Это правильный способ для yt-dlp передавать аргументы конкретному постпроцессору
+           
             ydl_opts['postprocessor_args'] = { 
                 'FFmpegExtractAudio': ['-metadata', f'comment={metadata_watermark_text}']
             }
-            # ydl_opts['verbose'] = True # Раскомментировать для детального лога yt-dlp
+            # ydl_opts['verbose'] = True 
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио (может быть не MP3).")
             ydl_opts['format'] = 'bestaudio[ext=m4a]/bestaudio/best' # Предпочитаем m4a или лучшее аудио
@@ -144,7 +142,7 @@ def download_audio_route():
             ydl_opts['format'] = 'bestaudio/best'
             ydl_opts['postprocessors'] = [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'wav', # WAV без сжатия
+                'preferredcodec': 'wav', 
             }]
             ydl_opts['postprocessor_args'] = {
                 'FFmpegExtractAudio': ['-metadata', f'comment={metadata_watermark_text}']
@@ -156,9 +154,9 @@ def download_audio_route():
     else:
         return jsonify({"status": "error", "message": "Неподдерживаемый формат."}), 400
 
-    # Удаляем ключи с None значениями, чтобы не передавать их в yt-dlp
+   
     ydl_opts_cleaned = {k: v for k, v in ydl_opts.items() if v is not None}
-    # Убедимся, что postprocessors и postprocessor_args существуют перед удалением, если они пустые
+    
     if 'postprocessors' in ydl_opts_cleaned and not ydl_opts_cleaned['postprocessors']:
         del ydl_opts_cleaned['postprocessors']
     if 'postprocessor_args' in ydl_opts_cleaned and not ydl_opts_cleaned['postprocessor_args']:
@@ -177,11 +175,11 @@ def download_audio_route():
         if '_type' in info_dict and info_dict['_type'] == 'playlist':
             logger.info(f"Обработка плейлиста: {info_dict.get('title', 'Без названия')}")
             for entry in info_dict.get('entries', []):
-                # yt-dlp должен заполнить 'requested_downloads' или 'filepath' после скачивания
-                # Проверяем, есть ли информация о скачанном файле
+               
+              
                 if entry and entry.get('filepath'): 
                     filename = os.path.basename(entry['filepath'])
-                    file_title = entry.get('title', filename) # Используем заголовок из entry
+                    file_title = entry.get('title', filename) 
                     downloaded_files_list.append({
                         "filename": filename,
                         "title": file_title,
@@ -197,10 +195,10 @@ def download_audio_route():
                 "title": file_title,
                 "download_url": f"/serve_file/{session_id}/{filename.replace('%', '%25')}"
             })
-        else: # Если информация о файле не найдена в info_dict, ищем в папке (запасной вариант)
+        else: 
             logger.warning("Информация о скачанном файле не найдена в info_dict, ищем файлы в директории.")
             for f_name in os.listdir(session_download_path):
-                # Простая проверка на аудио расширения
+              
                 if f_name.lower().endswith(('.mp3', '.m4a', '.wav', '.ogg', '.opus')):
                     # Пытаемся извлечь "чистое" название из имени файла
                     file_title = os.path.splitext(f_name)[0].replace(f" - {watermark_text_for_filename}", "").split(" [")[0]
@@ -212,7 +210,7 @@ def download_audio_route():
         
         if not downloaded_files_list:
             logger.error(f"Файлы не найдены в {session_download_path} после попытки скачивания.")
-            # Попытка удалить пустую папку сессии
+           
             try:
                 shutil.rmtree(session_download_path)
                 logger.info(f"Удалена пустая папка сессии: {session_download_path}")
@@ -224,7 +222,7 @@ def download_audio_route():
 
     except Exception as e:
         logger.error(f"Ошибка при обработке запроса на скачивание: {e}", exc_info=True)
-        # Попытка удалить папку сессии в случае ошибки
+
         try:
             if os.path.exists(session_download_path):
                 shutil.rmtree(session_download_path)
@@ -245,13 +243,8 @@ def serve_file(session_id, filename):
     except FileNotFoundError:
         logger.error(f"Файл не найден: {os.path.join(directory, filename)}")
         return jsonify({"status": "error", "message": "Файл не найден или был удален."}), 404
-    # Примечание: Автоматическое удаление файла/папки после отдачи здесь реализовать сложно,
-    # так как Flask отправляет файл, и мы не знаем точно, когда загрузка завершена.
-    # Для продакшена нужна отдельная система очистки временных файлов (например, cron задача).
+   
 
 if __name__ == '__main__':
-    # Для локальной разработки можно использовать app.run(debug=True)
-    # Для продакшена используйте WSGI сервер, например, Gunicorn или Waitress
-    # Пример: waitress-serve --host 127.0.0.1 --port 5000 app:app
+   
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
-
