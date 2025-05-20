@@ -99,92 +99,99 @@
             min-height: calc(100vh - 80px); 
         }
         
-        .tab-navigation {
-            margin-bottom: 2rem;
+        .top-nav-container {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            right: 1.5rem;
             display: flex;
-            gap: 1rem;
-            z-index: 10; 
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
         }
-        .tab-button {
-            padding: 0.75rem 1.5rem;
+
+        .nav-button {
+            padding: 0.6rem 1.2rem;
             background-color: rgba(51, 65, 85, 0.7); 
             color: #cbd5e1; 
             border: 2px solid transparent;
-            border-radius: 0.75rem; 
+            border-radius: 0.5rem; 
             font-weight: 600; 
             transition: all 0.3s ease;
             cursor: pointer;
             backdrop-filter: blur(5px);
         }
-        .tab-button.active, .tab-button:hover {
+        .nav-button:hover {
             background-color: rgba(14, 165, 233, 0.8); 
             color: white;
             border-color: #0ea5e9; 
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
-        }
-
-        .tab-content {
-            display: none; 
-            width: 100%;
-            max-width: 580px; 
-            animation: fadeInContent 0.6s ease-out forwards;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        @keyframes fadeInContent {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
 
-        .main-card, .info-card { 
+        .main-card { 
             background-color: rgba(30, 41, 59, 0.88); 
             backdrop-filter: blur(10px);
             padding: 2rem 2.5rem; 
             border-radius: 1.5rem; 
             box-shadow: 0 20px 40px rgba(0,0,0,0.45);
             width: 100%;
+            max-width: 580px;
+            margin-top: 5rem; /* Ensure space for top-nav */
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardEnterMain 0.7s 0.3s cubic-bezier(0.25,0.8,0.25,1) forwards;
+        }
+        @keyframes cardEnterMain {
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .info-card h2 {
+        .info-content-card {
+            background-color: rgba(30, 41, 59, 0.9); 
+            padding: 2rem 2.5rem;
+            border-radius: 1.25rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            max-width: 700px; 
+            width: 90%;
+            color: #e2e8f0; 
+            margin-top: 3rem; 
+            margin-bottom: 2rem; /* Space for scrolling */
+        }
+        .info-content-card h2 {
             font-size: 1.875rem; 
             font-weight: 700; 
             color: #38bdf8; 
             margin-bottom: 1.5rem;
             text-align: center;
         }
-        .info-card h3 {
+        .info-content-card h3 {
             font-size: 1.25rem; 
             font-weight: 600; 
-            color: #93c5fd; 
+            color: #7dd3fc; 
             margin-top: 1.5rem;
             margin-bottom: 0.75rem;
-            border-bottom: 1px solid rgba(71, 85, 105, 0.5); 
+            border-bottom: 1px solid rgb(71 85 105 / 0.5);
             padding-bottom: 0.5rem;
         }
-        .info-card p, .info-card li {
-            color: #cbd5e1; 
+        .info-content-card p, .info-content-card li {
+            font-size: 1rem; 
             line-height: 1.7;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
-        .info-card ul {
+        .info-content-card ul {
             list-style: disc;
             padding-left: 1.5rem;
         }
-        .info-card code {
-            background-color: rgba(51, 65, 85, 0.7); 
+        .info-content-card code {
+            background-color: rgb(51 65 85 / 0.7); 
             padding: 0.1rem 0.4rem;
             border-radius: 0.25rem;
             font-family: monospace;
-            color: #e2e8f0; 
+            color: #f0f0f0;
         }
 
 
         .loader { border-top-color: #0ea5e9; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .lang-switcher-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 50; }
         .lang-switcher-container select { padding: 0.6rem 1rem; border-radius: 0.5rem; border: 1px solid rgb(71 85 105 / 0.7); background-color: rgb(30 41 59 / 0.85); backdrop-filter: blur(6px); color: white; font-size: 0.875rem; transition: all 0.2s ease-in-out; }
         .lang-switcher-container select:hover { border-color: #0ea5e9; background-color: rgb(51 65 85 / 0.9); }
         #statusArea ul::-webkit-scrollbar { width: 8px; }
@@ -223,6 +230,8 @@
         .app-footer {
             opacity: 0;
             animation: fadeInFooter 1s 0.5s ease-out forwards; 
+            position: relative; /* Ensure it's part of the flow */
+            z-index: 5;
         }
         @keyframes fadeInFooter {
             to { opacity: 1; }
@@ -238,7 +247,7 @@
         .telegram-link-container a { color: #38bdf8; text-decoration: underline; }
         .telegram-link-container a:hover { color: #7dd3fc; }
 
-        #infoSection {
+        #infoSectionOverlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -252,56 +261,14 @@
             transition: opacity 0.4s ease-out;
             padding: 2rem;
             overflow-y: auto; 
+            align-items: center; /* For centering info-content-card */
+            justify-content: center; /* For centering info-content-card */
         }
-        #infoSection.visible {
+        #infoSectionOverlay.visible {
             display: flex; 
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; 
             opacity: 1;
         }
-        .info-content-card {
-            background-color: rgba(30, 41, 59, 0.9); 
-            padding: 2rem 2.5rem;
-            border-radius: 1.25rem;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            max-width: 700px; 
-            width: 90%;
-            color: #e2e8f0; 
-            margin-top: 3rem; 
-        }
-        .info-content-card h2 {
-            font-size: 1.875rem; 
-            font-weight: 700; 
-            color: #38bdf8; 
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-        .info-content-card h3 {
-            font-size: 1.25rem; 
-            font-weight: 600; 
-            color: #7dd3fc; 
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
-            border-bottom: 1px solid rgb(71 85 105 / 0.5);
-            padding-bottom: 0.5rem;
-        }
-        .info-content-card p, .info-content-card li {
-            font-size: 1rem; 
-            line-height: 1.7;
-            margin-bottom: 0.75rem;
-        }
-        .info-content-card ul {
-            list-style: disc;
-            padding-left: 1.5rem;
-        }
-        .info-content-card code {
-            background-color: rgb(51 65 85 / 0.7); 
-            padding: 0.1rem 0.4rem;
-            border-radius: 0.25rem;
-            font-family: monospace;
-            color: #f0f0f0;
-        }
+        
         .close-info-button {
             position: absolute;
             top: 1.5rem;
@@ -312,10 +279,11 @@
             font-size: 2.5rem; 
             cursor: pointer;
             line-height: 1;
-            transition: color 0.2s ease;
+            transition: color 0.2s ease, transform 0.2s ease;
         }
         .close-info-button:hover {
             color: #f87171; 
+            transform: scale(1.1);
         }
 
     </style>
@@ -328,7 +296,8 @@
 
     <div class="top-nav-container">
         <button id="infoButton" class="nav-button" data-translate-key="navInfoButton">Info</button>
-        <div class="lang-switcher-container" style="position: static;"> <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Language:</label>
+        <div class="lang-switcher-container" style="position: static;"> 
+            <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Language:</label>
             <select id="languageSelector" title="Select Language">
                 <option value="en">English</option>
                 <option value="ru">Русский</option>
@@ -342,80 +311,50 @@
 
 
     <div class="app-container">
-        <div class="tab-navigation">
-        </div>
-
-        <div id="downloaderContent" class="tab-content active">
-            <div class="main-card">
-                <div class="text-center mb-8 sm:mb-10">
-                    <div class="music-icon-animated inline-block mb-4">
-                        <svg width="60" height="50" viewBox="0 0 60 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <line x1="5" y1="45" x2="5" y2="5" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
-                            <line x1="15" y1="45" x2="15" y2="15" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
-                            <line x1="25" y1="45" x2="25" y2="25" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
-                            <line x1="35" y1="45" x2="35" y2="10" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
-                            <line x1="45" y1="45" x2="45" y2="20" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
-                            <line x1="55" y1="45" x2="55" y2="30" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <h1 data-translate-key="headerH1" class="text-4xl sm:text-5xl font-extrabold text-sky-400 tracking-tight">Music Downloader</h1>
-                    <p data-translate-key="headerP" class="text-slate-400 mt-3 text-lg">Paste a YouTube video or playlist link</p>
+        <div id="downloaderContent" class="main-card">
+            <div class="text-center mb-8 sm:mb-10">
+                <div class="music-icon-animated inline-block mb-4">
+                    <svg width="60" height="50" viewBox="0 0 60 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="5" y1="45" x2="5" y2="5" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="15" y1="45" x2="15" y2="15" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="25" y1="45" x2="25" y2="25" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="35" y1="45" x2="35" y2="10" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="45" y1="45" x2="45" y2="20" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="55" y1="45" x2="55" y2="30" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
                 </div>
-
-                <form id="downloadForm" class="space-y-6">
-                    <div>
-                        <label for="youtube_url" data-translate-key="urlLabel" class="block text-sm font-medium text-slate-300 mb-2">YouTube Link:</label>
-                        <input type="url" id="youtube_url" name="youtube_url" required
-                               class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out"
-                               data-translate-placeholder="urlPlaceholder"
-                               placeholder="https://www.youtube.com/watch?v=...">
-                    </div>
-
-                    <div>
-                        <label for="format_choice" data-translate-key="formatLabel" class="block text-sm font-medium text-slate-300 mb-2">Select format:</label>
-                        <select id="format_choice" name="format_choice"
-                                class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out">
-                            <option value="mp3" selected data-translate-key="formatMp3">MP3 (recommended)</option>
-                            <option value="wav" data-translate-key="formatWav">WAV (uncompressed, larger size)</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" data-translate-key="submitButton"
-                            class="submit-button w-full bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold py-3.5 px-4 rounded-lg shadow-lg focus:outline-none focus:ring-4 focus:ring-sky-500/50">
-                        Download Audio
-                    </button>
-                </form>
-
-                <div id="statusArea" class="mt-8 text-center min-h-[60px]">
-                </div>
-                <div id="telegramLinkContainer" class="telegram-link-container text-center hidden">
-                     <span data-translate-key="telegramSubscription">Subscribe to Telegram Channel of developers:</span> <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer">@ytdlpdeveloper</a>
-                </div>
+                <h1 data-translate-key="headerH1" class="text-4xl sm:text-5xl font-extrabold text-sky-400 tracking-tight">Music Downloader</h1>
+                <p data-translate-key="headerP" class="text-slate-400 mt-3 text-lg">Paste a YouTube video or playlist link</p>
             </div>
-        </div>
 
-        <div id="infoSectionContent" class="tab-content"> <div class="info-card">
-                <h2 data-translate-key="infoTitle">Information</h2>
-                
-                <h3 data-translate-key="infoHowItWorksTitle">How This Site Works</h3>
-                <p data-translate-key="infoHowItWorksPara1">This web application allows you to download audio from YouTube videos or playlists. You simply paste the YouTube URL, choose your desired audio format (MP3 or WAV), and the server-side script processes your request.</p>
-                <p data-translate-key="infoHowItWorksPara2">The backend uses the powerful <code>yt-dlp</code> library to fetch video information and extract the audio stream. If MP3 or WAV format is selected, <code>ffmpeg</code> is used for audio conversion and to embed metadata.</p>
-                <p data-translate-key="infoHowItWorksPara3">The downloaded audio file is temporarily stored on the server and then made available for you to download directly through your browser. After the download is served to you, the file is automatically deleted from the server to save space and ensure privacy.</p>
+            <form id="downloadForm" class="space-y-6">
+                <div>
+                    <label for="youtube_url" data-translate-key="urlLabel" class="block text-sm font-medium text-slate-300 mb-2">YouTube Link:</label>
+                    <input type="url" id="youtube_url" name="youtube_url" required
+                           class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out"
+                           data-translate-placeholder="urlPlaceholder"
+                           placeholder="https://www.youtube.com/watch?v=...">
+                </div>
 
-                <h3 data-translate-key="infoLibrariesTitle">Key Libraries & Technologies Used</h3>
-                <ul>
-                    <li data-translate-key="infoLibFlask"><strong>Flask:</strong> A micro web framework for Python, used to build the backend API.</li>
-                    <li data-translate-key="infoLibYtdlp"><strong>yt-dlp:</strong> A command-line program to download videos from YouTube and many other sites. It's a fork of youtube-dl with additional features and fixes.</li>
-                    <li data-translate-key="infoLibFFmpeg"><strong>FFmpeg:</strong> A complete, cross-platform solution to record, convert and stream audio and video. Used here for audio format conversion (to MP3/WAV) and metadata embedding.</li>
-                    <li data-translate-key="infoLibTailwind"><strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.</li>
-                    <li data-translate-key="infoLibJS"><strong>JavaScript:</strong> Used for frontend interactivity, language switching, animations, and communication with the backend API.</li>
-                </ul>
+                <div>
+                    <label for="format_choice" data-translate-key="formatLabel" class="block text-sm font-medium text-slate-300 mb-2">Select format:</label>
+                    <select id="format_choice" name="format_choice"
+                            class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out">
+                        <option value="mp3" selected data-translate-key="formatMp3">MP3 (recommended)</option>
+                        <option value="wav" data-translate-key="formatWav">WAV (uncompressed, larger size)</option>
+                    </select>
+                </div>
 
-                <h3 data-translate-key="infoPythonCodeTitle">Python Backend Code</h3>
-                <p data-translate-key="infoPythonCodePara">The core backend logic is written in Python using the Flask framework. The Python script (typically named <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the audio files. Due to the nature of this interactive environment, the full Python code is best viewed in its source file. It includes error handling, file management, and the specific options passed to the download utilities.</p>
-                
-                <h3 data-translate-key="infoCreatorTitle">Creator</h3>
-                <p data-translate-key="infoCreatorName">This YouTube Music Downloader site was created by <strong>Suleyman Aslanov</strong>.</p>
+                <button type="submit" data-translate-key="submitButton"
+                        class="submit-button w-full bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold py-3.5 px-4 rounded-lg shadow-lg focus:outline-none focus:ring-4 focus:ring-sky-500/50">
+                    Download Audio
+                </button>
+            </form>
+
+            <div id="statusArea" class="mt-8 text-center min-h-[60px]">
+            </div>
+            <div id="telegramLinkContainer" class="telegram-link-container text-center hidden">
+                 <span data-translate-key="telegramSubscription">Subscribe to Telegram Channel of developers:</span> <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer">@ytdlpdeveloper</a>
             </div>
         </div>
 
@@ -425,7 +364,7 @@
         </footer>
     </div>
 
-    <div id="infoSection">
+    <div id="infoSectionOverlay">
         <button id="closeInfoButton" class="close-info-button" aria-label="Close Info">×</button>
         <div class="info-content-card">
             <h2 data-translate-key="infoTitle">Information</h2>
@@ -714,20 +653,15 @@
         function applyTranslations(lang) {
             currentLanguage = lang;
             localStorage.setItem('preferredLanguage', lang);
-
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-
             const pageTitleKey = translations[lang]?.pageTitle || translations.en.pageTitle;
             document.title = pageTitleKey;
-
             const metaDescElement = document.querySelector('meta[data-translate-meta-description]');
             if (metaDescElement) {
                 const metaDescKey = metaDescElement.getAttribute('data-translate-meta-description');
                 metaDescElement.content = translations[lang]?.[metaDescKey] || translations.en[metaDescKey] || '';
             }
-
-
             document.querySelectorAll('[data-translate-key]').forEach(element => {
                 const key = element.getAttribute('data-translate-key');
                 if (translations[lang] && translations[lang][key]) {
@@ -759,6 +693,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM Fully Loaded and Parsed");
+
             const nightSky = document.querySelector('.night-sky-bg-main');
             if (nightSky) { 
                 const numberOfStars = 60; 
@@ -773,6 +709,8 @@
                     star.style.animationDuration = `${Math.random() * 2 + 2}s`;
                     nightSky.appendChild(star);
                 }
+            } else {
+                console.error("Element .night-sky-bg-main not found for star generation.");
             }
 
             const yearSpan = document.getElementById('year');
@@ -787,32 +725,30 @@
             const formatChoiceSelect = document.getElementById('format_choice');
             const languageSelector = document.getElementById('languageSelector');
             const infoButton = document.getElementById('infoButton');
-            const infoSection = document.getElementById('infoSection');
+            const infoSectionOverlay = document.getElementById('infoSectionOverlay');
             const closeInfoButton = document.getElementById('closeInfoButton');
-            
             const downloaderContent = document.getElementById('downloaderContent');
-            const infoSectionContent = document.getElementById('infoSectionContent'); 
 
 
-            if (infoButton && infoSection && closeInfoButton && downloaderContent && infoSectionContent) {
+            if (infoButton && infoSectionOverlay && closeInfoButton && downloaderContent) {
+                console.log("Info button and sections found. Attaching event listeners.");
                 infoButton.addEventListener('click', () => {
-                    downloaderContent.style.display = 'none'; 
-                    infoSection.classList.add('visible'); 
+                    console.log("Info button clicked.");
+                    infoSectionOverlay.classList.add('visible'); 
                 });
                 closeInfoButton.addEventListener('click', () => {
-                    infoSection.classList.remove('visible');
-                     setTimeout(() => { 
-                        downloaderContent.style.display = 'block'; 
-                    }, 400); 
+                    console.log("Close info button clicked.");
+                    infoSectionOverlay.classList.remove('visible');
                 });
-                infoSection.addEventListener('click', (event) => {
-                    if (event.target === infoSection) { 
-                        infoSection.classList.remove('visible');
-                        setTimeout(() => {
-                           downloaderContent.style.display = 'block';
-                        }, 400);
+                infoSectionOverlay.addEventListener('click', (event) => {
+                    if (event.target === infoSectionOverlay) { 
+                        console.log("Info overlay backdrop clicked.");
+                        infoSectionOverlay.classList.remove('visible');
                     }
                 });
+            } else {
+                console.error("One or more elements for info section functionality are missing:", 
+                    {infoButton, infoSectionOverlay, closeInfoButton, downloaderContent });
             }
 
 
@@ -948,10 +884,10 @@
             applyTranslations(initialLang);
             
             if (downloaderContent) downloaderContent.style.display = 'block';
-            if (infoSectionContent) infoSectionContent.style.display = 'none';
-            if (infoSection) infoSection.style.display = 'none'; 
+            if (infoSectionOverlay) infoSectionOverlay.style.display = 'none';
 
 
+            console.log("Initial setup complete. Downloader should be visible.");
         });
     </script>
 </body>
