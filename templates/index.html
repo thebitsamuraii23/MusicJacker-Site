@@ -19,9 +19,12 @@
             display: flex; 
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; 
             min-height: 100vh;
             position: relative; 
+        }
+        body.overflow-hidden { /* Class to prevent body scroll when overlay is open */
+            overflow: hidden;
         }
         body:lang(ar) {
             font-family: 'Tajawal', sans-serif;
@@ -92,22 +95,26 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: center; 
             width: 100%;
-            padding: 1rem;
+            padding: 1rem; 
             z-index: 1;
-            min-height: calc(100vh - 80px); 
+            padding-bottom: 100px; /* Increased space for the fixed footer */
+            flex-grow: 1; /* Allows app-container to take available space */
         }
         
         .top-nav-container {
-            position: fixed;
-            top: 1.5rem;
-            left: 1.5rem;
-            right: 1.5rem;
+            position: fixed; 
+            top: 0;
+            left: 0;
+            right: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 50;
+            padding: 1rem 1.5rem; 
+            background-color: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(10px); 
         }
 
         .nav-button {
@@ -127,7 +134,6 @@
             border-color: #0ea5e9; 
         }
 
-
         .main-card { 
             background-color: rgba(30, 41, 59, 0.88); 
             backdrop-filter: blur(10px);
@@ -136,7 +142,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.45);
             width: 100%;
             max-width: 580px;
-            margin-top: 5rem; /* Ensure space for top-nav */
+            margin-top: 8rem; /* Adjusted margin-top to ensure space below fixed nav */
             opacity: 0;
             transform: translateY(20px);
             animation: cardEnterMain 0.7s 0.3s cubic-bezier(0.25,0.8,0.25,1) forwards;
@@ -145,50 +151,81 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .info-content-card {
-            background-color: rgba(30, 41, 59, 0.9); 
-            padding: 2rem 2.5rem;
-            border-radius: 1.25rem;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            max-width: 700px; 
-            width: 90%;
-            color: #e2e8f0; 
-            margin-top: 3rem; 
-            margin-bottom: 2rem; /* Space for scrolling */
+        #infoSectionOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.92); 
+            backdrop-filter: blur(10px); 
+            z-index: 100; 
+            
+            display: none; /* Initially hidden by default CSS */
+            opacity: 0;   /* Initially transparent by default CSS */
+            
+            align-items: center; 
+            justify-content: center;
+            padding: 1rem; 
+            
+            transition: opacity 0.3s ease-out; 
         }
+        #infoSectionOverlay.visible { /* This class makes it visible */
+            display: flex; 
+            opacity: 1;
+        }
+        
+        .info-content-card {
+            background-color: rgba(45, 55, 72, 0.97); 
+            padding: 1.5rem 2rem; 
+            border-radius: 1rem; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 700px; 
+            width: calc(100% - 2rem); 
+            color: #e2e8f0; 
+            margin: auto; 
+            max-height: calc(100vh - 4rem); 
+            overflow-y: auto; 
+            position: relative; 
+        }
+
         .info-content-card h2 {
-            font-size: 1.875rem; 
+            font-size: 1.75rem; 
             font-weight: 700; 
             color: #38bdf8; 
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             text-align: center;
         }
         .info-content-card h3 {
-            font-size: 1.25rem; 
+            font-size: 1.15rem; 
             font-weight: 600; 
             color: #7dd3fc; 
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.6rem;
             border-bottom: 1px solid rgb(71 85 105 / 0.5);
-            padding-bottom: 0.5rem;
+            padding-bottom: 0.4rem;
         }
         .info-content-card p, .info-content-card li {
-            font-size: 1rem; 
-            line-height: 1.7;
-            margin-bottom: 0.75rem;
+            font-size: 0.95rem; 
+            line-height: 1.65;
+            margin-bottom: 0.6rem;
         }
         .info-content-card ul {
             list-style: disc;
-            padding-left: 1.5rem;
+            padding-left: 1.5rem; 
         }
-        .info-content-card code {
+        body:lang(ar) .info-content-card ul {
+            padding-left: 0;
+            padding-right: 1.5rem;
+        }
+        .info-content-card code { 
             background-color: rgb(51 65 85 / 0.7); 
             padding: 0.1rem 0.4rem;
             border-radius: 0.25rem;
             font-family: monospace;
             color: #f0f0f0;
         }
-
+        /* Removed pre and pre code styles as Python code block is removed */
 
         .loader { border-top-color: #0ea5e9; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -230,8 +267,15 @@
         .app-footer {
             opacity: 0;
             animation: fadeInFooter 1s 0.5s ease-out forwards; 
-            position: relative; /* Ensure it's part of the flow */
+            position: fixed; 
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 0.75rem 1rem; 
+            background-color: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(10px); 
             z-index: 5;
+            width: 100%;
         }
         @keyframes fadeInFooter {
             to { opacity: 1; }
@@ -241,54 +285,50 @@
             color: #94a3b8; 
             margin-left: 0.5rem; 
         }
+        body:lang(ar) .file-download-status {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
         .file-download-status.downloading { color: #38bdf8; }
         .file-download-status.completed { color: #22c55e; }
         .telegram-link-container { margin-top: 0.75rem; font-size: 0.875rem; color: #94a3b8; }
         .telegram-link-container a { color: #38bdf8; text-decoration: underline; }
         .telegram-link-container a:hover { color: #7dd3fc; }
-
-        #infoSectionOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(15, 23, 42, 0.92); 
-            backdrop-filter: blur(15px); 
-            z-index: 100; 
-            display: none; 
-            opacity: 0;
-            transition: opacity 0.4s ease-out;
-            padding: 2rem;
-            overflow-y: auto; 
-            align-items: center; /* For centering info-content-card */
-            justify-content: center; /* For centering info-content-card */
-        }
-        #infoSectionOverlay.visible {
-            display: flex; 
-            opacity: 1;
-        }
         
         .close-info-button {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            background: none;
-            border: none;
+            position: fixed; 
+            top: 1.25rem; 
+            right: 1.25rem;
+            background: rgba(51, 65, 85, 0.5); 
+            border: 1px solid rgba(100,116,139,0.5);
             color: #cbd5e1; 
-            font-size: 2.5rem; 
+            font-size: 1.5rem; 
+            width: 2.5rem; 
+            height: 2.5rem;
+            border-radius: 50%; 
             cursor: pointer;
-            line-height: 1;
-            transition: color 0.2s ease, transform 0.2s ease;
+            line-height: 1; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 110; 
+            backdrop-filter: blur(3px);
+        }
+        body:lang(ar) .close-info-button {
+            right: auto;
+            left: 1.25rem;
         }
         .close-info-button:hover {
             color: #f87171; 
+            background-color: rgba(100, 65, 85, 0.7);
+            border-color: rgba(200,116,139,0.7);
             transform: scale(1.1);
         }
 
     </style>
 </head>
-<body class="text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-sky-500 selection:text-white">
+<body class="text-white min-h-screen flex flex-col items-center p-4 selection:bg-sky-500 selection:text-white">
 
     <div class="night-sky-bg-main">
         <div class="moon-main"></div>
@@ -296,7 +336,7 @@
 
     <div class="top-nav-container">
         <button id="infoButton" class="nav-button" data-translate-key="navInfoButton">Info</button>
-        <div class="lang-switcher-container" style="position: static;"> 
+        <div class="lang-switcher-container"> 
             <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Language:</label>
             <select id="languageSelector" title="Select Language">
                 <option value="en">English</option>
@@ -308,7 +348,6 @@
             </select>
         </div>
     </div>
-
 
     <div class="app-container">
         <div id="downloaderContent" class="main-card">
@@ -333,7 +372,7 @@
                     <input type="url" id="youtube_url" name="youtube_url" required
                            class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out"
                            data-translate-placeholder="urlPlaceholder"
-                           placeholder="https://www.youtube.com/watch?v=...">
+                           placeholder="e.g., https://www.youtube.com/watch?v=...">
                 </div>
 
                 <div>
@@ -358,11 +397,11 @@
             </div>
         </div>
 
-        <footer class="app-footer text-center mt-10 text-slate-500 text-sm">
-            <p>© <span id="year"></span> <span data-translate-key="footerCopyrightText">YouTube Music downloader. Site made by Suleyman Aslanov.</span></p>
-            <p class="text-xs mt-1" data-translate-key="footerWatermark">Developed By Suleyman Aslanov</p>
-        </footer>
     </div>
+    <footer class="app-footer text-center text-slate-500 text-sm">
+        <p>© <span id="year"></span> <span data-translate-key="footerCopyrightText">YouTube Music downloader. Site made by Suleyman Aslanov.</span></p>
+        <p class="text-xs mt-1" data-translate-key="footerWatermark">Developed By Suleyman Aslanov</p>
+    </footer>
 
     <div id="infoSectionOverlay">
         <button id="closeInfoButton" class="close-info-button" aria-label="Close Info">×</button>
@@ -384,8 +423,7 @@
             </ul>
 
             <h3 data-translate-key="infoPythonCodeTitle">Python Backend Code</h3>
-            <p data-translate-key="infoPythonCodePara">The core backend logic is written in Python using the Flask framework. The Python script (typically named <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the audio files. Due to the nature of this interactive environment, the full Python code is best viewed in its source file. It includes error handling, file management, and the specific options passed to the download utilities.</p>
-
+            <p data-translate-key="infoPythonCodePara">The core backend logic is written in Python using the Flask framework. The Python script (typically named <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the audio files. This code runs on the server and is not directly visible here, but it ensures the functionality of the downloader.</p>
             <h3 data-translate-key="infoCreatorTitle">Creator</h3>
             <p data-translate-key="infoCreatorName">This YouTube Music Downloader site was created by <strong>Suleyman Aslanov</strong>.</p>
         </div>
@@ -410,20 +448,20 @@
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.",
                 infoLibJS: "<strong>JavaScript:</strong> Used for frontend interactivity, language switching, animations, and communication with the backend API.",
                 infoPythonCodeTitle: "Python Backend Code",
-                infoPythonCodePara: "The core backend logic is written in Python using the Flask framework. The Python script (typically named <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the audio files. Due to the nature of this interactive environment, the full Python code is best viewed in its source file. It includes error handling, file management, and the specific options passed to the download utilities.",
+                infoPythonCodePara: "The core backend logic is written in Python using the Flask framework. The Python script (typically named <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the audio files. This code runs on the server and is not directly visible here, but it ensures the functionality of the downloader.",
                 infoCreatorTitle: "Creator",
                 infoCreatorName: "This YouTube Music Downloader site was created by <strong>Suleyman Aslanov</strong>.",
                 headerH1: "Music Downloader",
                 headerP: "Paste a YouTube video or playlist link",
                 urlLabel: "YouTube Link:",
-                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                urlPlaceholder: "e.g., https://www.youtube.com/watch?v=...",
                 formatLabel: "Select format:",
                 formatMp3: "MP3 (recommended)",
                 formatWav: "WAV (uncompressed, larger size)",
                 submitButton: "Download Audio",
                 footerCopyrightText: "YouTube Music downloader. Site made by Suleyman Aslanov.",
                 footerWatermark: "Developed By Suleyman Aslanov",
-                statusErrorUrl: "Please enter a URL.",
+                statusErrorUrl: "Please enter a valid YouTube URL.",
                 statusProcessing: "Processing link... Please wait.",
                 statusSuccessHeader: "Done! Initiating downloads:",
                 statusDownloadLinkText: "Download {FORMAT}",
@@ -452,20 +490,20 @@
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> Утилитарный CSS-фреймворк для быстрой разработки пользовательских интерфейсов.",
                 infoLibJS: "<strong>JavaScript:</strong> Используется для интерактивности фронтенда, переключения языков, анимаций и взаимодействия с бэкенд API.",
                 infoPythonCodeTitle: "Код бэкенда на Python",
-                infoPythonCodePara: "Основная логика бэкенда написана на Python с использованием фреймворка Flask. Python-скрипт (обычно с именем <code>app.py</code>) обрабатывает API-запросы, взаимодействует с <code>yt-dlp</code> и <code>ffmpeg</code>, управляет временным хранением файлов и отдает аудиофайлы. В силу особенностей этой интерактивной среды, полный код Python лучше всего просматривать в его исходном файле. Он включает обработку ошибок, управление файлами и специфические опции, передаваемые утилитам загрузки.",
+                infoPythonCodePara: "Основная логика бэкенда написана на Python с использованием фреймворка Flask. Python-скрипт (обычно с именем <code>app.py</code>) обрабатывает API-запросы, взаимодействует с <code>yt-dlp</code> и <code>ffmpeg</code>, управляет временным хранением файлов и отдает аудиофайлы. Этот код выполняется на сервере и здесь не отображается напрямую, но он обеспечивает работоспособность загрузчика.",
                 infoCreatorTitle: "Создатель",
                 infoCreatorName: "Этот сайт для загрузки музыки с YouTube был создан <strong>Suleyman Aslanov</strong>.",
                 headerH1: "Загрузчик Музыки",
                 headerP: "Вставьте ссылку на YouTube видео или плейлист",
                 urlLabel: "Ссылка YouTube:",
-                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                urlPlaceholder: "например, https://www.youtube.com/watch?v=...",
                 formatLabel: "Выберите формат:",
                 formatMp3: "MP3 (рекомендуется)",
                 formatWav: "WAV (без сжатия, больше размер)",
                 submitButton: "Скачать Аудио",
                 footerCopyrightText: "Загрузчик музыки YouTube. Сайт сделан Suleyman Aslanov.",
                 footerWatermark: "Разработано Suleyman Aslanov",
-                statusErrorUrl: "Пожалуйста, введите URL.",
+                statusErrorUrl: "Пожалуйста, введите корректную ссылку YouTube.",
                 statusProcessing: "Обработка ссылки... Пожалуйста, подождите.",
                 statusSuccessHeader: "Готово! Начинаю загрузку файла(ов):",
                 statusDownloadLinkText: "Скачать {FORMAT}",
@@ -494,20 +532,20 @@
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> Un framework CSS de utilidad primero para construir rápidamente interfaces de usuario personalizadas.",
                 infoLibJS: "<strong>JavaScript:</strong> Utilizado para la interactividad del frontend, cambio de idioma, animaciones y comunicación con la API del backend.",
                 infoPythonCodeTitle: "Código Backend en Python",
-                infoPythonCodePara: "La lógica central del backend está escrita en Python utilizando el framework Flask. El script de Python (generalmente llamado <code>app.py</code>) maneja las solicitudes API, interactúa con <code>yt-dlp</code> y <code>ffmpeg</code>, gestiona el almacenamiento temporal de archivos y sirve los archivos de audio. Debido a la naturaleza de este entorno interactivo, el código Python completo se visualiza mejor en su archivo fuente. Incluye manejo de errores, gestión de archivos y las opciones específicas pasadas a las utilidades de descarga.",
+                infoPythonCodePara: "La lógica central del backend está escrita en Python utilizando el framework Flask. El script de Python (generalmente llamado <code>app.py</code>) maneja las solicitudes API, interactúa con <code>yt-dlp</code> y <code>ffmpeg</code>, gestiona el almacenamiento temporal de archivos y sirve los archivos de audio. Este código se ejecuta en el servidor y no es visible directamente aquí, pero asegura la funcionalidad del descargador.",
                 infoCreatorTitle: "Creador",
                 infoCreatorName: "Este sitio de Descarga de Música de YouTube fue creado por <strong>Suleyman Aslanov</strong>.",
                 headerH1: "Descargador de Música",
                 headerP: "Pega un enlace de video o lista de reproducción de YouTube",
                 urlLabel: "Enlace de YouTube:",
-                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                urlPlaceholder: "ej., https://www.youtube.com/watch?v=...",
                 formatLabel: "Seleccionar formato:",
                 formatMp3: "MP3 (recomendado)",
                 formatWav: "WAV (sin comprimir, tamaño mayor)",
                 submitButton: "Descargar Audio",
                 footerCopyrightText: "Descargador de música de YouTube. Sitio hecho por Suleyman Aslanov.",
                 footerWatermark: "Desarrollado por Suleyman Aslanov",
-                statusErrorUrl: "Por favor, introduce una URL.",
+                statusErrorUrl: "Por favor, introduce una URL de YouTube válida.",
                 statusProcessing: "Procesando enlace... Por favor, espera.",
                 statusSuccessHeader: "¡Listo! Iniciando descargas:",
                 statusDownloadLinkText: "Descargar {FORMAT}",
@@ -536,20 +574,20 @@
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> Xüsusi istifadəçi interfeyslərini sürətlə qurmaq üçün utilitar CSS freymvorku.",
                 infoLibJS: "<strong>JavaScript:</strong> Frontend interaktivliyi, dil dəyişdirmə, animasiyalar və backend API ilə əlaqə üçün istifadə olunur.",
                 infoPythonCodeTitle: "Python Backend Kodu",
-                infoPythonCodePara: "Əsas backend məntiqi Flask freymvorkundan istifadə edərək Python-da yazılmışdır. Python skripti (adətən <code>app.py</code> adlanır) API sorğularını idarə edir, <code>yt-dlp</code> və <code>ffmpeg</code> ilə qarşılıqlı əlaqədə olur, müvəqqəti fayl saxlanmasını idarə edir və audio faylları təqdim edir. Bu interaktiv mühitin təbiətinə görə, tam Python kodunu onun mənbə faylında nəzərdən keçirmək daha yaxşıdır. Bu, səhv idarəetmə, fayl idarəetmə və yükləmə utilitlərinə ötürülən xüsusi seçimləri əhatə edir.",
+                infoPythonCodePara: "Əsas backend məntiqi Flask freymvorkundan istifadə edərək Python-da yazılmışdır. Python skripti (adətən <code>app.py</code> adlanır) API sorğularını idarə edir, <code>yt-dlp</code> və <code>ffmpeg</code> ilə qarşılıqlı əlaqədə olur, müvəqqəti fayl saxlanmasını idarə edir və audio faylları təqdim edir. Bu kod serverdə işləyir və burada birbaşa görünmür, lakin yükləyicinin funksionallığını təmin edir.",
                 infoCreatorTitle: "Yaradıcı",
                 infoCreatorName: "Bu YouTube Musiqi Yükləyicisi saytı <strong>Suleyman Aslanov</strong> tərəfindən yaradılmışdır.",
                 headerH1: "Musiqi Yükləyicisi",
                 headerP: "YouTube video və ya pleylist keçidini daxil edin",
                 urlLabel: "YouTube Keçidi:",
-                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                urlPlaceholder: "məsələn, https://www.youtube.com/watch?v=...",
                 formatLabel: "Format seçin:",
                 formatMp3: "MP3 (tövsiyə olunur)",
                 formatWav: "WAV (sıxılmamış, daha böyük ölçü)",
                 submitButton: "Audio Yüklə",
                 footerCopyrightText: "YouTube musiqi yükləyicisi. Sayt Suleyman Aslanov tərəfindən hazırlanıb.",
                 footerWatermark: "Suleyman Aslanov tərəfindən hazırlanıb",
-                statusErrorUrl: "Zəhmət olmasa, URL daxil edin.",
+                statusErrorUrl: "Zəhmət olmasa, düzgün YouTube URL daxil edin.",
                 statusProcessing: "Keçid emal olunur... Zəhmət olmasa, gözləyin.",
                 statusSuccessHeader: "Hazırdır! Yükləmələr başlayır:",
                 statusDownloadLinkText: "{FORMAT} Yüklə",
@@ -578,20 +616,20 @@
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> Özel kullanıcı arayüzlerini hızla oluşturmak için bir yardımcı program öncelikli CSS çerçevesi.",
                 infoLibJS: "<strong>JavaScript:</strong> Ön uç etkileşimi, dil değiştirme, animasyonlar ve arka uç API ile iletişim için kullanılır.",
                 infoPythonCodeTitle: "Python Arka Uç Kodu",
-                infoPythonCodePara: "Temel arka uç mantığı, Flask çerçevesi kullanılarak Python ile yazılmıştır. Python betiği (genellikle <code>app.py</code> olarak adlandırılır) API isteklerini işler, <code>yt-dlp</code> ve <code>ffmpeg</code> ile etkileşime girer, geçici dosya depolamasını yönetir ve ses dosyalarını sunar. Bu etkileşimli ortamın doğası gereği, tam Python kodu en iyi kaynak dosyasında görüntülenir. Hata yönetimi, dosya yönetimi ve indirme yardımcı programlarına iletilen belirli seçenekleri içerir.",
+                infoPythonCodePara: "Temel arka uç mantığı, Flask çerçevesi kullanılarak Python ile yazılmıştır. Python betiği (genellikle <code>app.py</code> olarak adlandırılır) API isteklerini işler, <code>yt-dlp</code> ve <code>ffmpeg</code> ile etkileşime girer, geçici dosya depolamasını yönetir ve ses dosyalarını sunar. Bu kod sunucuda çalışır ve burada doğrudan görünmez, ancak indiricinin işlevselliğini sağlar.",
                 infoCreatorTitle: "Oluşturan",
                 infoCreatorName: "Bu YouTube Müzik İndirici sitesi <strong>Suleyman Aslanov</strong> tarafından oluşturulmuştur.",
                 headerH1: "Müzik İndirici",
                 headerP: "Bir YouTube video veya oynatma listesi bağlantısı yapıştırın",
                 urlLabel: "YouTube Bağlantısı:",
-                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                urlPlaceholder: "örneğin, https://www.youtube.com/watch?v=...",
                 formatLabel: "Format seçin:",
                 formatMp3: "MP3 (önerilir)",
                 formatWav: "WAV (sıkıştırılmamış, daha büyük boyut)",
                 submitButton: "Sesi İndir",
                 footerCopyrightText: "YouTube müzik indiricisi. Site Suleyman Aslanov tarafından yapıldı.",
                 footerWatermark: "Suleyman Aslanov tarafından geliştirildi",
-                statusErrorUrl: "Lütfen bir URL girin.",
+                statusErrorUrl: "Lütfen geçerli bir YouTube URL'si girin.",
                 statusProcessing: "Bağlantı işleniyor... Lütfen bekleyin.",
                 statusSuccessHeader: "Tamamlandı! İndirmeler başlatılıyor:",
                 statusDownloadLinkText: "{FORMAT} İndir",
@@ -620,20 +658,20 @@
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> إطار عمل CSS يعتمد على الأدوات المساعدة لإنشاء واجهات مستخدم مخصصة بسرعة.",
                 infoLibJS: "<strong>JavaScript:</strong> يستخدم للتفاعل في الواجهة الأمامية، وتبديل اللغة، والرسوم المتحركة، والتواصل مع واجهة برمجة تطبيقات الواجهة الخلفية.",
                 infoPythonCodeTitle: "كود الواجهة الخلفية بلغة بايثون",
-                infoPythonCodePara: "تتم كتابة منطق الواجهة الخلفية الأساسي بلغة بايثون باستخدام إطار عمل Flask. يتعامل برنامج بايثون النصي (عادةً ما يسمى <code>app.py</code>) مع طلبات واجهة برمجة التطبيقات، ويتفاعل مع <code>yt-dlp</code> و <code>ffmpeg</code>، ويدير تخزين الملفات المؤقت، ويقدم ملفات الصوت. نظرًا لطبيعة هذه البيئة التفاعلية، فمن الأفضل عرض كود بايثون الكامل في ملف المصدر الخاص به. وهو يتضمن معالجة الأخطاء، وإدارة الملفات، والخيارات المحددة التي تم تمريرها إلى أدوات التنزيل.",
+                infoPythonCodePara: "تتم كتابة منطق الواجهة الخلفية الأساسي بلغة بايثون باستخدام إطار عمل Flask. يتعامل برنامج بايثون النصي (عادةً ما يسمى <code>app.py</code>) مع طلبات واجهة برمجة التطبيقات، ويتفاعل مع <code>yt-dlp</code> و <code>ffmpeg</code>، ويدير تخزين الملفات المؤقت، ويقدم ملفات الصوت. يعمل هذا الكود على الخادم وهو غير مرئي مباشرة هنا، ولكنه يضمن وظائف أداة التنزيل.",
                 infoCreatorTitle: "المنشئ",
                 infoCreatorName: "تم إنشاء موقع تنزيل موسيقى يوتيوب هذا بواسطة <strong>سليمان أصلانوف</strong>.",
                 headerH1: "محمل الموسيقى",
                 headerP: "الصق رابط فيديو يوتيوب أو قائمة تشغيل",
                 urlLabel: "رابط يوتيوب:",
-                urlPlaceholder: "https://www.youtube.com/watch?v=...",
+                urlPlaceholder: "مثال: https://www.youtube.com/watch?v=...",
                 formatLabel: "اختر الصيغة:",
                 formatMp3: "MP3 (موصى به)",
                 formatWav: "WAV (غير مضغوط، حجم أكبر)",
                 submitButton: "تحميل الصوت",
                 footerCopyrightText: "محمل موسيقى يوتيوب. الموقع من صنع سليمان أصلانوف.",
                 footerWatermark: "تم التطوير بواسطة سليمان أصلانوف",
-                statusErrorUrl: "الرجاء إدخال عنوان URL.",
+                statusErrorUrl: "الرجاء إدخال رابط يوتيوب صحيح.",
                 statusProcessing: "جاري معالجة الرابط... يرجى الانتظار.",
                 statusSuccessHeader: "اكتمل! جاري بدء التنزيلات:",
                 statusDownloadLinkText: "تحميل {FORMAT}",
@@ -648,36 +686,41 @@
             }
         };
 
-        let currentLanguage = 'ru';
+        let currentLanguage = 'ru'; // Default language
 
         function applyTranslations(lang) {
             currentLanguage = lang;
             localStorage.setItem('preferredLanguage', lang);
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
             const pageTitleKey = translations[lang]?.pageTitle || translations.en.pageTitle;
             document.title = pageTitleKey;
+
             const metaDescElement = document.querySelector('meta[data-translate-meta-description]');
             if (metaDescElement) {
-                const metaDescKey = metaDescElement.getAttribute('data-translate-meta-description');
+                const metaDescKey = metaDescElement.getAttribute('data-translate-meta-description'); 
                 metaDescElement.content = translations[lang]?.[metaDescKey] || translations.en[metaDescKey] || '';
             }
+
             document.querySelectorAll('[data-translate-key]').forEach(element => {
                 const key = element.getAttribute('data-translate-key');
                 if (translations[lang] && translations[lang][key]) {
                     element.innerHTML = translations[lang][key]; 
-                } else if (translations.en[key]) {
+                } else if (translations.en[key]) { 
                     element.innerHTML = translations.en[key];
                 }
             });
+
             document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
                 const key = element.getAttribute('data-translate-placeholder');
                  if (translations[lang] && translations[lang][key]) {
                     element.placeholder = translations[lang][key];
-                } else if (translations.en[key]) {
+                } else if (translations.en[key]) { 
                     element.placeholder = translations.en[key];
                 }
             });
+
             const langSelector = document.getElementById('languageSelector');
             if (langSelector) {
                 langSelector.value = lang;
@@ -727,30 +770,35 @@
             const infoButton = document.getElementById('infoButton');
             const infoSectionOverlay = document.getElementById('infoSectionOverlay');
             const closeInfoButton = document.getElementById('closeInfoButton');
-            const downloaderContent = document.getElementById('downloaderContent');
-
-
-            if (infoButton && infoSectionOverlay && closeInfoButton && downloaderContent) {
+            
+            if (infoButton && infoSectionOverlay && closeInfoButton) {
                 console.log("Info button and sections found. Attaching event listeners.");
                 infoButton.addEventListener('click', () => {
-                    console.log("Info button clicked.");
+                    console.log("Info button clicked. Current overlay display (computed):", window.getComputedStyle(infoSectionOverlay).display, "Opacity (computed):", window.getComputedStyle(infoSectionOverlay).opacity);
+                    
                     infoSectionOverlay.classList.add('visible'); 
+                    document.body.classList.add('overflow-hidden'); 
+                    
+                    setTimeout(() => {
+                        console.log("Overlay display after adding .visible (computed):", window.getComputedStyle(infoSectionOverlay).display, "Opacity (computed):", window.getComputedStyle(infoSectionOverlay).opacity);
+                    }, 0);
                 });
                 closeInfoButton.addEventListener('click', () => {
                     console.log("Close info button clicked.");
                     infoSectionOverlay.classList.remove('visible');
+                    document.body.classList.remove('overflow-hidden'); 
                 });
                 infoSectionOverlay.addEventListener('click', (event) => {
                     if (event.target === infoSectionOverlay) { 
                         console.log("Info overlay backdrop clicked.");
                         infoSectionOverlay.classList.remove('visible');
+                        document.body.classList.remove('overflow-hidden'); 
                     }
                 });
             } else {
                 console.error("One or more elements for info section functionality are missing:", 
-                    {infoButton, infoSectionOverlay, closeInfoButton, downloaderContent });
+                    {infoButton, infoSectionOverlay, closeInfoButton });
             }
-
 
             if (languageSelector) {
                 languageSelector.addEventListener('change', (event) => {
@@ -771,9 +819,7 @@
                         return;
                     }
                      try {
-                        new URL(url);
-                         if (!url.includes('youtube.com/') && !url.includes('youtu.be/') && !url.includes('m.youtube.com') && !url.includes('youtu.be')) {
-                        }
+                        new URL(url); 
                     } catch (_) {
                         statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md status-message-item">${getTranslation('statusErrorUrl')}</p>`;
                         return;
@@ -789,7 +835,7 @@
                     if(submitButtonEl) {
                         submitButtonEl.disabled = true;
                         submitButtonEl.classList.add('opacity-50', 'cursor-not-allowed');
-                        submitButtonEl.classList.remove('hover:bg-sky-400', 'hover:scale-105');
+                        submitButtonEl.classList.remove('hover:bg-sky-400', 'submit-button:hover'); 
                     }
 
                     try {
@@ -823,7 +869,6 @@
                             `;
                             if (telegramLinkContainer) telegramLinkContainer.classList.remove('hidden');
 
-
                             (async () => {
                                 for (let i = 0; i < data.files.length; i++) {
                                     const fileInfo = data.files[i];
@@ -849,7 +894,7 @@
                                     }
 
                                     if (i < data.files.length - 1) {
-                                        await new Promise(resolve => setTimeout(resolve, 750));
+                                        await new Promise(resolve => setTimeout(resolve, 750)); 
                                     }
                                 }
                             })();
@@ -864,7 +909,7 @@
                         if(submitButtonEl) {
                             submitButtonEl.disabled = false;
                             submitButtonEl.classList.remove('opacity-50', 'cursor-not-allowed');
-                            submitButtonEl.classList.add('hover:bg-sky-400', 'hover:scale-105');
+                            submitButtonEl.classList.add('hover:bg-sky-400'); 
                         }
                     }
                 });
@@ -873,8 +918,8 @@
             }
 
             const preferredLang = localStorage.getItem('preferredLanguage');
-            const browserLang = navigator.language.split('-')[0];
-            let initialLang = 'ru';
+            const browserLang = navigator.language.split('-')[0]; 
+            let initialLang = 'ru'; 
 
             if (preferredLang && translations[preferredLang]) {
                 initialLang = preferredLang;
@@ -883,10 +928,6 @@
             }
             applyTranslations(initialLang);
             
-            if (downloaderContent) downloaderContent.style.display = 'block';
-            if (infoSectionOverlay) infoSectionOverlay.style.display = 'none';
-
-
             console.log("Initial setup complete. Downloader should be visible.");
         });
     </script>
