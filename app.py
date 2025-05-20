@@ -90,8 +90,8 @@ def download_audio_route():
 
     logger.info(f"Запрос на скачивание: URL='{url}', Формат='{requested_format}', Сессия='{session_id}'")
 
-    watermark_text_for_filename = "Developed By BitSamurai_"
-    metadata_watermark_text = "Developed By BitSamurai"
+    watermark_text_for_filename = "YouTube Music Downloader. Site created by Suleyman Aslanov"
+    metadata_watermark_text = "YouTube Music Downlodaer. Site created by Suleyman Aslanov"
 
     output_template = os.path.join(session_download_path, f"%(title).75B - {watermark_text_for_filename}.%(ext)s")
 
