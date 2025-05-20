@@ -3,111 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" data-translate-meta-description="metaDescriptionContent" content="Download music and audio from YouTube videos and playlists in MP3 or WAV format.">
+    <meta name="theme-color" content="#0f172a">
     <title>YouTube Music Downloader</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            background-color: #0f172a; 
+            overflow-x: hidden;
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative; 
         }
         body:lang(ar) {
             font-family: 'Tajawal', sans-serif;
         }
-        .loader {
-            border-top-color: #3498db;
-            animation: spin 1s linear infinite;
+
+        .night-sky-bg-main {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0b1021, #111827, #1e293b);
+            background-size: 300% 300%;
+            animation: gradientBGMain 30s ease infinite;
+            z-index: -1; 
+            overflow: hidden;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes gradientBGMain {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .lang-switcher-container {
+        .star-main {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            z-index: 10;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: twinkleMain 3s infinite ease-in-out;
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5), 0 0 6px rgba(255, 255, 255, 0.3);
         }
-        .lang-switcher-container select {
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            border: 1px solid #4A5568;
-            background-color: #2D3748;
-            color: white;
-            font-size: 0.875rem;
+        @keyframes twinkleMain {
+            0%, 100% { opacity: 0.4; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.1); }
         }
-        #statusArea ul::-webkit-scrollbar {
-            width: 8px;
+        .moon-main {
+            position: absolute;
+            width: 100px; 
+            height: 100px;
+            background-color: #f0f8ff; 
+            border-radius: 50%;
+            box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa; 
+            top: 10%;
+            left: 15%; 
+            animation: gentleDriftMain 15s ease-in-out infinite alternate, moonPhase 60s linear infinite;
+            opacity: 0; 
+            animation-fill-mode: forwards; 
+            animation-name: gentleDriftMain, moonPhase, fadeInMoon;
+            animation-duration: 15s, 60s, 2s;
+            animation-timing-function: ease-in-out, linear, ease-out;
+            animation-iteration-count: infinite, infinite, 1;
+            animation-direction: alternate, normal, normal;
+            animation-delay: 0s, 0s, 0.5s; 
         }
-        #statusArea ul::-webkit-scrollbar-track {
-            background: #2D3748;
-            border-radius: 10px;
+         @keyframes fadeInMoon {
+            to { opacity: 0.85; }
         }
-        #statusArea ul::-webkit-scrollbar-thumb {
-            background: #4A5568;
-            border-radius: 10px;
+        @keyframes gentleDriftMain {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, 10px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
         }
-        #statusArea ul::-webkit-scrollbar-thumb:hover {
-            background: #718096;
+        @keyframes moonPhase { 
+            0% { box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa, inset -10px 0 15px rgba(0,0,0,0.1); }
+            50% { box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa, inset 5px 0 15px rgba(0,0,0,0.05); }
+            100% { box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa, inset -10px 0 15px rgba(0,0,0,0.1); }
         }
+
+
+        .main-downloader-container { 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 1rem; 
+            z-index: 1; 
+        }
+
+        .main-card {
+            background-color: rgba(30, 41, 59, 0.88); 
+            backdrop-filter: blur(10px);
+            padding: 2rem 2.5rem; 
+            border-radius: 1.5rem; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+            width: 100%;
+            max-width: 580px; 
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+            animation: cardEnterMain 0.8s 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+        @keyframes cardEnterMain {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .loader { border-top-color: #0ea5e9; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .lang-switcher-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 50; }
+        .lang-switcher-container select { padding: 0.6rem 1rem; border-radius: 0.5rem; border: 1px solid rgb(71 85 105 / 0.7); background-color: rgb(30 41 59 / 0.85); backdrop-filter: blur(6px); color: white; font-size: 0.875rem; transition: all 0.2s ease-in-out; }
+        .lang-switcher-container select:hover { border-color: #0ea5e9; background-color: rgb(51 65 85 / 0.9); }
+        #statusArea ul::-webkit-scrollbar { width: 8px; }
+        #statusArea ul::-webkit-scrollbar-track { background: rgb(51 65 85); border-radius: 10px; }
+        #statusArea ul::-webkit-scrollbar-thumb { background: rgb(71 85 105); border-radius: 10px; }
+        #statusArea ul::-webkit-scrollbar-thumb:hover { background: #0ea5e9; }
+
+        input[type="url"]:focus, select:focus { box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.5); border-color: #0ea5e9 !important; }
+        .submit-button { transition: all 0.3s ease-out; }
+        .submit-button:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 12px 25px rgba(14, 165, 233, 0.25), 0 8px 10px rgba(14, 165, 233, 0.22); }
+        .submit-button:active { transform: translateY(-1px) scale(0.99); box-shadow: 0 5px 10px rgba(14, 165, 233, 0.2), 0 2px 4px rgba(14, 165, 233, 0.18); }
+        .status-message-item { opacity: 0; transform: translateY(10px); animation: fadeInItem 0.5s ease-out forwards; }
+        @keyframes fadeInItem { to { opacity: 1; transform: translateY(0); } }
+        .music-icon-animated svg line { stroke-dasharray: 50; stroke-dashoffset: 50; animation: drawLine 1.5s ease-out forwards infinite alternate; }
+        .music-icon-animated svg line:nth-child(1) { animation-delay: 0s; }
+        .music-icon-animated svg line:nth-child(2) { animation-delay: 0.2s; }
+        .music-icon-animated svg line:nth-child(3) { animation-delay: 0.4s; }
+        .music-icon-animated svg line:nth-child(4) { animation-delay: 0.6s; }
+        .music-icon-animated svg line:nth-child(5) { animation-delay: 0.8s; }
+        .music-icon-animated svg line:nth-child(6) { animation-delay: 1.0s; }
+        @keyframes drawLine { 50% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 0; transform: scaleY(0.3); } }
+        
+        .main-card form > div, .main-card .submit-button {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: formItemEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .main-card .text-center { 
+             opacity: 0;
+             transform: translateY(15px);
+             animation: formItemEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s forwards; 
+        }
+        .main-card form > div:nth-child(1) { animation-delay: 0.8s; } 
+        .main-card form > div:nth-child(2) { animation-delay: 0.9s; } 
+        .main-card .submit-button { animation-delay: 1.0s; }       
+
+        @keyframes formItemEnter {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .app-footer {
+            opacity: 0;
+            animation: fadeInFooter 1s 1.2s ease-out forwards; 
+        }
+        @keyframes fadeInFooter {
+            to { opacity: 1; }
+        }
+        .file-download-status {
+            font-size: 0.75rem; /* text-xs */
+            color: #94a3b8; /* slate-400 */
+            margin-left: 0.5rem; /* ml-2 */
+        }
+        .file-download-status.downloading {
+            color: #38bdf8; /* sky-400 */
+        }
+        .file-download-status.completed {
+            color: #22c55e; /* green-500 */
+        }
+        .telegram-link-container {
+            margin-top: 0.75rem; /* mt-3 */
+            font-size: 0.875rem; /* text-sm */
+            color: #94a3b8; /* slate-400 */
+        }
+        .telegram-link-container a {
+            color: #38bdf8; /* sky-400 */
+            text-decoration: underline;
+        }
+        .telegram-link-container a:hover {
+            color: #7dd3fc; /* sky-300 */
+        }
+
     </style>
 </head>
-<body class="bg-gradient-to-r from-slate-900 to-slate-700 text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-sky-500 selection:text-white">
+<body class="text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-sky-500 selection:text-white">
 
-    <div class="lang-switcher-container">
-        <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Language:</label>
-        <select id="languageSelector" title="Select Language">
-            <option value="en">English</option>
-            <option value="ru">Русский</option>
-            <option value="es">Español</option>
-            <option value="az">Azərbaycanca</option>
-            <option value="tr">Türkçe</option>
-            <option value="ar">العربية</option>
-        </select>
+    <div class="night-sky-bg-main">
+        <div class="moon-main"></div>
     </div>
 
-    <div class="bg-slate-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-lg">
-        <div class="text-center mb-6 sm:mb-8">
-            <h1 data-translate-key="headerH1" class="text-3xl sm:text-4xl font-bold text-sky-400">Music Downloader 🎶</h1>
-            <p data-translate-key="headerP" class="text-slate-400 mt-2">Paste a YouTube video or playlist link</p>
+    <div class="main-downloader-container">
+        <div class="lang-switcher-container">
+            <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Language:</label>
+            <select id="languageSelector" title="Select Language">
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+                <option value="es">Español</option>
+                <option value="az">Azərbaycanca</option>
+                <option value="tr">Türkçe</option>
+                <option value="ar">العربية</option>
+            </select>
         </div>
 
-        <form id="downloadForm" class="space-y-6">
-            <div>
-                <label for="youtube_url" data-translate-key="urlLabel" class="block text-sm font-medium text-slate-300 mb-1">YouTube Link:</label>
-                <input type="url" id="youtube_url" name="youtube_url" required
-                       class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-sky-500 focus:border-sky-500 transition duration-150"
-                       data-translate-placeholder="urlPlaceholder"
-                       placeholder="https://www.youtube.com/watch?v=...">
+        <div class="main-card">
+            <div class="text-center mb-8 sm:mb-10">
+                <div class="music-icon-animated inline-block mb-4">
+                    <svg width="60" height="50" viewBox="0 0 60 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="5" y1="45" x2="5" y2="5" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="15" y1="45" x2="15" y2="15" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="25" y1="45" x2="25" y2="25" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="35" y1="45" x2="35" y2="10" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="45" y1="45" x2="45" y2="20" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="55" y1="45" x2="55" y2="30" stroke="#0ea5e9" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h1 data-translate-key="headerH1" class="text-4xl sm:text-5xl font-extrabold text-sky-400 tracking-tight">Music Downloader</h1>
+                <p data-translate-key="headerP" class="text-slate-400 mt-3 text-lg">Paste a YouTube video or playlist link</p>
             </div>
 
-            <div>
-                <label for="format_choice" data-translate-key="formatLabel" class="block text-sm font-medium text-slate-300 mb-1">Select format:</label>
-                <select id="format_choice" name="format_choice"
-                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-sky-500 focus:border-sky-500 transition duration-150">
-                    <option value="mp3" selected data-translate-key="formatMp3">MP3 (recommended)</option>
-                    <option value="wav" data-translate-key="formatWav">WAV (uncompressed, larger size)</option>
-                </select>
-            </div>
+            <form id="downloadForm" class="space-y-6">
+                <div>
+                    <label for="youtube_url" data-translate-key="urlLabel" class="block text-sm font-medium text-slate-300 mb-2">YouTube Link:</label>
+                    <input type="url" id="youtube_url" name="youtube_url" required
+                           class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out"
+                           data-translate-placeholder="urlPlaceholder"
+                           placeholder="https://www.youtube.com/watch?v=...">
+                </div>
 
-            <button type="submit" data-translate-key="submitButton"
-                    class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50">
-                Download Audio
-            </button>
-        </form>
+                <div>
+                    <label for="format_choice" data-translate-key="formatLabel" class="block text-sm font-medium text-slate-300 mb-2">Select format:</label>
+                    <select id="format_choice" name="format_choice"
+                            class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out">
+                        <option value="mp3" selected data-translate-key="formatMp3">MP3 (recommended)</option>
+                        <option value="wav" data-translate-key="formatWav">WAV (uncompressed, larger size)</option>
+                    </select>
+                </div>
 
-        <div id="statusArea" class="mt-6 text-center min-h-[50px]">
+                <button type="submit" data-translate-key="submitButton"
+                        class="submit-button w-full bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold py-3.5 px-4 rounded-lg shadow-lg focus:outline-none focus:ring-4 focus:ring-sky-500/50">
+                    Download Audio
+                </button>
+            </form>
+
+            <div id="statusArea" class="mt-8 text-center min-h-[60px]">
             </div>
+            <div id="telegramLinkContainer" class="telegram-link-container text-center hidden">
+                 <span data-translate-key="telegramSubscription">Subscribe to Telegram Channel of developers:</span> <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer">@ytdlpdeveloper</a>
+            </div>
+        </div>
+
+        <footer class="app-footer text-center mt-10 text-slate-500 text-sm">
+            <p>© <span id="year"></span> <span data-translate-key="footerCopyrightText">YouTube Music downloader. Site made by BitSamurai.</span></p>
+            <p class="text-xs mt-1" data-translate-key="footerWatermark">Developed By BitSamurai_</p>
+        </footer>
     </div>
-
-    <footer class="text-center mt-8 text-slate-500 text-sm">
-        <p>© <span id="year"></span> <span data-translate-key="footerCopyrightText">YouTube Music downloader. Site made by BitSamurai.</span></p>
-    </footer>
 
     <script>
         const translations = {
             en: {
                 pageTitle: "YouTube Music Downloader",
-                headerH1: "Music Downloader 🎶",
+                metaDescriptionContent: "Easily download music and audio from YouTube videos and playlists in MP3 or WAV format. Simple, fast, and free YouTube to audio converter.",
+                headerH1: "Music Downloader",
                 headerP: "Paste a YouTube video or playlist link",
                 urlLabel: "YouTube Link:",
                 urlPlaceholder: "https://www.youtube.com/watch?v=...",
@@ -116,18 +276,24 @@
                 formatWav: "WAV (uncompressed, larger size)",
                 submitButton: "Download Audio",
                 footerCopyrightText: "YouTube Music downloader. Site made by BitSamurai.",
+                footerWatermark: "Developed By BitSamurai_",
                 statusErrorUrl: "Please enter a URL.",
                 statusProcessing: "Processing link... Please wait.",
-                statusSuccessHeader: "Done! File(s) ready:",
-                statusDownloadButton: "Download {FORMAT}",
-                statusPostDownloadHint: "If the download didn't start, check your browser settings or try right-clicking and 'Save link as...'.",
+                statusSuccessHeader: "Done! Initiating downloads:",
+                statusDownloadLinkText: "Download {FORMAT}",
+                statusPostDownloadHint: "If downloads didn't start, check browser pop-up settings or file save location.",
                 statusErrorGeneric: "Error: {MESSAGE}",
                 statusNetworkError: "A network error occurred. Please try again.",
-                languageLabel: "Language:"
+                languageLabel: "Language:",
+                telegramSubscription: "Subscribe to Telegram Channel of developers:",
+                fileStatusPending: "Pending...",
+                fileStatusDownloading: "Downloading...",
+                fileStatusStarted: "Started! Check browser."
             },
             ru: {
                 pageTitle: "Загрузчик Музыки с YouTube",
-                headerH1: "Загрузчик Музыки 🎶",
+                metaDescriptionContent: "Легко скачивайте музыку и аудио из видео и плейлистов YouTube в формате MP3 или WAV. Простой, быстрый и бесплатный конвертер YouTube в аудио.",
+                headerH1: "Загрузчик Музыки",
                 headerP: "Вставьте ссылку на YouTube видео или плейлист",
                 urlLabel: "Ссылка YouTube:",
                 urlPlaceholder: "https://www.youtube.com/watch?v=...",
@@ -136,18 +302,24 @@
                 formatWav: "WAV (без сжатия, больше размер)",
                 submitButton: "Скачать Аудио",
                 footerCopyrightText: "Загрузчик музыки YouTube. Сайт сделан BitSamurai.",
+                footerWatermark: "Разработано BitSamurai_",
                 statusErrorUrl: "Пожалуйста, введите URL.",
                 statusProcessing: "Обработка ссылки... Пожалуйста, подождите.",
-                statusSuccessHeader: "Готово! Файл(ы) для скачивания:",
-                statusDownloadButton: "Скачать {FORMAT}",
-                statusPostDownloadHint: "Если загрузка не началась, проверьте настройки браузера или попробуйте кликнуть правой кнопкой мыши и \"Сохранить ссылку как...\".",
+                statusSuccessHeader: "Готово! Начинаю загрузку файла(ов):",
+                statusDownloadLinkText: "Скачать {FORMAT}",
+                statusPostDownloadHint: "Если загрузка не началась, проверьте настройки блокировки всплывающих окон или место сохранения файлов.",
                 statusErrorGeneric: "Ошибка: {MESSAGE}",
                 statusNetworkError: "Произошла сетевая ошибка. Пожалуйста, попробуйте еще раз.",
-                languageLabel: "Язык:"
+                languageLabel: "Язык:",
+                telegramSubscription: "Подпишитесь на Telegram канал разработчиков:",
+                fileStatusPending: "В ожидании...",
+                fileStatusDownloading: "Загрузка...",
+                fileStatusStarted: "Начато! Проверьте браузер."
             },
             es: {
                 pageTitle: "Descargador de Música de YouTube",
-                headerH1: "Descargador de Música 🎶",
+                metaDescriptionContent: "Descarga fácilmente música y audio de videos y listas de reproducción de YouTube en formato MP3 o WAV. Convertidor de YouTube a audio simple, rápido y gratuito.",
+                headerH1: "Descargador de Música",
                 headerP: "Pega un enlace de video o lista de reproducción de YouTube",
                 urlLabel: "Enlace de YouTube:",
                 urlPlaceholder: "https://www.youtube.com/watch?v=...",
@@ -156,18 +328,24 @@
                 formatWav: "WAV (sin comprimir, tamaño mayor)",
                 submitButton: "Descargar Audio",
                 footerCopyrightText: "Descargador de música de YouTube. Sitio hecho por BitSamurai.",
+                footerWatermark: "Desarrollado por BitSamurai_",
                 statusErrorUrl: "Por favor, introduce una URL.",
                 statusProcessing: "Procesando enlace... Por favor, espera.",
-                statusSuccessHeader: "¡Listo! Archivo(s) listo(s):",
-                statusDownloadButton: "Descargar {FORMAT}",
-                statusPostDownloadHint: "Si la descarga no comenzó, revisa la configuración de tu navegador o intenta hacer clic derecho y 'Guardar enlace como...'.",
+                statusSuccessHeader: "¡Listo! Iniciando descargas:",
+                statusDownloadLinkText: "Descargar {FORMAT}",
+                statusPostDownloadHint: "Si las descargas no comenzaron, revisa la configuración de ventanas emergentes del navegador o la ubicación de guardado de archivos.",
                 statusErrorGeneric: "Error: {MESSAGE}",
                 statusNetworkError: "Ocurrió un error de red. Por favor, inténtalo de nuevo.",
-                languageLabel: "Idioma:"
+                languageLabel: "Idioma:",
+                telegramSubscription: "Suscríbete al canal de Telegram de los desarrolladores:",
+                fileStatusPending: "Pendiente...",
+                fileStatusDownloading: "Descargando...",
+                fileStatusStarted: "¡Iniciado! Revisa el navegador."
             },
             az: {
                 pageTitle: "YouTube Musiqi Yükləyicisi",
-                headerH1: "Musiqi Yükləyicisi 🎶",
+                metaDescriptionContent: "YouTube videolarından və pleylistlərindən musiqi və audio faylları MP3 və ya WAV formatında asanlıqla yükləyin. Sadə, sürətli və pulsuz YouTube-dan audioya çevirici.",
+                headerH1: "Musiqi Yükləyicisi",
                 headerP: "YouTube video və ya pleylist keçidini daxil edin",
                 urlLabel: "YouTube Keçidi:",
                 urlPlaceholder: "https://www.youtube.com/watch?v=...",
@@ -176,18 +354,24 @@
                 formatWav: "WAV (sıxılmamış, daha böyük ölçü)",
                 submitButton: "Audio Yüklə",
                 footerCopyrightText: "YouTube musiqi yükləyicisi. Sayt BitSamurai tərəfindən hazırlanıb.",
+                footerWatermark: "BitSamurai_ tərəfindən hazırlanıb",
                 statusErrorUrl: "Zəhmət olmasa, URL daxil edin.",
                 statusProcessing: "Keçid emal olunur... Zəhmət olmasa, gözləyin.",
-                statusSuccessHeader: "Hazırdır! Fayl(lar) yüklənməyə hazırdır:",
-                statusDownloadButton: "{FORMAT} Yüklə",
-                statusPostDownloadHint: "Əgər yükləmə başlamadısa, brauzerinizin parametrlərini yoxlayın və ya sağ klikləyib 'Linki fərqli saxla...' seçin.",
+                statusSuccessHeader: "Hazırdır! Yükləmələr başlayır:",
+                statusDownloadLinkText: "{FORMAT} Yüklə",
+                statusPostDownloadHint: "Əgər yükləmələr başlamadısa, brauzerin pop-up parametrlərini və ya faylın yadda saxlanma yerini yoxlayın.",
                 statusErrorGeneric: "Xəta: {MESSAGE}",
                 statusNetworkError: "Şəbəkə xətası baş verdi. Zəhmət olmasa, yenidən cəhd edin.",
-                languageLabel: "Dil:"
+                languageLabel: "Dil:",
+                telegramSubscription: "İstehsalçıların Telegram kanalına abunə olun:",
+                fileStatusPending: "Gözlənilir...",
+                fileStatusDownloading: "Yüklənir...",
+                fileStatusStarted: "Başladı! Brauzeri yoxlayın."
             },
             tr: {
                 pageTitle: "YouTube Müzik İndirici",
-                headerH1: "Müzik İndirici 🎶",
+                metaDescriptionContent: "YouTube videolarından ve çalma listelerinden MP3 veya WAV formatında kolayca müzik ve ses indirin. Basit, hızlı ve ücretsiz YouTube'dan sese dönüştürücü.",
+                headerH1: "Müzik İndirici",
                 headerP: "Bir YouTube video veya oynatma listesi bağlantısı yapıştırın",
                 urlLabel: "YouTube Bağlantısı:",
                 urlPlaceholder: "https://www.youtube.com/watch?v=...",
@@ -196,18 +380,24 @@
                 formatWav: "WAV (sıkıştırılmamış, daha büyük boyut)",
                 submitButton: "Sesi İndir",
                 footerCopyrightText: "YouTube müzik indiricisi. Site BitSamurai tarafından yapıldı.",
+                footerWatermark: "BitSamurai_ tarafından geliştirildi",
                 statusErrorUrl: "Lütfen bir URL girin.",
                 statusProcessing: "Bağlantı işleniyor... Lütfen bekleyin.",
-                statusSuccessHeader: "Tamamlandı! Dosya(lar) hazır:",
-                statusDownloadButton: "{FORMAT} İndir",
-                statusPostDownloadHint: "İndirme başlamadıysa, tarayıcı ayarlarınızı kontrol edin veya sağ tıklayıp 'Bağlantıyı farklı kaydet...' seçeneğini deneyin.",
+                statusSuccessHeader: "Tamamlandı! İndirmeler başlatılıyor:",
+                statusDownloadLinkText: "{FORMAT} İndir",
+                statusPostDownloadHint: "İndirmeler başlamadıysa, tarayıcının pop-up ayarlarını veya dosya kaydetme konumunu kontrol edin.",
                 statusErrorGeneric: "Hata: {MESSAGE}",
                 statusNetworkError: "Bir ağ hatası oluştu. Lütfen tekrar deneyin.",
-                languageLabel: "Dil:"
+                languageLabel: "Dil:",
+                telegramSubscription: "Geliştiricilerin Telegram Kanalına Abone Olun:",
+                fileStatusPending: "Beklemede...",
+                fileStatusDownloading: "İndiriliyor...",
+                fileStatusStarted: "Başladı! Tarayıcıyı kontrol et."
             },
             ar: {
                 pageTitle: "محمل موسيقى يوتيوب",
-                headerH1: "محمل الموسيقى 🎶",
+                metaDescriptionContent: "قم بتنزيل الموسيقى والصوت بسهولة من مقاطع فيديو يوتيوب وقوائم التشغيل بصيغة MP3 أو WAV. محول يوتيوب إلى صوت بسيط وسريع ومجاني.",
+                headerH1: "محمل الموسيقى",
                 headerP: "الصق رابط فيديو يوتيوب أو قائمة تشغيل",
                 urlLabel: "رابط يوتيوب:",
                 urlPlaceholder: "https://www.youtube.com/watch?v=...",
@@ -216,37 +406,55 @@
                 formatWav: "WAV (غير مضغوط، حجم أكبر)",
                 submitButton: "تحميل الصوت",
                 footerCopyrightText: "محمل موسيقى يوتيوب. الموقع من صنع BitSamurai.",
+                footerWatermark: "تم التطوير بواسطة BitSamurai_",
                 statusErrorUrl: "الرجاء إدخال عنوان URL.",
                 statusProcessing: "جاري معالجة الرابط... يرجى الانتظار.",
-                statusSuccessHeader: "اكتمل! الملف (الملفات) جاهز:",
-                statusDownloadButton: "تحميل {FORMAT}",
-                statusPostDownloadHint: "إذا لم يبدأ التنزيل، تحقق من إعدادات المتصفح أو حاول النقر بزر الماوس الأيمن واختيار 'حفظ الرابط باسم...'.",
+                statusSuccessHeader: "اكتمل! جاري بدء التنزيلات:",
+                statusDownloadLinkText: "تحميل {FORMAT}",
+                statusPostDownloadHint: "إذا لم تبدأ التنزيلات، تحقق من إعدادات النوافذ المنبثقة بالمتصفح أو موقع حفظ الملف.",
                 statusErrorGeneric: "خطأ: {MESSAGE}",
                 statusNetworkError: "حدث خطأ في الشبكة. الرجاء معاودة المحاولة.",
-                languageLabel: "اللغة:"
+                languageLabel: "اللغة:",
+                telegramSubscription: "اشترك في قناة تيليجرام للمطورين:",
+                fileStatusPending: "قيد الانتظار...",
+                fileStatusDownloading: "جار التحميل...",
+                fileStatusStarted: "بدأ! تحقق من المتصفح."
             }
         };
 
-        let currentLanguage = 'ru'; 
+        let currentLanguage = 'ru';
 
         function applyTranslations(lang) {
             currentLanguage = lang;
-            localStorage.setItem('preferredLanguage', lang); 
+            localStorage.setItem('preferredLanguage', lang);
 
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-            document.title = translations[lang].pageTitle;
+
+            const pageTitleKey = translations[lang]?.pageTitle || translations.en.pageTitle;
+            document.title = pageTitleKey;
+
+            const metaDescElement = document.querySelector('meta[data-translate-meta-description]');
+            if (metaDescElement) {
+                const metaDescKey = metaDescElement.getAttribute('data-translate-meta-description');
+                metaDescElement.content = translations[lang]?.[metaDescKey] || translations.en[metaDescKey] || '';
+            }
+
 
             document.querySelectorAll('[data-translate-key]').forEach(element => {
                 const key = element.getAttribute('data-translate-key');
-                if (translations[lang][key]) {
+                if (translations[lang] && translations[lang][key]) {
                     element.textContent = translations[lang][key];
+                } else if (translations.en[key]) {
+                    element.textContent = translations.en[key];
                 }
             });
             document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
                 const key = element.getAttribute('data-translate-placeholder');
-                 if (translations[lang][key]) {
+                 if (translations[lang] && translations[lang][key]) {
                     element.placeholder = translations[lang][key];
+                } else if (translations.en[key]) {
+                    element.placeholder = translations.en[key];
                 }
             });
             const langSelector = document.getElementById('languageSelector');
@@ -256,121 +464,173 @@
         }
 
         function getTranslation(key, lang = currentLanguage, replacements = {}) {
-            let text = translations[lang]?.[key] || key; 
+            let text = (translations[lang] && translations[lang][key]) ? translations[lang][key] : (translations.en[key] || key);
             for (const placeholder in replacements) {
                 text = text.replace(`{${placeholder}}`, replacements[placeholder]);
             }
             return text;
         }
 
-        document.getElementById('year').textContent = new Date().getFullYear();
-        const downloadForm = document.getElementById('downloadForm');
-        const statusArea = document.getElementById('statusArea');
-        const youtubeUrlInput = document.getElementById('youtube_url');
-        const formatChoiceSelect = document.getElementById('format_choice');
-        const languageSelector = document.getElementById('languageSelector');
-
-        languageSelector.addEventListener('change', (event) => {
-            applyTranslations(event.target.value);
-        });
-
-        downloadForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const url = youtubeUrlInput.value.trim();
-            const format = formatChoiceSelect.value;
-
-            if (!url) {
-                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorUrl')}</p>`;
-                return;
-            }
-             try {
-                new URL(url);
-                if (!url.includes('youtube.com/') && !url.includes('youtu.be/') && !url.includes('m.youtube.com') && !url.includes('youtu.be')) {
+        document.addEventListener('DOMContentLoaded', () => {
+            const nightSky = document.querySelector('.night-sky-bg-main');
+            if (nightSky) { 
+                const numberOfStars = 60; 
+                for (let i = 0; i < numberOfStars; i++) {
+                    let star = document.createElement('div');
+                    star.className = 'star-main';
+                    star.style.width = `${Math.random() * 2 + 0.5}px`; 
+                    star.style.height = star.style.width;
+                    star.style.left = `${Math.random() * 100}%`;
+                    star.style.top = `${Math.random() * 100}%`;
+                    star.style.animationDelay = `${Math.random() * 3}s`;
+                    star.style.animationDuration = `${Math.random() * 2 + 2}s`;
+                    nightSky.appendChild(star);
                 }
-            } catch (_) {
-                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorUrl')}</p>`;
-                return;
             }
 
-            statusArea.innerHTML = `
-                <div class="flex flex-col justify-center items-center space-y-2 text-sky-400 p-3">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-600 h-8 w-8 mb-2"></div>
-                    <span>${getTranslation('statusProcessing')}</span>
-                </div>`;
+            const yearSpan = document.getElementById('year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+            
+            const downloadForm = document.getElementById('downloadForm');
+            const statusArea = document.getElementById('statusArea');
+            const telegramLinkContainer = document.getElementById('telegramLinkContainer');
+            const youtubeUrlInput = document.getElementById('youtube_url');
+            const formatChoiceSelect = document.getElementById('format_choice');
+            const languageSelector = document.getElementById('languageSelector');
 
-            const submitButton = this.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-
-            try {
-                const response = await fetch('/api/download_audio', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: url, format: format }),
+            if (languageSelector) {
+                languageSelector.addEventListener('change', (event) => {
+                    applyTranslations(event.target.value);
                 });
+            }
 
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    const errorText = await response.text();
-                    throw new Error(`Server returned an unexpected response: ${response.status} ${response.statusText}. ${errorText.substring(0,100)}`);
-                }
-                const data = await response.json();
+            if (downloadForm) {
+                downloadForm.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                    const url = youtubeUrlInput.value.trim();
+                    const format = formatChoiceSelect.value;
 
-                if (response.ok && data.status === 'success' && data.files && data.files.length > 0) {
-                    let filesHtml = data.files.map(fileInfo => `
-                        <li class="bg-slate-700 p-3 rounded-md shadow hover:shadow-md transition-shadow duration-150">
-                            <span class="text-slate-300 block truncate" title="${fileInfo.title || ''}">${fileInfo.title || 'Untitled'}</span>
-                            <a href="${fileInfo.download_url}"
-                               target="_blank" rel="noopener noreferrer"
-                               download="${fileInfo.filename || ''}"
-                               class="inline-block mt-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md text-sm transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
-                               ${getTranslation('statusDownloadButton', currentLanguage, {FORMAT: (fileInfo.filename ? fileInfo.filename.split('.').pop().toUpperCase() : format.toUpperCase())})}
-                            </a>
-                        </li>
-                    `).join('');
+                    telegramLinkContainer.classList.add('hidden'); // Hide on new submission
+
+                    if (!url) {
+                        statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md status-message-item">${getTranslation('statusErrorUrl')}</p>`;
+                        return;
+                    }
+                     try {
+                        new URL(url);
+                         if (!url.includes('youtube.com/') && !url.includes('youtu.be/') && !url.includes('m.youtube.com') && !url.includes('youtu.be')) {
+                        }
+                    } catch (_) {
+                        statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md status-message-item">${getTranslation('statusErrorUrl')}</p>`;
+                        return;
+                    }
 
                     statusArea.innerHTML = `
-                        <p class="text-green-400 mb-3 text-lg">${getTranslation('statusSuccessHeader')}</p>
-                        <ul class="space-y-3 text-left max-h-60 overflow-y-auto">${filesHtml}</ul>
-                        <p class="text-xs text-slate-500 mt-4">${getTranslation('statusPostDownloadHint')}</p>
-                    `;
-                    (async () => {
-                        for (let i = 0; i < data.files.length; i++) {
-                            const fileInfo = data.files[i];
-                            const link = document.createElement('a');
-                            link.href = fileInfo.download_url;
-                            link.download = fileInfo.filename || `audio_download.${fileInfo.download_url.split('.').pop()}`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            if (i < data.files.length - 1) {
-                                await new Promise(resolve => setTimeout(resolve, 1000)); 
-                            }
-                        }
-                    })();
+                        <div class="flex flex-col justify-center items-center space-y-2 text-sky-400 p-3 status-message-item">
+                            <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-600 h-8 w-8 mb-2"></div>
+                            <span>${getTranslation('statusProcessing')}</span>
+                        </div>`;
 
-                } else {
-                    statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusErrorGeneric', currentLanguage, {MESSAGE: (data.message || 'Could not download audio.')})}</p>`;
-                }
-            } catch (error) {
-                console.error('Fetch error:', error);
-                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md">${getTranslation('statusNetworkError')} (${error.message})</p>`;
-            } finally {
-                submitButton.disabled = false;
-                submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    const submitButtonEl = this.querySelector('button[type="submit"]');
+                    if(submitButtonEl) {
+                        submitButtonEl.disabled = true;
+                        submitButtonEl.classList.add('opacity-50', 'cursor-not-allowed');
+                        submitButtonEl.classList.remove('hover:bg-sky-400', 'hover:scale-105');
+                    }
+
+                    try {
+                        const response = await fetch('/api/download_audio', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: url, format: format }),
+                        });
+
+                        const contentType = response.headers.get("content-type");
+                        if (!contentType || !contentType.includes("application/json")) {
+                            const errorText = await response.text();
+                            throw new Error(`Server returned an unexpected response: ${response.status} ${response.statusText}. ${errorText.substring(0,100)}`);
+                        }
+                        const data = await response.json();
+
+                        if (response.ok && data.status === 'success' && data.files && data.files.length > 0) {
+                            let filesListHtml = data.files.map((fileInfo, index) => `
+                                <li id="file-item-${index}" class="bg-slate-700/60 p-3.5 rounded-lg shadow status-message-item flex justify-between items-center" style="animation-delay: ${index * 0.12}s">
+                                    <span class="text-slate-300 block truncate" title="${fileInfo.title || ''}">${fileInfo.title || 'Untitled'} (${fileInfo.filename ? fileInfo.filename.split('.').pop().toUpperCase() : format.toUpperCase()})</span>
+                                    <span id="file-status-${index}" class="file-download-status">${getTranslation('fileStatusPending')}</span>
+                                </li>
+                            `).join('');
+
+                            statusArea.innerHTML = `
+                                <div class="status-message-item">
+                                    <p class="text-green-400 mb-3 text-lg">${getTranslation('statusSuccessHeader')}</p>
+                                    <ul id="downloadQueueList" class="space-y-2.5 text-left max-h-60 overflow-y-auto pr-2">${filesListHtml}</ul>
+                                    <p class="text-xs text-slate-500 mt-4">${getTranslation('statusPostDownloadHint')}</p>
+                                </div>
+                            `;
+                            telegramLinkContainer.classList.remove('hidden');
+
+
+                            (async () => {
+                                for (let i = 0; i < data.files.length; i++) {
+                                    const fileInfo = data.files[i];
+                                    const fileStatusSpan = document.getElementById(`file-status-${i}`);
+                                    
+                                    if (fileStatusSpan) {
+                                        fileStatusSpan.textContent = getTranslation('fileStatusDownloading');
+                                        fileStatusSpan.className = 'file-download-status downloading';
+                                    }
+
+                                    const link = document.createElement('a');
+                                    link.href = fileInfo.download_url;
+                                    link.download = fileInfo.filename || `audio_download.${fileInfo.download_url.split('.').pop()}`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    
+                                    await new Promise(resolve => setTimeout(resolve, 250)); 
+                                    document.body.removeChild(link);
+
+                                    if (fileStatusSpan) {
+                                        fileStatusSpan.textContent = getTranslation('fileStatusStarted');
+                                        fileStatusSpan.className = 'file-download-status completed';
+                                    }
+
+                                    if (i < data.files.length - 1) {
+                                        await new Promise(resolve => setTimeout(resolve, 750));
+                                    }
+                                }
+                            })();
+
+                        } else {
+                            statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md status-message-item">${getTranslation('statusErrorGeneric', currentLanguage, {MESSAGE: (data.message || 'Could not download audio.')})}</p>`;
+                        }
+                    } catch (error) {
+                        console.error('Fetch error:', error);
+                        statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md status-message-item">${getTranslation('statusNetworkError')} (${error.message})</p>`;
+                    } finally {
+                        if(submitButtonEl) {
+                            submitButtonEl.disabled = false;
+                            submitButtonEl.classList.remove('opacity-50', 'cursor-not-allowed');
+                            submitButtonEl.classList.add('hover:bg-sky-400', 'hover:scale-105');
+                        }
+                    }
+                });
+            } else {
+                console.error("Download form not found!");
+            }
+
+            const preferredLang = localStorage.getItem('preferredLanguage');
+            const browserLang = navigator.language.split('-')[0];
+
+            if (preferredLang && translations[preferredLang]) {
+                applyTranslations(preferredLang);
+            } else if (translations[browserLang]) {
+                applyTranslations(browserLang);
+            } else {
+                applyTranslations('ru');
             }
         });
-
-        const preferredLang = localStorage.getItem('preferredLanguage');
-        const browserLang = navigator.language.split('-')[0]; 
-
-        if (preferredLang && translations[preferredLang]) {
-            applyTranslations(preferredLang);
-        } else if (translations[browserLang]) {
-            applyTranslations(browserLang);
-        } else {
-            applyTranslations('ru'); 
-        }
     </script>
 </body>
 </html>
