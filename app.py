@@ -1,7 +1,7 @@
 import os
 import logging
 import shutil
-import json 
+import json
 import uuid
 from flask import Flask, request, jsonify, render_template, send_from_directory, after_this_request
 from dotenv import load_dotenv
@@ -9,21 +9,18 @@ import yt_dlp
 
 load_dotenv()
 
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Конфигурация путей
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-USER_DOWNLOADS_DIR = os.path.join(BASE_DIR, "user_downloads") 
-TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates') 
+USER_DOWNLOADS_DIR = os.path.join(BASE_DIR, "user_downloads")
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 
 if not os.path.exists(USER_DOWNLOADS_DIR):
     os.makedirs(USER_DOWNLOADS_DIR)
     logger.info(f"Создана директория для загрузок: {USER_DOWNLOADS_DIR}")
-
 
 if os.path.exists(TEMPLATES_DIR):
     app.template_folder = TEMPLATES_DIR
@@ -48,9 +45,6 @@ else:
 
 
 def blocking_yt_dlp_download(ydl_opts, url_to_download):
-    """
-    Синхронная функция для выполнения загрузки yt-dlp.
-    """
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url_to_download, download=True)
@@ -65,6 +59,8 @@ def blocking_yt_dlp_download(ydl_opts, url_to_download):
         if "ffmpeg is not installed" in error_message.lower() or "ffmpeg command not found" in error_message.lower():
             logger.error("FFmpeg не найден yt-dlp во время выполнения download().")
             raise Exception("Ошибка конвертации: FFmpeg не найден.")
+        if "filename" in error_message.lower() or "filepath" in error_message.lower():
+             logger.error(f"Возможная ошибка с именем файла при загрузке yt-dlp: {e}")
         raise
     except Exception as e:
         logger.error(f"Неожиданная ошибка в blocking_yt_dlp_download: {e}", exc_info=True)
@@ -94,16 +90,14 @@ def download_audio_route():
 
     logger.info(f"Запрос на скачивание: URL='{url}', Формат='{requested_format}', Сессия='{session_id}'")
 
-   
-    watermark_text_for_filename = "Developed By BitSamurai & MGSamurai" 
-    metadata_watermark_text = "Developed By BitSamurai & MGSamurai"    
+    watermark_text_for_filename = "Developed By BitSamurai_"
+    metadata_watermark_text = "Developed By BitSamurai"
 
-    
     output_template = os.path.join(session_download_path, f"%(title).75B - {watermark_text_for_filename}.%(ext)s")
-
 
     ydl_opts = {
         'outtmpl': output_template,
+        'restrictfilenames': True,
         'noplaylist': False,
         'ignoreerrors': True,
         'cookiefile': cookies_path if os.path.exists(cookies_path) else None,
@@ -170,46 +164,46 @@ def download_audio_route():
 
         for entry in entries_to_check:
             if not entry:
+                logger.warning(f"Пропущена пустая или ошибочная запись в плейлисте (ID: {entry.get('id', 'N/A') if entry else 'N/A'})")
                 continue
+
             actual_filepath = None
             if entry.get('requested_downloads'):
                 for req_download in entry['requested_downloads']:
-                    if req_download.get('filepath') and os.path.exists(req_download['filepath']):
+                    if req_download and req_download.get('filepath') and os.path.exists(req_download['filepath']):
                         actual_filepath = req_download['filepath']
                         break
+            
             if not actual_filepath and entry.get('filepath') and os.path.exists(entry['filepath']):
                  actual_filepath = entry['filepath']
 
             if actual_filepath:
                 filename = os.path.basename(actual_filepath)
-                file_title = entry.get('title', os.path.splitext(filename)[0]) 
+                file_title = entry.get('title', os.path.splitext(filename)[0].split(f" - {watermark_text_for_filename}")[0])
+
                 expected_path_in_session = os.path.join(session_download_path, filename)
                 if os.path.exists(expected_path_in_session):
                     downloaded_files_list.append({
-                        "filename": filename, 
-                        "title": file_title,  
+                        "filename": filename,
+                        "title": file_title,
                         "download_url": f"/serve_file/{session_id}/{filename.replace('%', '%25')}"
                     })
                 else:
-                    logger.warning(f"Файл '{filename}' (из '{actual_filepath}') не найден в '{session_download_path}'.")
+                    logger.warning(f"Файл '{filename}' (ожидаемый путь: '{expected_path_in_session}', извлеченный путь: '{actual_filepath}') не найден в папке сессии. Проверьте outtmpl и права на запись.")
             else:
-                logger.warning(f"Не удалось определить путь к файлу для: {entry.get('title', 'ID: '+str(entry.get('id')))}.")
+                logger.warning(f"Не удалось определить путь к скачанному файлу для записи: '{entry.get('title', 'ID: '+str(entry.get('id')))}'. Возможно, элемент не был скачан.")
 
-        
         if not downloaded_files_list and os.path.exists(session_download_path) and any(os.scandir(session_download_path)):
-            logger.warning("Файлы не извлечены из info_dict, сканируем директорию сессии.")
+            logger.warning("Файлы не извлечены из info_dict, сканируем директорию сессии (запасной вариант).")
             for f_name in os.listdir(session_download_path):
                 file_path_check = os.path.join(session_download_path, f_name)
                 if os.path.isfile(file_path_check) and f_name.lower().endswith(('.mp3', '.m4a', '.wav', '.ogg', '.opus')):
-                    
                     base_name_for_title = os.path.splitext(f_name)[0]
-                   
                     title_part = base_name_for_title.split(f" - {watermark_text_for_filename}")[0]
                     title_part = title_part.rsplit('[', 1)[0].strip() if '[' in title_part and title_part.endswith(']') else title_part
-
                     downloaded_files_list.append({
-                        "filename": f_name, 
-                        "title": title_part if title_part else f_name, 
+                        "filename": f_name,
+                        "title": title_part if title_part else f_name,
                         "download_url": f"/serve_file/{session_id}/{f_name.replace('%', '%25')}"
                     })
 
@@ -218,7 +212,7 @@ def download_audio_route():
             if os.path.exists(session_download_path):
                 shutil.rmtree(session_download_path)
                 logger.info(f"Удалена пустая или проблемная папка сессии: {session_download_path}")
-            return jsonify({"status": "error", "message": "Не удалось скачать или найти аудиофайлы."}), 500
+            return jsonify({"status": "error", "message": "Не удалось скачать или найти аудиофайлы. Проверьте URL или логи сервера для подробностей."}), 500
 
         return jsonify({"status": "success", "files": downloaded_files_list})
 
@@ -227,7 +221,13 @@ def download_audio_route():
         if os.path.exists(session_download_path):
             shutil.rmtree(session_download_path)
             logger.info(f"Удалена папка сессии из-за ошибки: {session_download_path}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        user_message = "Произошла ошибка на сервере при обработке вашего запроса."
+        if isinstance(e, yt_dlp.utils.DownloadError) and ("Unsupported URL" in str(e) or "Unable to extract" in str(e)):
+            user_message = "Неподдерживаемый URL или не удалось извлечь информацию. Убедитесь, что ссылка корректна."
+        elif "FFmpeg" in str(e):
+             user_message = "Ошибка конвертации аудио. Возможно, проблема с FFmpeg на сервере."
+
+        return jsonify({"status": "error", "message": user_message}), 500
 
 
 @app.route('/serve_file/<session_id>/<path:filename>')
