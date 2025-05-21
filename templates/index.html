@@ -99,8 +99,8 @@
             width: 100%;
             padding: 1rem; 
             z-index: 1;
-            padding-bottom: 100px; /* Increased space for the fixed footer */
-            flex-grow: 1; /* Allows app-container to take available space */
+            padding-bottom: 100px; 
+            flex-grow: 1; 
         }
         
         .top-nav-container {
@@ -109,13 +109,18 @@
             left: 0;
             right: 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* Adjusted for multiple buttons */
             align-items: center;
             z-index: 50;
             padding: 1rem 1.5rem; 
             background-color: rgba(15, 23, 42, 0.6); 
             backdrop-filter: blur(10px); 
         }
+        .top-nav-buttons { /* Container for left-aligned buttons */
+            display: flex;
+            gap: 0.75rem; /* Space between Info and Copyright buttons */
+        }
+
 
         .nav-button {
             padding: 0.6rem 1.2rem;
@@ -142,7 +147,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.45);
             width: 100%;
             max-width: 580px;
-            margin-top: 8rem; /* Adjusted margin-top to ensure space below fixed nav */
+            margin-top: 8rem; 
             opacity: 0;
             transform: translateY(20px);
             animation: cardEnterMain 0.7s 0.3s cubic-bezier(0.25,0.8,0.25,1) forwards;
@@ -151,7 +156,8 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        #infoSectionOverlay {
+        /* Common styles for all overlays */
+        .overlay-section {
             position: fixed;
             top: 0;
             left: 0;
@@ -160,22 +166,21 @@
             background-color: rgba(15, 23, 42, 0.92); 
             backdrop-filter: blur(10px); 
             z-index: 100; 
-            
-            display: none; /* Initially hidden by default CSS */
-            opacity: 0;   /* Initially transparent by default CSS */
-            
+            display: flex; 
+            visibility: hidden; 
+            opacity: 0;   
             align-items: center; 
             justify-content: center;
             padding: 1rem; 
-            
-            transition: opacity 0.3s ease-out; 
+            transition: opacity 0.3s ease-out, visibility 0s linear 0.3s; 
         }
-        #infoSectionOverlay.visible { /* This class makes it visible */
-            display: flex; 
+        .overlay-section.visible {
+            visibility: visible; 
             opacity: 1;
+            transition: opacity 0.3s ease-out, visibility 0s linear 0s; 
         }
         
-        .info-content-card {
+        .info-content-card { /* Reused for both Info and Copyright content */
             background-color: rgba(45, 55, 72, 0.97); 
             padding: 1.5rem 2rem; 
             border-radius: 1rem; 
@@ -225,7 +230,6 @@
             font-family: monospace;
             color: #f0f0f0;
         }
-        /* Removed pre and pre code styles as Python code block is removed */
 
         .loader { border-top-color: #0ea5e9; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -295,7 +299,7 @@
         .telegram-link-container a { color: #38bdf8; text-decoration: underline; }
         .telegram-link-container a:hover { color: #7dd3fc; }
         
-        .close-info-button {
+        .close-overlay-button { /* Common style for close buttons */
             position: fixed; 
             top: 1.25rem; 
             right: 1.25rem;
@@ -315,11 +319,11 @@
             z-index: 110; 
             backdrop-filter: blur(3px);
         }
-        body:lang(ar) .close-info-button {
+        body:lang(ar) .close-overlay-button {
             right: auto;
             left: 1.25rem;
         }
-        .close-info-button:hover {
+        .close-overlay-button:hover {
             color: #f87171; 
             background-color: rgba(100, 65, 85, 0.7);
             border-color: rgba(200,116,139,0.7);
@@ -335,7 +339,10 @@
     </div>
 
     <div class="top-nav-container">
-        <button id="infoButton" class="nav-button" data-translate-key="navInfoButton">Info</button>
+        <div class="top-nav-buttons">
+            <button id="infoButton" class="nav-button" data-translate-key="navInfoButton">Info</button>
+            <button id="copyrightButton" class="nav-button" data-translate-key="navCopyrightButton">Copyright</button>
+        </div>
         <div class="lang-switcher-container"> 
             <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Language:</label>
             <select id="languageSelector" title="Select Language">
@@ -393,7 +400,8 @@
             <div id="statusArea" class="mt-8 text-center min-h-[60px]">
             </div>
             <div id="telegramLinkContainer" class="telegram-link-container text-center hidden">
-                 <span data-translate-key="telegramSubscription">Subscribe to Telegram Channel of developers:</span> <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer">@ytdlpdeveloper</a>
+                 <p><span data-translate-key="telegramSubscription">Subscribe to Telegram Channel of developers:</span> <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer">@ytdlpdeveloper</a></p>
+                 <p class="mt-2"><span data-translate-key="telegramBotAlternative">Telegram bot alternative:</span> <a href="https://t.me/ytdlpload_bot" target="_blank" rel="noopener noreferrer">@ytdlpload_bot</a></p>
             </div>
         </div>
 
@@ -403,8 +411,8 @@
         <p class="text-xs mt-1" data-translate-key="footerWatermark">Developed By Suleyman Aslanov</p>
     </footer>
 
-    <div id="infoSectionOverlay">
-        <button id="closeInfoButton" class="close-info-button" aria-label="Close Info">×</button>
+    <div id="infoSectionOverlay" class="overlay-section">
+        <button id="closeInfoButton" class="close-overlay-button" aria-label="Close Info">×</button>
         <div class="info-content-card">
             <h2 data-translate-key="infoTitle">Information</h2>
             
@@ -424,8 +432,17 @@
 
             <h3 data-translate-key="infoPythonCodeTitle">Python Backend Code</h3>
             <p data-translate-key="infoPythonCodePara">The core backend logic is written in Python using the Flask framework. The Python script (typically named <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the audio files. This code runs on the server and is not directly visible here, but it ensures the functionality of the downloader.</p>
+            
             <h3 data-translate-key="infoCreatorTitle">Creator</h3>
             <p data-translate-key="infoCreatorName">This YouTube Music Downloader site was created by <strong>Suleyman Aslanov</strong>.</p>
+        </div>
+    </div>
+
+    <div id="copyrightSectionOverlay" class="overlay-section">
+        <button id="closeCopyrightButton" class="close-overlay-button" aria-label="Close Copyright">×</button>
+        <div class="info-content-card"> <h2 data-translate-key="copyrightTitle">Copyright & Responsibility</h2>
+            <p data-translate-key="copyrightPara1">Please be aware that music and other audio content available on YouTube may be protected by copyright. Many artists and content creators have specific licenses and terms of use for their work. It is your responsibility to ensure that you have the necessary rights or permissions before downloading any content.</p>
+            <p data-translate-key="copyrightPara2">The developer of this site provides this tool for convenience and is not responsible for the content you choose to download or how you use it. By using this service, you agree that you are solely responsible for your actions and for complying with all applicable copyright laws and terms of service of the content providers.</p>
         </div>
     </div>
 
@@ -436,6 +453,7 @@
                 pageTitle: "YouTube Music Downloader by Suleyman Aslanov",
                 metaDescriptionContent: "Easily download music and audio from YouTube videos and playlists in MP3 or WAV format. Created by Suleyman Aslanov.",
                 navInfoButton: "Info",
+                navCopyrightButton: "Copyright",
                 infoTitle: "About This Site",
                 infoHowItWorksTitle: "How This Site Works",
                 infoHowItWorksPara1: "This web application allows you to download audio from YouTube videos or playlists. You simply paste the YouTube URL, choose your desired audio format (MP3 or WAV), and the server-side script processes your request.",
@@ -449,6 +467,9 @@
                 infoLibJS: "<strong>JavaScript:</strong> Used for frontend interactivity, language switching, animations, and communication with the backend API.",
                 infoPythonCodeTitle: "Python Backend Code",
                 infoPythonCodePara: "The core backend logic is written in Python using the Flask framework. The Python script (typically named <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the audio files. This code runs on the server and is not directly visible here, but it ensures the functionality of the downloader.",
+                copyrightTitle: "Copyright & Responsibility",
+                copyrightPara1: "Please be aware that music and other audio content available on YouTube may be protected by copyright. Many artists and content creators have specific licenses and terms of use for their work. It is your responsibility to ensure that you have the necessary rights or permissions before downloading any content.",
+                copyrightPara2: "The developer of this site provides this tool for convenience and is not responsible for the content you choose to download or how you use it. By using this service, you agree that you are solely responsible for your actions and for complying with all applicable copyright laws and terms of service of the content providers.",
                 infoCreatorTitle: "Creator",
                 infoCreatorName: "This YouTube Music Downloader site was created by <strong>Suleyman Aslanov</strong>.",
                 headerH1: "Music Downloader",
@@ -470,6 +491,7 @@
                 statusNetworkError: "A network error occurred. Please try again.",
                 languageLabel: "Language:",
                 telegramSubscription: "Subscribe to Telegram Channel of developers:",
+                telegramBotAlternative: "Telegram bot alternative:",
                 fileStatusPending: "Pending...",
                 fileStatusDownloading: "Downloading...",
                 fileStatusStarted: "Started! Check browser."
@@ -478,6 +500,7 @@
                 pageTitle: "Загрузчик Музыки с YouTube от Suleyman Aslanov",
                 metaDescriptionContent: "Легко скачивайте музыку и аудио из видео и плейлистов YouTube в формате MP3 или WAV. Создано Suleyman Aslanov.",
                 navInfoButton: "Инфо",
+                navCopyrightButton: "Авторское право",
                 infoTitle: "Об этом сайте",
                 infoHowItWorksTitle: "Как работает этот сайт",
                 infoHowItWorksPara1: "Это веб-приложение позволяет загружать аудио из видео или плейлистов YouTube. Вы просто вставляете URL-адрес YouTube, выбираете желаемый аудиоформат (MP3 или WAV), и серверный скрипт обрабатывает ваш запрос.",
@@ -491,6 +514,9 @@
                 infoLibJS: "<strong>JavaScript:</strong> Используется для интерактивности фронтенда, переключения языков, анимаций и взаимодействия с бэкенд API.",
                 infoPythonCodeTitle: "Код бэкенда на Python",
                 infoPythonCodePara: "Основная логика бэкенда написана на Python с использованием фреймворка Flask. Python-скрипт (обычно с именем <code>app.py</code>) обрабатывает API-запросы, взаимодействует с <code>yt-dlp</code> и <code>ffmpeg</code>, управляет временным хранением файлов и отдает аудиофайлы. Этот код выполняется на сервере и здесь не отображается напрямую, но он обеспечивает работоспособность загрузчика.",
+                copyrightTitle: "Авторские права и ответственность",
+                copyrightPara1: "Пожалуйста, имейте в виду, что музыка и другой аудиоконтент, доступный на YouTube, может быть защищен авторским правом. Многие исполнители и создатели контента имеют особые лицензии и условия использования своих произведений. Вы несете ответственность за то, чтобы у вас были необходимые права или разрешения перед загрузкой любого контента.",
+                copyrightPara2: "Разработчик этого сайта предоставляет данный инструмент для удобства и не несет ответственности за контент, который вы решите загрузить, или за то, как вы его используете. Используя этот сервис, вы соглашаетесь с тем, что несете полную ответственность за свои действия и за соблюдение всех применимых законов об авторском праве и условий обслуживания поставщиков контента.",
                 infoCreatorTitle: "Создатель",
                 infoCreatorName: "Этот сайт для загрузки музыки с YouTube был создан <strong>Suleyman Aslanov</strong>.",
                 headerH1: "Загрузчик Музыки",
@@ -512,6 +538,7 @@
                 statusNetworkError: "Произошла сетевая ошибка. Пожалуйста, попробуйте еще раз.",
                 languageLabel: "Язык:",
                 telegramSubscription: "Подпишитесь на Telegram канал разработчиков:",
+                telegramBotAlternative: "Альтернативный Telegram-бот:",
                 fileStatusPending: "В ожидании...",
                 fileStatusDownloading: "Загрузка...",
                 fileStatusStarted: "Начато! Проверьте браузер."
@@ -520,6 +547,7 @@
                 pageTitle: "Descargador de Música de YouTube por Suleyman Aslanov",
                 metaDescriptionContent: "Descarga fácilmente música y audio de videos y listas de reproducción de YouTube en formato MP3 o WAV. Creado por Suleyman Aslanov.",
                 navInfoButton: "Info",
+                navCopyrightButton: "Copyright",
                 infoTitle: "Sobre este Sitio",
                 infoHowItWorksTitle: "Cómo Funciona Este Sitio",
                 infoHowItWorksPara1: "Esta aplicación web te permite descargar audio de videos o listas de reproducción de YouTube. Simplemente pegas la URL de YouTube, eliges tu formato de audio deseado (MP3 o WAV), y el script del lado del servidor procesa tu solicitud.",
@@ -533,6 +561,9 @@
                 infoLibJS: "<strong>JavaScript:</strong> Utilizado para la interactividad del frontend, cambio de idioma, animaciones y comunicación con la API del backend.",
                 infoPythonCodeTitle: "Código Backend en Python",
                 infoPythonCodePara: "La lógica central del backend está escrita en Python utilizando el framework Flask. El script de Python (generalmente llamado <code>app.py</code>) maneja las solicitudes API, interactúa con <code>yt-dlp</code> y <code>ffmpeg</code>, gestiona el almacenamiento temporal de archivos y sirve los archivos de audio. Este código se ejecuta en el servidor y no es visible directamente aquí, pero asegura la funcionalidad del descargador.",
+                copyrightTitle: "Derechos de Autor y Responsabilidad",
+                copyrightPara1: "Tenga en cuenta que la música y otro contenido de audio disponible en YouTube pueden estar protegidos por derechos de autor. Muchos artistas y creadores de contenido tienen licencias y términos de uso específicos para su trabajo. Es su responsabilidad asegurarse de tener los derechos o permisos necesarios antes de descargar cualquier contenido.",
+                copyrightPara2: "El desarrollador de este sitio proporciona esta herramienta por conveniencia y no es responsable del contenido que elija descargar ni de cómo lo utilice. Al utilizar este servicio, usted acepta que es el único responsable de sus acciones y de cumplir con todas las leyes de derechos de autor aplicables y los términos de servicio de los proveedores de contenido.",
                 infoCreatorTitle: "Creador",
                 infoCreatorName: "Este sitio de Descarga de Música de YouTube fue creado por <strong>Suleyman Aslanov</strong>.",
                 headerH1: "Descargador de Música",
@@ -554,6 +585,7 @@
                 statusNetworkError: "Ocurrió un error de red. Por favor, inténtalo de nuevo.",
                 languageLabel: "Idioma:",
                 telegramSubscription: "Suscríbete al canal de Telegram de los desarrolladores:",
+                telegramBotAlternative: "Alternativa de bot de Telegram:",
                 fileStatusPending: "Pendiente...",
                 fileStatusDownloading: "Descargando...",
                 fileStatusStarted: "¡Iniciado! Revisa el navegador."
@@ -562,6 +594,7 @@
                 pageTitle: "Suleyman Aslanov tərəfindən YouTube Musiqi Yükləyicisi",
                 metaDescriptionContent: "YouTube videolarından və pleylistlərindən musiqi və audio faylları MP3 və ya WAV formatında asanlıqla yükləyin. Suleyman Aslanov tərəfindən yaradılıb.",
                 navInfoButton: "Məlumat",
+                navCopyrightButton: "Müəllif Hüququ",
                 infoTitle: "Bu Sayt Haqqında",
                 infoHowItWorksTitle: "Bu Sayt Necə İşləyir",
                 infoHowItWorksPara1: "Bu veb tətbiqi YouTube videolarından və ya pleylistlərindən audio yükləməyə imkan verir. Siz sadəcə YouTube URL-ni daxil edir, istədiyiniz audio formatını (MP3 və ya WAV) seçirsiniz və server tərəfi skripti sorğunuzu emal edir.",
@@ -575,6 +608,9 @@
                 infoLibJS: "<strong>JavaScript:</strong> Frontend interaktivliyi, dil dəyişdirmə, animasiyalar və backend API ilə əlaqə üçün istifadə olunur.",
                 infoPythonCodeTitle: "Python Backend Kodu",
                 infoPythonCodePara: "Əsas backend məntiqi Flask freymvorkundan istifadə edərək Python-da yazılmışdır. Python skripti (adətən <code>app.py</code> adlanır) API sorğularını idarə edir, <code>yt-dlp</code> və <code>ffmpeg</code> ilə qarşılıqlı əlaqədə olur, müvəqqəti fayl saxlanmasını idarə edir və audio faylları təqdim edir. Bu kod serverdə işləyir və burada birbaşa görünmür, lakin yükləyicinin funksionallığını təmin edir.",
+                copyrightTitle: "Müəllif Hüquqları və Məsuliyyət",
+                copyrightPara1: "Nəzərə alın ki, YouTube-da mövcud olan musiqi və digər audio məzmun müəllif hüquqları ilə qoruna bilər. Bir çox sənətçi və məzmun yaradıcısının əsərləri üçün xüsusi lisenziyaları və istifadə şərtləri var. Hər hansı bir məzmunu yükləməzdən əvvəl lazımi hüquqlara və ya icazələrə sahib olduğunuzdan əmin olmaq sizin məsuliyyətinizdir.",
+                copyrightPara2: "Bu saytın tərtibatçısı bu aləti rahatlıq üçün təqdim edir və yükləməyi seçdiyiniz məzmuna və ya ondan necə istifadə etdiyinizə görə məsuliyyət daşımır. Bu xidmətdən istifadə etməklə, hərəkətlərinizə və bütün tətbiq olunan müəllif hüquqları qanunlarına və məzmun təminatçılarının xidmət şərtlərinə riayət etməyə görə yalnız sizin məsuliyyət daşıdığınızı qəbul edirsiniz.",
                 infoCreatorTitle: "Yaradıcı",
                 infoCreatorName: "Bu YouTube Musiqi Yükləyicisi saytı <strong>Suleyman Aslanov</strong> tərəfindən yaradılmışdır.",
                 headerH1: "Musiqi Yükləyicisi",
@@ -596,6 +632,7 @@
                 statusNetworkError: "Şəbəkə xətası baş verdi. Zəhmət olmasa, yenidən cəhd edin.",
                 languageLabel: "Dil:",
                 telegramSubscription: "İstehsalçıların Telegram kanalına abunə olun:",
+                telegramBotAlternative: "Telegram bot alternativi:",
                 fileStatusPending: "Gözlənilir...",
                 fileStatusDownloading: "Yüklənir...",
                 fileStatusStarted: "Başladı! Brauzeri yoxlayın."
@@ -604,6 +641,7 @@
                 pageTitle: "Suleyman Aslanov'dan YouTube Müzik İndirici",
                 metaDescriptionContent: "YouTube videolarından ve çalma listelerinden MP3 veya WAV formatında kolayca müzik ve ses indirin. Suleyman Aslanov tarafından oluşturuldu.",
                 navInfoButton: "Bilgi",
+                navCopyrightButton: "Telif Hakkı",
                 infoTitle: "Bu Site Hakkında",
                 infoHowItWorksTitle: "Bu Site Nasıl Çalışır?",
                 infoHowItWorksPara1: "Bu web uygulaması, YouTube videolarından veya oynatma listelerinden ses indirmenizi sağlar. YouTube URL'sini yapıştırır, istediğiniz ses formatını (MP3 veya WAV) seçersiniz ve sunucu tarafı betiği isteğinizi işler.",
@@ -617,6 +655,9 @@
                 infoLibJS: "<strong>JavaScript:</strong> Ön uç etkileşimi, dil değiştirme, animasyonlar ve arka uç API ile iletişim için kullanılır.",
                 infoPythonCodeTitle: "Python Arka Uç Kodu",
                 infoPythonCodePara: "Temel arka uç mantığı, Flask çerçevesi kullanılarak Python ile yazılmıştır. Python betiği (genellikle <code>app.py</code> olarak adlandırılır) API isteklerini işler, <code>yt-dlp</code> ve <code>ffmpeg</code> ile etkileşime girer, geçici dosya depolamasını yönetir ve ses dosyalarını sunar. Bu kod sunucuda çalışır ve burada doğrudan görünmez, ancak indiricinin işlevselliğini sağlar.",
+                copyrightTitle: "Telif Hakkı ve Sorumluluk",
+                copyrightPara1: "Lütfen YouTube'da bulunan müzik ve diğer ses içeriklerinin telif hakkıyla korunuyor olabileceğini unutmayın. Birçok sanatçı ve içerik oluşturucunun eserleri için özel lisansları ve kullanım koşulları vardır. Herhangi bir içeriği indirmeden önce gerekli haklara veya izinlere sahip olduğunuzdan emin olmak sizin sorumluluğunuzdadır.",
+                copyrightPara2: "Bu sitenin geliştiricisi, bu aracı kolaylık sağlamak amacıyla sunar ve indirmeyi seçtiğiniz içerikten veya onu nasıl kullandığınızdan sorumlu değildir. Bu hizmeti kullanarak, eylemlerinizden ve geçerli tüm telif hakkı yasalarına ve içerik sağlayıcıların hizmet şartlarına uymaktan yalnızca sizin sorumlu olduğunuzu kabul edersiniz.",
                 infoCreatorTitle: "Oluşturan",
                 infoCreatorName: "Bu YouTube Müzik İndirici sitesi <strong>Suleyman Aslanov</strong> tarafından oluşturulmuştur.",
                 headerH1: "Müzik İndirici",
@@ -638,6 +679,7 @@
                 statusNetworkError: "Bir ağ hatası oluştu. Lütfen tekrar deneyin.",
                 languageLabel: "Dil:",
                 telegramSubscription: "Geliştiricilerin Telegram Kanalına Abone Olun:",
+                telegramBotAlternative: "Telegram bot alternatifi:",
                 fileStatusPending: "Beklemede...",
                 fileStatusDownloading: "İndiriliyor...",
                 fileStatusStarted: "Başladı! Tarayıcıyı kontrol et."
@@ -646,6 +688,7 @@
                 pageTitle: "محمل موسيقى يوتيوب بواسطة سليمان أصلانوف",
                 metaDescriptionContent: "قم بتنزيل الموسيقى والصوت بسهولة من مقاطع فيديو يوتيوب وقوائم التشغيل بصيغة MP3 أو WAV. تم إنشاؤه بواسطة سليمان أصلانوف.",
                 navInfoButton: "معلومات",
+                navCopyrightButton: "حقوق النشر",
                 infoTitle: "عن هذا الموقع",
                 infoHowItWorksTitle: "كيف يعمل هذا الموقع",
                 infoHowItWorksPara1: "يتيح لك تطبيق الويب هذا تنزيل الصوت من مقاطع فيديو يوتيوب أو قوائم التشغيل. ما عليك سوى لصق عنوان URL الخاص بيوتيوب، واختيار تنسيق الصوت الذي تريده (MP3 أو WAV)، ويقوم البرنامج النصي من جانب الخادم بمعالجة طلبك.",
@@ -659,6 +702,9 @@
                 infoLibJS: "<strong>JavaScript:</strong> يستخدم للتفاعل في الواجهة الأمامية، وتبديل اللغة، والرسوم المتحركة، والتواصل مع واجهة برمجة تطبيقات الواجهة الخلفية.",
                 infoPythonCodeTitle: "كود الواجهة الخلفية بلغة بايثون",
                 infoPythonCodePara: "تتم كتابة منطق الواجهة الخلفية الأساسي بلغة بايثون باستخدام إطار عمل Flask. يتعامل برنامج بايثون النصي (عادةً ما يسمى <code>app.py</code>) مع طلبات واجهة برمجة التطبيقات، ويتفاعل مع <code>yt-dlp</code> و <code>ffmpeg</code>، ويدير تخزين الملفات المؤقت، ويقدم ملفات الصوت. يعمل هذا الكود على الخادم وهو غير مرئي مباشرة هنا، ولكنه يضمن وظائف أداة التنزيل.",
+                copyrightTitle: "حقوق النشر والمسؤولية",
+                copyrightPara1: "يرجى العلم أن الموسيقى ومحتويات الصوت الأخرى المتاحة على YouTube قد تكون محمية بموجب حقوق النشر. لدى العديد من الفنانين ومنشئي المحتوى تراخيص وشروط استخدام محددة لأعمالهم. تقع على عاتقك مسؤولية التأكد من أن لديك الحقوق أو الأذونات اللازمة قبل تنزيل أي محتوى.",
+                copyrightPara2: "يوفر مطور هذا الموقع هذه الأداة للتسهيل وهو غير مسؤول عن المحتوى الذي تختاره للتنزيل أو كيفية استخدامه. باستخدام هذه الخدمة، فإنك توافق على أنك المسؤول الوحيد عن أفعالك وعن الامتثال لجميع قوانين حقوق النشر المعمول بها وشروط خدمة موفري المحتوى.",
                 infoCreatorTitle: "المنشئ",
                 infoCreatorName: "تم إنشاء موقع تنزيل موسيقى يوتيوب هذا بواسطة <strong>سليمان أصلانوف</strong>.",
                 headerH1: "محمل الموسيقى",
@@ -680,6 +726,7 @@
                 statusNetworkError: "حدث خطأ في الشبكة. الرجاء معاودة المحاولة.",
                 languageLabel: "اللغة:",
                 telegramSubscription: "اشترك في قناة تيليجرام للمطورين:",
+                telegramBotAlternative: "بديل بوت تيليجرام:",
                 fileStatusPending: "قيد الانتظار...",
                 fileStatusDownloading: "جار التحميل...",
                 fileStatusStarted: "بدأ! تحقق من المتصفح."
@@ -767,38 +814,49 @@
             const youtubeUrlInput = document.getElementById('youtube_url');
             const formatChoiceSelect = document.getElementById('format_choice');
             const languageSelector = document.getElementById('languageSelector');
+            
+            // Info Overlay Elements
             const infoButton = document.getElementById('infoButton');
             const infoSectionOverlay = document.getElementById('infoSectionOverlay');
             const closeInfoButton = document.getElementById('closeInfoButton');
+
+            // Copyright Overlay Elements
+            const copyrightButton = document.getElementById('copyrightButton');
+            const copyrightSectionOverlay = document.getElementById('copyrightSectionOverlay');
+            const closeCopyrightButton = document.getElementById('closeCopyrightButton');
             
-            if (infoButton && infoSectionOverlay && closeInfoButton) {
-                console.log("Info button and sections found. Attaching event listeners.");
-                infoButton.addEventListener('click', () => {
-                    console.log("Info button clicked. Current overlay display (computed):", window.getComputedStyle(infoSectionOverlay).display, "Opacity (computed):", window.getComputedStyle(infoSectionOverlay).opacity);
-                    
-                    infoSectionOverlay.classList.add('visible'); 
-                    document.body.classList.add('overflow-hidden'); 
-                    
-                    setTimeout(() => {
-                        console.log("Overlay display after adding .visible (computed):", window.getComputedStyle(infoSectionOverlay).display, "Opacity (computed):", window.getComputedStyle(infoSectionOverlay).opacity);
-                    }, 0);
-                });
-                closeInfoButton.addEventListener('click', () => {
-                    console.log("Close info button clicked.");
-                    infoSectionOverlay.classList.remove('visible');
-                    document.body.classList.remove('overflow-hidden'); 
-                });
-                infoSectionOverlay.addEventListener('click', (event) => {
-                    if (event.target === infoSectionOverlay) { 
-                        console.log("Info overlay backdrop clicked.");
-                        infoSectionOverlay.classList.remove('visible');
+            function setupOverlay(button, overlay, closeButton) {
+                if (button && overlay && closeButton) {
+                    console.log(`Button for ${overlay.id} and sections found. Attaching event listeners.`);
+                    button.addEventListener('click', () => {
+                        console.log(`${button.id} clicked. Current overlay display (computed):`, window.getComputedStyle(overlay).display, "Opacity (computed):", window.getComputedStyle(overlay).opacity, "Visibility (computed):", window.getComputedStyle(overlay).visibility);
+                        overlay.classList.add('visible'); 
+                        document.body.classList.add('overflow-hidden'); 
+                        setTimeout(() => {
+                            console.log(`Overlay ${overlay.id} display after adding .visible (computed):`, window.getComputedStyle(overlay).display, "Opacity (computed):", window.getComputedStyle(overlay).opacity, "Visibility (computed):", window.getComputedStyle(overlay).visibility);
+                        }, 0);
+                    });
+                    closeButton.addEventListener('click', () => {
+                        console.log(`${closeButton.id} clicked.`);
+                        overlay.classList.remove('visible');
                         document.body.classList.remove('overflow-hidden'); 
-                    }
-                });
-            } else {
-                console.error("One or more elements for info section functionality are missing:", 
-                    {infoButton, infoSectionOverlay, closeInfoButton });
+                    });
+                    overlay.addEventListener('click', (event) => {
+                        if (event.target === overlay) { 
+                            console.log(`${overlay.id} backdrop clicked.`);
+                            overlay.classList.remove('visible');
+                            document.body.classList.remove('overflow-hidden'); 
+                        }
+                    });
+                } else {
+                    console.error(`One or more elements for ${overlay ? overlay.id : 'an overlay'} functionality are missing:`, 
+                        {button, overlay, closeButton });
+                }
             }
+
+            setupOverlay(infoButton, infoSectionOverlay, closeInfoButton);
+            setupOverlay(copyrightButton, copyrightSectionOverlay, closeCopyrightButton);
+
 
             if (languageSelector) {
                 languageSelector.addEventListener('change', (event) => {
