@@ -9,6 +9,7 @@ import yt_dlp
 
 load_dotenv()
 
+# Настройка логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ cookies_path = os.getenv('COOKIES_PATH', 'youtube.com_cookies.txt')
 ffmpeg_path_from_env = os.getenv('FFMPEG_PATH')
 ffmpeg_path = ffmpeg_path_from_env if ffmpeg_path_from_env else '/usr/bin/ffmpeg'
 
+# Перепроверяем доступность FFmpeg, так как это важно
 FFMPEG_IS_AVAILABLE = os.path.exists(ffmpeg_path) and os.access(ffmpeg_path, os.X_OK)
 
 if FFMPEG_IS_AVAILABLE:
@@ -45,26 +47,39 @@ else:
 
 
 def blocking_yt_dlp_download(ydl_opts, url_to_download):
+    """
+    Выполняет блокирующую загрузку с помощью yt-dlp.
+    Возвращает info_dict при успехе, None при определенных ошибках yt-dlp,
+    или выбрасывает исключение для критических ошибок.
+    """
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url_to_download, download=True)
         return info_dict
     except yt_dlp.utils.DownloadError as e:
         logger.error(f"yt-dlp DownloadError: {e}")
-        error_message = str(e)
-        if "private video" in error_message.lower() or "login required" in error_message.lower():
+        error_message = str(e).lower()
+        if "private video" in error_message or "login required" in error_message:
             raise Exception("Это приватное видео или для доступа требуется вход.")
-        if "video unavailable" in error_message.lower():
+        if "video unavailable" in error_message:
             raise Exception("Видео недоступно.")
-        if "ffmpeg is not installed" in error_message.lower() or "ffmpeg command not found" in error_message.lower():
+        if "ffmpeg is not installed" in error_message or "ffmpeg command not found" in error_message:
             logger.error("FFmpeg не найден yt-dlp во время выполнения download().")
             raise Exception("Ошибка конвертации: FFmpeg не найден.")
-        if "filename" in error_message.lower() or "filepath" in error_message.lower():
-             logger.error(f"Возможная ошибка с именем файла при загрузке yt-dlp: {e}")
-        raise
+        if "requested format is not available" in error_message:
+            logger.warning(f"Запрошенный формат аудио недоступен для URL '{url_to_download}'. Попытка загрузить лучший доступный аудиоформат.")
+            # В этом случае, возможно, yt-dlp уже не смог ничего скачать
+            return None # <--- ЯВНО ВОЗВРАЩАЕМ NONE при недоступности формата
+        if "unsupported url" in error_message or "unable to extract" in error_message:
+            raise Exception("Неподдерживаемый URL или не удалось извлечь информацию.")
+        
+        # Если это DownloadError, но не одна из специфических выше, то возвращаем None
+        logger.error(f"Неспецифичная ошибка загрузки yt-dlp для URL '{url_to_download}': {e}")
+        return None # <--- ЯВНО ВОЗВРАЩАЕМ NONE для других DownloadError
+
     except Exception as e:
-        logger.error(f"Неожиданная ошибка в blocking_yt_dlp_download: {e}", exc_info=True)
-        raise
+        logger.error(f"Неожиданная ошибка в blocking_yt_dlp_download для URL '{url_to_download}': {e}", exc_info=True)
+        return None # <--- ЯВНО ВОЗВРАЩАЕМ NONE для любых других неожиданных ошибок
 
 
 @app.route('/')
@@ -91,7 +106,7 @@ def download_audio_route():
     logger.info(f"Запрос на скачивание: URL='{url}', Формат='{requested_format}', Сессия='{session_id}'")
 
     watermark_text_for_filename = "YouTube Music Downloader. Site created by Suleyman Aslanov"
-    metadata_watermark_text = "YouTube Music Downlodaer. Site created by Suleyman Aslanov"
+    metadata_watermark_text = "YouTube Music Downloader. Site created by Suleyman Aslanov" # Опечатка в оригинале "Downlodaer" исправлена
 
     output_template = os.path.join(session_download_path, f"%(title).75B - {watermark_text_for_filename}.%(ext)s")
 
@@ -99,11 +114,11 @@ def download_audio_route():
         'outtmpl': output_template,
         'restrictfilenames': True,
         'noplaylist': False,
-        'ignoreerrors': True,
+        'ignoreerrors': True, # В режиме продакшена оставляем True, чтобы не прерывать плейлисты
         'cookiefile': cookies_path if os.path.exists(cookies_path) else None,
         'nocheckcertificate': True,
-        'quiet': True,
-        'no_warnings': True,
+        'quiet': True, # Держим True для продакшена
+        'no_warnings': True, # Держим True для продакшена
         'ffmpeg_location': ffmpeg_path if FFMPEG_IS_AVAILABLE else None,
         'extract_flat': 'in_playlist',
         'skip_download': False,
@@ -123,7 +138,7 @@ def download_audio_route():
             }
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио (может быть не MP3).")
-            ydl_opts['format'] = 'bestaudio[ext=m4a]/bestaudio/best'
+            ydl_opts['format'] = 'bestaudio[ext=m4a]/bestaudio/best' # Fallback to m4a if no ffmpeg
     elif requested_format == "wav":
         if FFMPEG_IS_AVAILABLE:
             logger.info("FFmpeg доступен. Конвертация в WAV с метаданными.")
@@ -137,69 +152,95 @@ def download_audio_route():
             }
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио (может быть не WAV).")
-            ydl_opts['format'] = 'bestaudio/best'
+            ydl_opts['format'] = 'bestaudio/best' # Best available if no ffmpeg
     else:
-        return jsonify({"status": "error", "message": "Неподдерживаемый формат."}), 400
+        # Убираем созданную папку сессии, так как формат не поддерживается
+        if os.path.exists(session_download_path):
+            shutil.rmtree(session_download_path)
+        return jsonify({"status": "error", "message": "Неподдерживаемый формат. Выберите MP3 или WAV."}), 400
 
+    # Очистка ydl_opts от пустых postprocessors/postprocessor_args, если они не нужны
     ydl_opts_cleaned = {k: v for k, v in ydl_opts.items() if v is not None}
     if 'postprocessors' in ydl_opts_cleaned and not ydl_opts_cleaned['postprocessors']:
         del ydl_opts_cleaned['postprocessors']
-    if 'postprocessor_args' in ydl_opts_cleaned and not ydl_opts_cleaned.get('postprocessors'):
+    # Это условие исправлено: postprocessor_args нужны только если есть postprocessors
+    if 'postprocessor_args' in ydl_opts_cleaned and 'postprocessors' not in ydl_opts_cleaned:
         del ydl_opts_cleaned['postprocessor_args']
     elif 'postprocessor_args' in ydl_opts_cleaned and not ydl_opts_cleaned['postprocessor_args']:
-         del ydl_opts_cleaned['postprocessor_args']
+        del ydl_opts_cleaned['postprocessor_args']
+
 
     logger.debug(f"Финальные опции yt-dlp: {json.dumps(ydl_opts_cleaned, indent=2, ensure_ascii=False)}")
 
     try:
         info_dict = blocking_yt_dlp_download(ydl_opts_cleaned, url)
+
+        # <--- ГЛАВНОЕ ИСПРАВЛЕНИЕ: Проверка на None после загрузки
+        if info_dict is None:
+            logger.error(f"Не удалось получить info_dict для URL '{url}'. blocking_yt_dlp_download вернул None.")
+            if os.path.exists(session_download_path):
+                shutil.rmtree(session_download_path)
+                logger.info(f"Удалена проблемная папка сессии: {session_download_path}")
+            return jsonify({"status": "error", "message": "Не удалось загрузить или получить информацию о видео. Возможно, видео недоступно, защищено или возникла внутренняя ошибка."}), 500
+
         downloaded_files_list = []
 
         entries_to_check = []
+        # Проверяем, является ли info_dict плейлистом
         if '_type' in info_dict and info_dict['_type'] == 'playlist':
             logger.info(f"Обработка плейлиста: {info_dict.get('title', 'Без названия')}")
-            entries_to_check = info_dict.get('entries', [])
+            # Убеждаемся, что 'entries' существует и является итерируемым
+            entries_to_check = info_dict.get('entries', []) or [] # Добавил 'or []' для безопасности
         else:
-            entries_to_check = [info_dict]
+            entries_to_check = [info_dict] # Одиночное видео
 
         for entry in entries_to_check:
-            if not entry:
+            if not entry: # Пропускаем пустые или ошибочные записи в плейлисте
                 logger.warning(f"Пропущена пустая или ошибочная запись в плейлисте (ID: {entry.get('id', 'N/A') if entry else 'N/A'})")
                 continue
 
             actual_filepath = None
+            # yt-dlp 2024.03.10+ использует 'requested_downloads' для пути к файлу
             if entry.get('requested_downloads'):
                 for req_download in entry['requested_downloads']:
                     if req_download and req_download.get('filepath') and os.path.exists(req_download['filepath']):
                         actual_filepath = req_download['filepath']
                         break
             
+            # Если не найдено в 'requested_downloads', проверяем старый ключ 'filepath'
             if not actual_filepath and entry.get('filepath') and os.path.exists(entry['filepath']):
-                 actual_filepath = entry['filepath']
+                actual_filepath = entry['filepath']
 
             if actual_filepath:
                 filename = os.path.basename(actual_filepath)
-                file_title = entry.get('title', os.path.splitext(filename)[0].split(f" - {watermark_text_for_filename}")[0])
+                # Удаляем часть с водяным знаком из имени файла для отображения названия
+                file_title_raw = os.path.splitext(filename)[0]
+                file_title = file_title_raw.split(f" - {watermark_text_for_filename}")[0].strip()
+                
+                # Дополнительная очистка от квадратных скобок в названии (например, [audio only])
+                file_title = file_title.rsplit('[', 1)[0].strip() if '[' in file_title and file_title.endswith(']') else file_title
+
 
                 expected_path_in_session = os.path.join(session_download_path, filename)
                 if os.path.exists(expected_path_in_session):
                     downloaded_files_list.append({
                         "filename": filename,
-                        "title": file_title,
+                        "title": file_title if file_title else filename, # Используем очищенное название или имя файла
                         "download_url": f"/serve_file/{session_id}/{filename.replace('%', '%25')}"
                     })
                 else:
                     logger.warning(f"Файл '{filename}' (ожидаемый путь: '{expected_path_in_session}', извлеченный путь: '{actual_filepath}') не найден в папке сессии. Проверьте outtmpl и права на запись.")
             else:
-                logger.warning(f"Не удалось определить путь к скачанному файлу для записи: '{entry.get('title', 'ID: '+str(entry.get('id')))}'. Возможно, элемент не был скачан.")
+                logger.warning(f"Не удалось определить путь к скачанному файлу для записи: '{entry.get('title', 'ID: '+str(entry.get('id')))}'. Возможно, элемент не был скачан или произошла ошибка при загрузке конкретного элемента плейлиста.")
 
+        # Запасной вариант: сканирование директории сессии, если yt-dlp не вернул пути
         if not downloaded_files_list and os.path.exists(session_download_path) and any(os.scandir(session_download_path)):
             logger.warning("Файлы не извлечены из info_dict, сканируем директорию сессии (запасной вариант).")
             for f_name in os.listdir(session_download_path):
                 file_path_check = os.path.join(session_download_path, f_name)
                 if os.path.isfile(file_path_check) and f_name.lower().endswith(('.mp3', '.m4a', '.wav', '.ogg', '.opus')):
                     base_name_for_title = os.path.splitext(f_name)[0]
-                    title_part = base_name_for_title.split(f" - {watermark_text_for_filename}")[0]
+                    title_part = base_name_for_title.split(f" - {watermark_text_for_filename}")[0].strip()
                     title_part = title_part.rsplit('[', 1)[0].strip() if '[' in title_part and title_part.endswith(']') else title_part
                     downloaded_files_list.append({
                         "filename": f_name,
@@ -212,7 +253,7 @@ def download_audio_route():
             if os.path.exists(session_download_path):
                 shutil.rmtree(session_download_path)
                 logger.info(f"Удалена пустая или проблемная папка сессии: {session_download_path}")
-            return jsonify({"status": "error", "message": "Не удалось скачать или найти аудиофайлы. Проверьте URL или логи сервера для подробностей."}), 500
+            return jsonify({"status": "error", "message": "Не удалось скачать или найти аудиофайлы. Проверьте URL, формат или логи сервера для подробностей."}), 500
 
         return jsonify({"status": "success", "files": downloaded_files_list})
 
@@ -225,7 +266,11 @@ def download_audio_route():
         if isinstance(e, yt_dlp.utils.DownloadError) and ("Unsupported URL" in str(e) or "Unable to extract" in str(e)):
             user_message = "Неподдерживаемый URL или не удалось извлечь информацию. Убедитесь, что ссылка корректна."
         elif "FFmpeg" in str(e):
-             user_message = "Ошибка конвертации аудио. Возможно, проблема с FFmpeg на сервере."
+            user_message = "Ошибка конвертации аудио. Возможно, проблема с FFmpeg на сервере. (Хотя FFmpeg найден, могла быть проблема с его использованием)"
+        elif "private video" in str(e).lower() or "login required" in str(e).lower():
+            user_message = "Это приватное видео или для доступа требуется вход."
+        elif "video unavailable" in str(e).lower():
+            user_message = "Видео недоступно или было удалено."
 
         return jsonify({"status": "error", "message": user_message}), 500
 
