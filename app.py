@@ -43,7 +43,7 @@ else:
         logger.error(f"FFmpeg НЕ найден или недоступен по пути, указанному в FFMPEG_PATH: {ffmpeg_path_from_env}.")
     else:
         logger.warning(f"FFmpeg НЕ найден или недоступен по пути по умолчанию: {ffmpeg_path}.")
-    logger.warning("FFmpeg не найден или недоступен. Конвертация в MP3/WAV и добавление метаданных могут не работать корректно.")
+    logger.warning("FFmpeg не найден или недоступен. Конвертация в MP3/MP4 и добавление метаданных могут не работать корректно.")
 
 
 def blocking_yt_dlp_download(ydl_opts, url_to_download):
@@ -67,8 +67,7 @@ def blocking_yt_dlp_download(ydl_opts, url_to_download):
             logger.error("FFmpeg не найден yt-dlp во время выполнения download().")
             raise Exception("Ошибка конвертации: FFmpeg не найден.")
         if "requested format is not available" in error_message:
-            logger.warning(f"Запрошенный формат аудио недоступен для URL '{url_to_download}'. Попытка загрузить лучший доступный аудиоформат.")
-          
+            logger.warning(f"Запрошенный формат аудио/видео недоступен для URL '{url_to_download}'. Попытка загрузить лучший доступный формат.")
             return None 
         if "unsupported url" in error_message or "unable to extract" in error_message:
             raise Exception("Неподдерживаемый URL или не удалось извлечь информацию.")
@@ -138,25 +137,25 @@ def download_audio_route():
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио (может быть не MP3).")
             ydl_opts['format'] = 'bestaudio[ext=m4a]/bestaudio/best' 
-    elif requested_format == "wav":
+    elif requested_format == "mp4":
         if FFMPEG_IS_AVAILABLE:
-            logger.info("FFmpeg доступен. Конвертация в WAV с метаданными.")
-            ydl_opts['format'] = 'bestaudio/best'
+            logger.info("FFmpeg доступен. Скачивание в MP4.")
+            ydl_opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' # Предпочитаем MP4
             ydl_opts['postprocessors'] = [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'wav',
+                'key': 'FFmpegVideoConvertor',
+                'preferedformat': 'mp4',
             }]
             ydl_opts['postprocessor_args'] = {
-                'FFmpegExtractAudio': ['-metadata', f'comment={metadata_watermark_text}']
+                'FFmpegVideoConvertor': ['-metadata', f'comment={metadata_watermark_text}']
             }
         else:
-            logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио (может быть не WAV).")
-            ydl_opts['format'] = 'bestaudio/best' 
+            logger.warning("FFmpeg не найден. Попытка скачать лучшее видео (может быть не MP4).")
+            ydl_opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
     else:
        
         if os.path.exists(session_download_path):
             shutil.rmtree(session_download_path)
-        return jsonify({"status": "error", "message": "Неподдерживаемый формат. Выберите MP3 или WAV."}), 400
+        return jsonify({"status": "error", "message": "Неподдерживаемый формат. Выберите MP3 или MP4."}), 400
 
     
     ydl_opts_cleaned = {k: v for k, v in ydl_opts.items() if v is not None}
@@ -237,7 +236,7 @@ def download_audio_route():
             logger.warning("Файлы не извлечены из info_dict, сканируем директорию сессии (запасной вариант).")
             for f_name in os.listdir(session_download_path):
                 file_path_check = os.path.join(session_download_path, f_name)
-                if os.path.isfile(file_path_check) and f_name.lower().endswith(('.mp3', '.m4a', '.wav', '.ogg', '.opus')):
+                if os.path.isfile(file_path_check) and f_name.lower().endswith(('.mp3', '.m4a', '.mp4', '.ogg', '.opus')): # Добавлено .mp4
                     base_name_for_title = os.path.splitext(f_name)[0]
                     title_part = base_name_for_title.split(f" - {watermark_text_for_filename}")[0].strip()
                     title_part = title_part.rsplit('[', 1)[0].strip() if '[' in title_part and title_part.endswith(']') else title_part
@@ -252,7 +251,7 @@ def download_audio_route():
             if os.path.exists(session_download_path):
                 shutil.rmtree(session_download_path)
                 logger.info(f"Удалена пустая или проблемная папка сессии: {session_download_path}")
-            return jsonify({"status": "error", "message": "Не удалось скачать или найти аудиофайлы. Проверьте URL, формат или логи сервера для подробностей."}), 500
+            return jsonify({"status": "error", "message": "Не удалось скачать или найти файлы. Проверьте URL, формат или логи сервера для подробностей."}), 500
 
         return jsonify({"status": "success", "files": downloaded_files_list})
 
@@ -265,7 +264,7 @@ def download_audio_route():
         if isinstance(e, yt_dlp.utils.DownloadError) and ("Unsupported URL" in str(e) or "Unable to extract" in str(e)):
             user_message = "Неподдерживаемый URL или не удалось извлечь информацию. Убедитесь, что ссылка корректна."
         elif "FFmpeg" in str(e):
-            user_message = "Ошибка конвертации аудио. Возможно, проблема с FFmpeg на сервере. (Хотя FFmpeg найден, могла быть проблема с его использованием)"
+            user_message = "Ошибка конвертации. Возможно, проблема с FFmpeg на сервере. (Хотя FFmpeg найден, могла быть проблема с его использованием)"
         elif "private video" in str(e).lower() or "login required" in str(e).lower():
             user_message = "Это приватное видео или для доступа требуется вход."
         elif "video unavailable" in str(e).lower():
