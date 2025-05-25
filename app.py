@@ -3,14 +3,14 @@ import logging
 import shutil
 import json
 import uuid
-import re 
+import re
 from flask import Flask, request, jsonify, render_template, send_from_directory, after_this_request
 from dotenv import load_dotenv
 import yt_dlp
 
 load_dotenv()
 
-
+# --- Configuration ---
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
 logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -21,18 +21,18 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 USER_DOWNLOADS_DIR = os.path.join(BASE_DIR, "user_downloads")
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 
-
+# Ensure download directory exists
 if not os.path.exists(USER_DOWNLOADS_DIR):
     os.makedirs(USER_DOWNLOADS_DIR)
     logger.info(f"Создана директория для загрузок: {USER_DOWNLOADS_DIR}")
 
-
+# Set template folder
 if os.path.exists(TEMPLATES_DIR):
     app.template_folder = TEMPLATES_DIR
 else:
     logger.warning(f"Директория шаблонов {TEMPLATES_DIR} не найдена. Убедитесь, что index.html находится в правильном месте.")
 
-
+# FFmpeg path from environment or default
 FFMPEG_PATH_ENV = os.getenv('FFMPEG_PATH')
 FFMPEG_PATH = FFMPEG_PATH_ENV if FFMPEG_PATH_ENV else '/usr/bin/ffmpeg'
 
@@ -45,25 +45,25 @@ else:
         logger.error(f"FFmpeg НЕ найден или недоступен по пути, указанному в FFMPEG_PATH: {FFMPEG_PATH_ENV}.")
     else:
         logger.warning(f"FFmpeg НЕ найден или недоступен по пути по умолчанию: {FFMPEG_PATH}.")
-    logger.warning("FFmpeg не найден или недоступен. Конвертация в MP3/MP4/FLAC и добавление метаданных могут не работать корректно.")
+    logger.warning("FFmpeg не найден или недоступен. Конвертация в MP3/MP4 и добавление метаданных могут не работать корректно.")
 
-
+# Cookie file for YouTube
 COOKIES_PATH = os.getenv('COOKIES_PATH', 'youtube.com_cookies.txt')
 if not os.path.exists(COOKIES_PATH):
     logger.warning(f"Файл куки {COOKIES_PATH} не найден. Загрузка некоторых YouTube видео может быть ограничена.")
 
-
+# Watermark text
 WATERMARK_TEXT = "YouTube Music Downloader. Site created by Suleyman Aslanov"
 
-
+# --- Helper Functions ---
 def is_valid_url(url):
     """Basic URL validation."""
     regex = re.compile(
-        r'^(?:http|ftp)s?://' 
+        r'^(?:http|ftp)s?://' # http:// or https://
         r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' # domain...
-        r'localhost|' 
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' 
-        r'(?::\d+)?' 
+        r'localhost|' # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+        r'(?::\d+)?' # optional port
         r'(?:/?|[/?]\S+)$', re.IGNORECASE)
     return re.match(regex, url) is not None
 
@@ -89,8 +89,6 @@ def blocking_yt_dlp_download(ydl_opts, url_to_download):
             raise Exception("Ошибка конвертации: FFmpeg не найден на сервере.")
         if "requested format is not available" in error_message:
             logger.warning(f"Запрошенный формат аудио/видео недоступен для URL '{url_to_download}'. Попытка загрузить лучший доступный формат.")
-          
-            
             return None
         if "unsupported url" in error_message or "unable to extract" in error_message:
             raise Exception("Неподдерживаемый URL или не удалось извлечь информацию. Убедитесь, что ссылка корректна и поддерживается (YouTube, SoundCloud).")
@@ -103,7 +101,7 @@ def blocking_yt_dlp_download(ydl_opts, url_to_download):
         logger.error(f"Неожиданная ошибка в blocking_yt_dlp_download для URL '{url_to_download}': {e}", exc_info=True)
         return None
 
-
+# --- Routes ---
 @app.route('/')
 def index():
     """Renders the main page."""
@@ -133,17 +131,19 @@ def download_audio_route():
     ydl_opts = {
         'outtmpl': output_template,
         'restrictfilenames': True,
-        'noplaylist': False, 
-        'ignoreerrors': True, 
+        'noplaylist': False, # Allow playlist downloads
+        'ignoreerrors': True, # Ignore errors for individual videos in a playlist
         'nocheckcertificate': True,
         'quiet': True,
         'no_warnings': True,
         'ffmpeg_location': FFMPEG_PATH if FFMPEG_IS_AVAILABLE else None,
-        'extract_flat': 'in_playlist', 
+        'extract_flat': 'in_playlist', # Extract information for playlist entries without downloading them immediately
         'skip_download': False,
     }
 
-   
+    # Determine if it's a YouTube URL or SoundCloud URL
+    # Assuming googleusercontent.com/youtube.com/0 or youtube.com are indicators for YouTube.
+    # More robust check might involve URL parsing.
     is_youtube = "youtube.com" in url or "youtu.be" in url
     is_soundcloud = "soundcloud.com" in url
 
@@ -152,10 +152,7 @@ def download_audio_route():
         logger.info("Обнаружен YouTube URL. Применяются настройки cookie для YouTube.")
     elif is_soundcloud:
         logger.info("Обнаружен SoundCloud URL. Специфичные настройки cookie для SoundCloud не требуются для публичных треков.")
-       
-       
     else:
-        
         logger.info("Обнаружен другой URL. Настройки cookie не применяются.")
 
 
@@ -176,10 +173,9 @@ def download_audio_route():
             ydl_opts['format'] = 'bestaudio[ext=m4a]/bestaudio/best'
     elif requested_format == "mp4":
         if FFMPEG_IS_AVAILABLE:
-            logger.info("FFmpeg доступен. Скачивание в MP4.")
-            
-            
-            ydl_opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+            logger.info("FFmpeg доступен. Скачивание в MP4 720p.")
+            # Prioritize 720p MP4. If not available, fall back to best MP4, then any best.
+            ydl_opts['format'] = 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
             ydl_opts['postprocessors'] = [{
                 'key': 'FFmpegVideoConvertor',
                 'preferedformat': 'mp4',
@@ -188,26 +184,12 @@ def download_audio_route():
                 'FFmpegVideoConvertor': ['-metadata', f'comment={WATERMARK_TEXT}']
             }
         else:
-            logger.warning("FFmpeg не найден. Попытка скачать лучшее видео (может быть не MP4).")
+            logger.warning("FFmpeg не найден. Попытка скачать лучшее видео (может быть не MP4 720p).")
             ydl_opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
-    elif requested_format == "flac":
-        if FFMPEG_IS_AVAILABLE:
-            logger.info("FFmpeg доступен. Конвертация в FLAC с метаданными.")
-            ydl_opts['format'] = 'bestaudio/best'
-            ydl_opts['postprocessors'] = [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'flac',
-            }]
-            ydl_opts['postprocessor_args'] = {
-                'FFmpegExtractAudio': ['-metadata', f'comment={WATERMARK_TEXT}']
-            }
-        else:
-            logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио (может быть не FLAC).")
-            ydl_opts['format'] = 'bestaudio/best' 
     else:
         if os.path.exists(session_download_path):
             shutil.rmtree(session_download_path)
-        return jsonify({"status": "error", "message": "Неподдерживаемый формат. Выберите MP3, MP4 или FLAC."}), 400
+        return jsonify({"status": "error", "message": "Неподдерживаемый формат. Выберите MP3 или MP4."}), 400
 
 
     ydl_opts_cleaned = {k: v for k, v in ydl_opts.items() if v is not None}
@@ -287,7 +269,8 @@ def download_audio_route():
             logger.warning("Файлы не извлечены из info_dict, сканируем директорию сессии (запасной вариант).")
             for f_name in os.listdir(session_download_path):
                 file_path_check = os.path.join(session_download_path, f_name)
-                if os.path.isfile(file_path_check) and f_name.lower().endswith(('.mp3', '.m4a', '.mp4', '.ogg', '.opus', '.flac')): # Added .flac
+                # Removed '.flac' extension
+                if os.path.isfile(file_path_check) and f_name.lower().endswith(('.mp3', '.m4a', '.mp4', '.ogg', '.opus')):
                     base_name_for_title = os.path.splitext(f_name)[0]
                     title_part = base_name_for_title.split(f" - {WATERMARK_TEXT}")[0].strip()
                     title_part = title_part.rsplit('[', 1)[0].strip() if '[' in title_part and title_part.endswith(']') else title_part
