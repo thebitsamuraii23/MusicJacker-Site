@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" data-translate-meta-description="metaDescriptionContent" content="Download music and video from YouTube, SoundCloud and other videos/tracks and playlists in MP3, MP4 or FLAC format.">
+    <meta name="description" data-translate-meta-description="metaDescriptionContent" content="Download music and video from YouTube, SoundCloud and other videos/tracks and playlists in MP3 or MP4 format.">
     <meta name="theme-color" content="#0f172a">
     <title>YouTube Music Downloader</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,7 +23,7 @@
             min-height: 100vh;
             position: relative;
         }
-        body.overflow-hidden { 
+        body.overflow-hidden { /* Class to prevent body scroll when overlay is open */
             overflow: hidden;
         }
         body:lang(ar) {
@@ -109,16 +109,16 @@
             left: 0;
             right: 0;
             display: flex;
-            justify-content: space-between; 
+            justify-content: space-between; /* Adjusted for multiple buttons */
             align-items: center;
             z-index: 50;
             padding: 1rem 1.5rem;
             background-color: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(10px);
         }
-        .top-nav-buttons { 
+        .top-nav-buttons { /* Container for left-aligned buttons */
             display: flex;
-            gap: 0.75rem; 
+            gap: 0.75rem; /* Space between Info and Copyright buttons */
         }
 
 
@@ -156,7 +156,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-       
+        /* Common styles for all overlays */
         .overlay-section {
             position: fixed;
             top: 0;
@@ -180,7 +180,7 @@
             transition: opacity 0.3s ease-out, visibility 0s linear 0s;
         }
 
-        .info-content-card { 
+        .info-content-card { /* Reused for both Info and Copyright content */
             background-color: rgba(45, 55, 72, 0.97);
             padding: 1.5rem 2rem;
             border-radius: 1rem;
@@ -375,11 +375,11 @@
 
             <form id="downloadForm" class="space-y-6">
                 <div>
-                    <label for="youtube_url" data-translate-key="urlLabel" class="block text-sm font-medium text-slate-300 mb-2">YouTube/SoundCloud Link:</label>
+                    <label for="youtube_url" data-translate-key="urlLabel" class="block text-sm font-medium text-slate-300 mb-2">Link:</label>
                     <input type="url" id="youtube_url" name="youtube_url" required
                            class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out"
                            data-translate-placeholder="urlPlaceholder"
-                           placeholder="e.g., https://www.youtube.com/watch?v=... or https://soundcloud.com/track">
+                           placeholder="e.g., https://www.youtube.com/watch?v=video_id or https://soundcloud.com/track_name">
                 </div>
 
                 <div>
@@ -387,8 +387,7 @@
                     <select id="format_choice" name="format_choice"
                             class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out">
                         <option value="mp3" selected data-translate-key="formatMp3">MP3 (recommended)</option>
-                        <option value="mp4" data-translate-key="formatMp4">MP4 (video)</option>
-                        <option value="flac" data-translate-key="formatFlac">FLAC (lossless, larger size)</option>
+                        <option value="mp4" data-translate-key="formatMp4">MP4 (video 720p)</option>
                     </select>
                 </div>
 
@@ -408,7 +407,7 @@
 
     </div>
     <footer class="app-footer text-center text-slate-500 text-sm">
-        <p>© <span id="year"></span> <span data-translate-key="footerCopyrightText">YouTube Music downloader. Site made by Suleyman Aslanov.</span></p>
+        <p>© <span id="year"></span> <span data-translate-key="footerCopyrightText">YouTube, SoundCloud & Other downloader. Site made by Suleyman Aslanov.</span></p>
         <p class="text-xs mt-1" data-translate-key="footerWatermark">Developed By Suleyman Aslanov</p>
     </footer>
 
@@ -418,15 +417,15 @@
             <h2 data-translate-key="infoTitle">Information</h2>
 
             <h3 data-translate-key="infoHowItWorksTitle">How This Site Works</h3>
-            <p data-translate-key="infoHowItWorksPara1">This web application allows you to download audio/video from YouTube, SoundCloud or other videos/tracks or playlists. You simply paste the URL, choose your desired format (MP3, MP4 or FLAC), and the server-side script processes your request.</p>
-            <p data-translate-key="infoHowItWorksPara2">The backend uses the powerful <code>yt-dlp</code> library to fetch content information and extract the audio/video stream. If MP3, MP4 or FLAC format is selected, <code>ffmpeg</code> is used for conversion and to embed metadata.</p>
+            <p data-translate-key="infoHowItWorksPara1">This web application allows you to download audio/video from YouTube, SoundCloud or other videos/tracks or playlists. You simply paste the URL, choose your desired format (MP3 or MP4), and the server-side script processes your request.</p>
+            <p data-translate-key="infoHowItWorksPara2">The backend uses the powerful <code>yt-dlp</code> library to fetch content information and extract the audio/video stream. If MP3 or MP4 format is selected, <code>ffmpeg</code> is used for conversion and to embed metadata.</p>
             <p data-translate-key="infoHowItWorksPara3">The downloaded file is temporarily stored on the server and then made available for you to download directly through your browser. After the download is served to you, the file is automatically deleted from the server to save space and ensure privacy.</p>
 
             <h3 data-translate-key="infoLibrariesTitle">Key Libraries & Technologies Used</h3>
             <ul>
                 <li data-translate-key="infoLibFlask"><strong>Flask:</strong> A micro web framework for Python, used to build the backend API.</li>
                 <li data-translate-key="infoLibYtdlp"><strong>yt-dlp:</strong> A command-line program to download videos/audio from YouTube, SoundCloud and many other sites. It's a fork of youtube-dl with additional features and fixes.</li>
-                <li data-translate-key="infoLibFFmpeg"><strong>FFmpeg:</strong> A complete, cross-platform solution to record, convert and stream audio and video. Used here for format conversion (to MP3/MP4/FLAC) and metadata embedding.</li>
+                <li data-translate-key="infoLibFFmpeg"><strong>FFmpeg:</strong> A complete, cross-platform solution to record, convert and stream audio and video. Used here for format conversion (to MP3/MP4) and metadata embedding.</li>
                 <li data-translate-key="infoLibTailwind"><strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.</li>
                 <li data-translate-key="infoLibJS"><strong>JavaScript:</strong> Used for frontend interactivity, language switching, animations, and communication with the backend API.</li>
             </ul>
@@ -452,18 +451,18 @@
         const translations = {
             en: {
                 pageTitle: "YouTube, SoundCloud & Other Downloader by Suleyman Aslanov",
-                metaDescriptionContent: "Easily download music and video from YouTube, SoundCloud and other videos/tracks and playlists in MP3, MP4 or FLAC format. Created by Suleyman Aslanov.",
+                metaDescriptionContent: "Easily download music and video from YouTube, SoundCloud and other videos/tracks and playlists in MP3 or MP4 format. Created by Suleyman Aslanov.",
                 navInfoButton: "Info",
                 navCopyrightButton: "Copyright",
                 infoTitle: "About This Site",
                 infoHowItWorksTitle: "How This Site Works",
-                infoHowItWorksPara1: "This web application allows you to download audio/video from YouTube, SoundCloud or other videos/tracks or playlists. You simply paste the URL, choose your desired format (MP3, MP4 or FLAC), and the server-side script processes your request.",
-                infoHowItWorksPara2: "The backend uses the powerful <code>yt-dlp</code> library to fetch content information and extract the audio/video stream. If MP3, MP4 or FLAC format is selected, <code>ffmpeg</code> is used for conversion and to embed metadata.",
+                infoHowItWorksPara1: "This web application allows you to download audio/video from YouTube, SoundCloud or other videos/tracks or playlists. You simply paste the URL, choose your desired format (MP3 or MP4), and the server-side script processes your request.",
+                infoHowItWorksPara2: "The backend uses the powerful <code>yt-dlp</code> library to fetch content information and extract the audio/video stream. If MP3 or MP4 format is selected, <code>ffmpeg</code> is used for conversion and to embed metadata.",
                 infoHowItWorksPara3: "The downloaded file is temporarily stored on the server and then made available for you to download directly through your browser. After the download is served to you, the file is automatically deleted from the server to save space and ensure privacy.",
                 infoLibrariesTitle: "Key Libraries & Technologies Used",
                 infoLibFlask: "<strong>Flask:</strong> A micro web framework for Python, used to build the backend API.",
                 infoLibYtdlp: "<strong>yt-dlp:</strong> A command-line program to download videos/audio from YouTube, SoundCloud and many other sites. It's a fork of youtube-dl with additional features and fixes.",
-                infoLibFFmpeg: "<strong>FFmpeg:</strong> A complete, cross-platform solution to record, convert and stream audio and video. Used here for format conversion (to MP3/MP4/FLAC) and metadata embedding.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> A complete, cross-platform solution to record, convert and stream audio and video. Used here for format conversion (to MP3/MP4) and metadata embedding.",
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.",
                 infoLibJS: "<strong>JavaScript:</strong> Used for frontend interactivity, language switching, animations, and communication with the backend API.",
                 infoPythonCodeTitle: "Python Backend Code",
@@ -474,13 +473,12 @@
                 infoCreatorTitle: "Creator",
                 infoCreatorName: "This YouTube Music Downloader site was created by <strong>Suleyman Aslanov</strong>.",
                 headerH1: "Music Downloader",
-                headerP: "Paste a YouTube, SoundCloud or other video/track or playlist link",
+                headerP: "Paste a YouTube or SoundCloud video/track or playlist link",
                 urlLabel: "Link:",
-                urlPlaceholder: "e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ or https://soundcloud.com/track",
+                urlPlaceholder: "e.g., https://www.youtube.com/watch?v=video_id or https://soundcloud.com/track_name",
                 formatLabel: "Select format:",
                 formatMp3: "MP3 (recommended)",
-                formatMp4: "MP4 (video)",
-                formatFlac: "FLAC (lossless, larger size)",
+                formatMp4: "MP4 (video 720p)",
                 submitButton: "Download",
                 footerCopyrightText: "YouTube, SoundCloud & Other downloader. Site made by Suleyman Aslanov.",
                 footerWatermark: "Developed By Suleyman Aslanov",
@@ -500,18 +498,18 @@
             },
             ru: {
                 pageTitle: "Загрузчик Музыки с YouTube, SoundCloud и других сайтов от Suleyman Aslanov",
-                metaDescriptionContent: "Легко скачивайте музыку и видео из видео/треков и плейлистов YouTube, SoundCloud и других сайтов в формате MP3, MP4 или FLAC. Создано Suleyman Aslanov.",
+                metaDescriptionContent: "Легко скачивайте музыку и видео из видео/треков и плейлистов YouTube, SoundCloud и других сайтов в формате MP3 или MP4. Создано Suleyman Aslanov.",
                 navInfoButton: "Инфо",
                 navCopyrightButton: "Авторское право",
                 infoTitle: "Об этом сайте",
                 infoHowItWorksTitle: "Как работает этот сайт",
-                infoHowItWorksPara1: "Это веб-приложение позволяет загружать аудио/видео из видео/треков или плейлистов YouTube, SoundCloud или других сайтов. Вы просто вставляете URL-адрес, выбираете желаемый формат (MP3, MP4 или FLAC), и серверный скрипт обрабатывает ваш запрос.",
-                infoHowItWorksPara2: "Бэкенд использует мощную библиотеку <code>yt-dlp</code> для получения информации о контенте и извлечения аудио/видеопотока. Если выбран формат MP3, MP4 или FLAC, для преобразования и встраивания метаданных используется <code>ffmpeg</code>.",
+                infoHowItWorksPara1: "Это веб-приложение позволяет загружать аудио/видео из видео/треков или плейлистов YouTube, SoundCloud или других сайтов. Вы просто вставляете URL-адрес, выбираете желаемый формат (MP3 или MP4), и серверный скрипт обрабатывает ваш запрос.",
+                infoHowItWorksPara2: "Бэкенд использует мощную библиотеку <code>yt-dlp</code> для получения информации о контенте и извлечения аудио/видеопотока. Если выбран формат MP3 или MP4, для преобразования и встраивания метаданных используется <code>ffmpeg</code>.",
                 infoHowItWorksPara3: "Загруженный файл временно сохраняется на сервере, а затем становится доступным для прямой загрузки через ваш браузер. После того как файл передан вам, он автоматически удаляется с сервера для экономии места и обеспечения конфиденциальности.",
                 infoLibrariesTitle: "Ключевые библиотеки и технологии",
                 infoLibFlask: "<strong>Flask:</strong> Микрофреймворк для веб-разработки на Python, используемый для создания бэкенд API.",
                 infoLibYtdlp: "<strong>yt-dlp:</strong> Программа командной строки для загрузки видео/аудио с YouTube, SoundCloud и многих других сайтов. Это форк youtube-dl с дополнительными функциями и исправлениями.",
-                infoLibFFmpeg: "<strong>FFmpeg:</strong> Полное кроссплатформенное решение для записи, преобразования и потоковой передачи аудио и видео. Здесь используется для конвертации форматов (в MP3/MP4/FLAC) и встраивания метаданных.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> Полное кроссплатформенное решение для записи, преобразования и потоковой передачи аудио и видео. Здесь используется для конвертации форматов (в MP3/MP4) и встраивания метаданных.",
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> Утилитарный CSS-фреймворк для быстрой разработки пользовательских интерфейсов.",
                 infoLibJS: "<strong>JavaScript:</strong> Используется для интерактивности фронтенда, переключения языков, анимаций и взаимодействия с бэкенд API.",
                 infoPythonCodeTitle: "Код бэкенда на Python",
@@ -524,11 +522,10 @@
                 headerH1: "Загрузчик Музыки",
                 headerP: "Вставьте ссылку на YouTube, SoundCloud или другое видео/трек или плейлист",
                 urlLabel: "Ссылка:",
-                urlPlaceholder: "например, https://www.youtube.com/watch?v=dQw4w9WgXcQ или https://soundcloud.com/track",
+                urlPlaceholder: "например, https://www.youtube.com/watch?v=video_id или https://soundcloud.com/track_name",
                 formatLabel: "Выберите формат:",
                 formatMp3: "MP3 (рекомендуется)",
-                formatMp4: "MP4 (видео)",
-                formatFlac: "FLAC (без потерь, больший размер)",
+                formatMp4: "MP4 (видео 720p)",
                 submitButton: "Скачать",
                 footerCopyrightText: "Загрузчик музыки YouTube, SoundCloud и других сайтов. Сайт сделан Suleyman Aslanov.",
                 footerWatermark: "Разработано Suleyman Aslanov",
@@ -548,19 +545,19 @@
             },
             es: {
                 pageTitle: "Descargador de Música de YouTube, SoundCloud y otros sitios por Suleyman Aslanov",
-                metaDescriptionContent: "Descarga fácilmente música y video de videos/pistas y listas de reproducción de YouTube, SoundCloud y otros sitios en formato MP3, MP4 o FLAC. Creado por Suleyman Aslanov.",
+                metaDescriptionContent: "Descarga fácilmente música y video de videos/pistas y listas de reproducción de YouTube, SoundCloud y otros sitios en formato MP3 o MP4. Creado por Suleyman Aslanov.",
                 navInfoButton: "Info",
                 navCopyrightButton: "Copyright",
                 infoTitle: "Sobre este Sitio",
                 infoHowItWorksTitle: "Cómo Funciona Este Sitio",
-                infoHowItWorksPara1: "Esta aplicación web te permite descargar audio/video de videos/pistas o listas de reproducción de YouTube, SoundCloud u otros sitios. Simplemente pegas la URL, eliges tu formato deseado (MP3, MP4 o FLAC), y el script del lado del servidor procesa tu solicitud.",
-                infoHowItWorksPara2: "El backend utiliza la potente biblioteca <code>yt-dlp</code> para obtener información del contenido y extraer el flujo de audio/video. Si se selecciona el formato MP3, MP4 o FLAC, se utiliza <code>ffmpeg</code> para la conversión e incrustación de metadatos.",
+                infoHowItWorksPara1: "Esta aplicación web te permite descargar audio/video de videos/pistas o listas de reproducción de YouTube, SoundCloud u otros sitios. Simplemente pegas la URL, eliges tu formato deseado (MP3 o MP4), y el script del lado del servidor procesa tu solicitud.",
+                infoHowItWorksPara2: "El backend utiliza la potente biblioteca <code>yt-dlp</code> para obtener información del contenido y extraer el flujo de audio/video. Si se selecciona el formato MP3 o MP4, se utiliza <code>ffmpeg</code> para la conversión e incrustación de metadatos.",
                 infoHowItWorksPara3: "El archivo descargado se almacena temporalmente en el servidor y luego se pone a tu disposición para que lo descargues directamente a través de tu navegador. Después de que se te entrega la descarga, el archivo se elimina automáticamente del servidor para ahorrar espacio y garantizar la privacidad.",
                 infoLibrariesTitle: "Bibliotecas Clave y Tecnologías Utilizadas",
                 infoLibFlask: "<strong>Flask:</strong> Un microframework web para Python, utilizado para construir la API del backend.",
                 infoLibYtdlp: "<strong>yt-dlp:</strong> Un programa de línea de comandos para descargar videos/audio de YouTube, SoundCloud y muchos otros sitios. Es un fork de youtube-dl con características adicionales y correcciones.",
-                infoLibFFmpeg: "<strong>FFmpeg:</strong> Una solución completa y multiplataforma para grabar, convertir y transmitir audio y video. Se utiliza aquí para la conversión de formato (a MP3/MP4/FLAC) e incrustación de metadatos.",
-                infoLibTailwind: "<strong>Tailwind CSS:</strong> Un framework CSS de utilidad primero para construir rápidamente interfaces de usuario personalizadas.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> Una solución completa y multiplataforma para grabar, convertir y transmitir audio y video. Se utiliza aquí para la conversión de formato (a MP3/MP4) e incrustación de metadatos.",
+                infoLibTailwind: "<strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.",
                 infoLibJS: "<strong>JavaScript:</strong> Utilizado para la interactividad del frontend, cambio de idioma, animaciones y comunicación con la API del backend.",
                 infoPythonCodeTitle: "Código Backend en Python",
                 infoPythonCodePara: "La lógica central del backend está escrita en Python utilizando el framework Flask. El script de Python (generalmente llamado <code>app.py</code>) maneja las solicitudes API, interactúa con <code>yt-dlp</code> y <code>ffmpeg</code>, gestiona el almacenamiento temporal de archivos y sirve los archivos. Este código se ejecuta en el servidor y no es visible directamente aquí, pero asegura la funcionalidad del descargador.",
@@ -572,11 +569,10 @@
                 headerH1: "Descargador de Música",
                 headerP: "Pega un enlace de video/pista o lista de reproducción de YouTube, SoundCloud u otros sitios",
                 urlLabel: "Enlace:",
-                urlPlaceholder: "ej., https://www.youtube.com/watch?v=dQw4w9WgXcQ o https://soundcloud.com/track",
+                urlPlaceholder: "ej., https://www.youtube.com/watch?v=video_id o https://soundcloud.com/track_name",
                 formatLabel: "Seleccionar formato:",
                 formatMp3: "MP3 (recomendado)",
-                formatMp4: "MP4 (video)",
-                formatFlac: "FLAC (sin pérdidas, tamaño mayor)",
+                formatMp4: "MP4 (video 720p)",
                 submitButton: "Descargar",
                 footerCopyrightText: "Descargador de música de YouTube, SoundCloud y otros sitios. Sitio hecho por Suleyman Aslanov.",
                 footerWatermark: "Desarrollado por Suleyman Aslanov",
@@ -596,18 +592,18 @@
             },
             az: {
                 pageTitle: "Suleyman Aslanov tərəfindən YouTube, SoundCloud və digər saytlar üçün Yükləyici",
-                metaDescriptionContent: "YouTube, SoundCloud və digər saytlardan videolar/treklər və pleylistlərdən musiqi və video faylları MP3, MP4 və ya FLAC formatında asanlıqla yükləyin. Suleyman Aslanov tərəfindən yaradılıb.",
+                metaDescriptionContent: "YouTube, SoundCloud və digər saytlardan videolar/treklər və pleylistlərdən musiqi və video faylları MP3 və ya MP4 formatında asanlıqla yükləyin. Suleyman Aslanov tərəfindən yaradılıb.",
                 navInfoButton: "Məlumat",
                 navCopyrightButton: "Müəllif Hüququ",
                 infoTitle: "Bu Sayt Haqqında",
                 infoHowItWorksTitle: "Bu Sayt Necə İşləyir",
-                infoHowItWorksPara1: "Bu veb tətbiqi YouTube, SoundCloud və ya digər saytlardan videolar/treklər və ya pleylistlərdən audio/video yükləməyə imkan verir. Siz sadəcə URL-ni daxil edir, istədiyiniz formatını (MP3, MP4 və ya FLAC) seçirsiniz və server tərəfi skripti sorğunuzu emal edir.",
-                infoHowItWorksPara2: "Backend məzmun məlumatlarını əldə etmək və audio/video axınını çıxarmaq üçün güclü <code>yt-dlp</code> kitabxanasından istifadə edir. MP3, MP4 və ya FLAC formatı seçildikdə, konvertasiya və metadatanın daxil edilməsi üçün <code>ffmpeg</code> istifadə olunur.",
+                infoHowItWorksPara1: "Bu veb tətbiqi YouTube, SoundCloud və ya digər saytlardan videolar/treklər və ya pleylistlərdən audio/video yükləməyə imkan verir. Siz sadəcə URL-ni daxil edir, istədiyiniz formatını (MP3 və ya MP4) seçirsiniz və server tərəfi skripti sorğunuzu emal edir.",
+                infoHowItWorksPara2: "Backend məzmun məlumatlarını əldə etmək və audio/video axınını çıxarmaq üçün güclü <code>yt-dlp</code> kitabxanasından istifadə edir. MP3 və ya MP4 formatı seçildikdə, konvertasiya və metadatanın daxil edilməsi üçün <code>ffmpeg</code> istifadə olunur.",
                 infoHowItWorksPara3: "Yüklənmiş fayl müvəqqəti olaraq serverdə saxlanılır və sonra brauzeriniz vasitəsilə birbaşa yükləmək üçün sizə təqdim olunur. Fayl sizə təqdim edildikdən sonra, yerə qənaət etmək və məxfiliyi təmin etmək üçün avtomatik olaraq serverdən silinir.",
                 infoLibrariesTitle: "Əsas Kitabxanalar və Texnologiyalar",
                 infoLibFlask: "<strong>Flask:</strong> Backend API qurmaq üçün istifadə olunan Python üçün mikro veb freymvorku.",
                 infoLibYtdlp: "<strong>yt-dlp:</strong> YouTube, SoundCloud və bir çox başqa saytlardan video/audio yükləmək üçün əmr sətiri proqramı. Bu, əlavə funksiyalar və düzəlişlərlə youtube-dl-in bir forkudur.",
-                infoLibFFmpeg: "<strong>FFmpeg:</strong> Audio və video yazmaq, çevirmək və yayımlamaq üçün tam, çarpaz platformalı bir həll. Burada formatının çevrilməsi (MP3/MP4/FLAC-a) və metadatanın daxil edilməsi üçün istifadə olunur.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> Audio və video yazmaq, çevirmək və yayımlamaq üçün tam, çarpaz platformalı bir həll. Burada formatının çevrilməsi (MP3/MP4-a) və metadatanın daxil edilməsi üçün istifadə olunur.",
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> Xüsusi istifadəçi interfeyslərini sürətlə qurmaq üçün utilitar CSS freymvorku.",
                 infoLibJS: "<strong>JavaScript:</strong> Frontend interaktivliyi, dil dəyişdirmə, animasiyalar və backend API ilə əlaqə üçün istifadə olunur.",
                 infoPythonCodeTitle: "Python Backend Kodu",
@@ -620,11 +616,10 @@
                 headerH1: "Musiqi Yükləyicisi",
                 headerP: "YouTube video və ya pleylist keçidini daxil edin",
                 urlLabel: "Keçid:",
-                urlPlaceholder: "məsələn, https://www.youtube.com/watch?v=dQw4w9WgXcQ və ya https://soundcloud.com/track",
+                urlPlaceholder: "məsələn, https://www.youtube.com/watch?v=video_id və ya https://soundcloud.com/track_name",
                 formatLabel: "Format seçin:",
                 formatMp3: "MP3 (tövsiyə olunur)",
-                formatMp4: "MP4 (video)",
-                formatFlac: "FLAC (sıxılmamış, daha böyük ölçü)",
+                formatMp4: "MP4 (video 720p)",
                 submitButton: "Yüklə",
                 footerCopyrightText: "YouTube, SoundCloud və digər saytlar üçün musiqi yükləyicisi. Sayt Suleyman Aslanov tərəfindən hazırlanıb.",
                 footerWatermark: "Suleyman Aslanov tərəfindən hazırlanıb",
@@ -644,18 +639,18 @@
             },
             tr: {
                 pageTitle: "Suleyman Aslanov'dan YouTube, SoundCloud ve Diğer Siteler İçin İndirici",
-                metaDescriptionContent: "YouTube, SoundCloud ve diğer sitelerden videolar/şarkılar ve çalma listelerinden MP3, MP4 veya FLAC formatında kolayca müzik ve video indirin. Suleyman Aslanov tarafından oluşturuldu.",
+                metaDescriptionContent: "YouTube, SoundCloud ve diğer sitelerden videolar/şarkılar ve çalma listelerinden MP3 veya MP4 formatında kolayca müzik ve video indirin. Suleyman Aslanov tarafından oluşturuldu.",
                 navInfoButton: "Bilgi",
                 navCopyrightButton: "Telif Hakkı",
                 infoTitle: "Bu Site Hakkında",
                 infoHowItWorksTitle: "Bu Site Nasıl Çalışır?",
-                infoHowItWorksPara1: "Bu web uygulaması, YouTube, SoundCloud veya diğer sitelerden videolar/şarkılar veya oynatma listelerinden ses/video indirmenizi sağlar. URL'yi yapıştırır, istediğiniz formatı (MP3, MP4 veya FLAC) seçersiniz ve sunucu tarafı betiği isteğinizi işler.",
-                infoHowItWorksPara2: "Arka uç, içerik bilgilerini almak ve ses/video akışını çıkarmak için güçlü <code>yt-dlp</code> kitaplığını kullanır. MP3, MP4 veya FLAC formatı seçilirse, dönüştürme ve meta veri gömme için <code>ffmpeg</code> kullanılır.",
+                infoHowItWorksPara1: "Bu web uygulaması, YouTube, SoundCloud veya diğer sitelerden videolar/şarkılar veya oynatma listelerinden ses/video indirmenizi sağlar. URL'yi yapıştırır, istediğiniz formatı (MP3 veya MP4) seçersiniz ve sunucu tarafı betiği isteğinizi işler.",
+                infoHowItWorksPara2: "Arka uç, içerik bilgilerini almak ve ses/video akışını çıkarmak için güçlü <code>yt-dlp</code> kitaplığını kullanır. MP3 veya MP4 formatı seçilirse, dönüştürme ve meta veri gömme için <code>ffmpeg</code> kullanılır.",
                 infoHowItWorksPara3: "İndirilen dosya geçici olarak sunucuda saklanır ve ardından tarayıcınız üzerinden doğrudan indirmeniz için kullanıma sunulur. İndirme size sunulduktan sonra, yerden tasarruf etmek ve gizliliği sağlamak için dosya sunucudan otomatik olarak silinir.",
                 infoLibrariesTitle: "Kullanılan Temel Kitaplıklar ve Teknolojiler",
                 infoLibFlask: "<strong>Flask:</strong> Arka uç API'sini oluşturmak için kullanılan Python için bir mikro web çerçevesi.",
                 infoLibYtdlp: "<strong>yt-dlp:</strong> YouTube, SoundCloud ve diğer birçok siteden video/ses indirmek için bir komut satırı programı. Ek özellikler ve düzeltmeler içeren youtube-dl'nin bir çatalıdır.",
-                infoLibFFmpeg: "<strong>FFmpeg:</strong> Ses ve video kaydetmek, dönüştürmek ve yayınlamak için eksiksiz, platformlar arası bir çözüm. Burada format dönüştürme (MP3/MP4/FLAC'a) ve meta veri gömme için kullanılır.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> Ses ve video kaydetmek, dönüştürmek ve yayınlamak için eksiksiz, platformlar arası bir çözüm. Burada format dönüştürme (MP3/MP4) ve meta veri gömme için kullanılır.",
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> Özel kullanıcı arayüzlerini hızla oluşturmak için bir yardımcı program öncelikli CSS çerçevesi.",
                 infoLibJS: "<strong>JavaScript:</strong> Ön uç etkileşimi, dil değiştirme, animasyonlar ve arka uç API ile iletişim için kullanılır.",
                 infoPythonCodeTitle: "Python Arka Uç Kodu",
@@ -668,11 +663,10 @@
                 headerH1: "Müzik İndirici",
                 headerP: "Bir YouTube video veya oynatma listesi bağlantısı yapıştırın",
                 urlLabel: "Bağlantı:",
-                urlPlaceholder: "örneğin, https://www.youtube.com/watch?v=dQw4w9WgXcQ veya https://soundcloud.com/track",
+                urlPlaceholder: "örneğin, https://www.youtube.com/watch?v=video_id или https://soundcloud.com/track_name",
                 formatLabel: "Format seçin:",
                 formatMp3: "MP3 (önerilir)",
-                formatMp4: "MP4 (video)",
-                formatFlac: "FLAC (kayıpsız, daha büyük boyut)",
+                formatMp4: "MP4 (video 720p)",
                 submitButton: "İndir",
                 footerCopyrightText: "YouTube, SoundCloud ve Diğer İndirici. Site Suleyman Aslanov tarafından yapıldı.",
                 footerWatermark: "Suleyman Aslanov tarafından geliştirildi",
@@ -898,7 +892,7 @@
 
                                     const link = document.createElement('a');
                                     link.href = fileInfo.download_url;
-                                    link.download = fileInfo.filename || `audio_download.${fileInfo.download_url.split('.').pop()}`;
+                                    link.download = fileInfo.filename || `download.${fileInfo.download_url.split('.').pop()}`;
                                     document.body.appendChild(link);
                                     link.click();
 
