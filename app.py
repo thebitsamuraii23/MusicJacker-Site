@@ -10,7 +10,7 @@ import yt_dlp
 
 load_dotenv()
 
-# --- Configuration ---
+
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
 logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -21,18 +21,18 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 USER_DOWNLOADS_DIR = os.path.join(BASE_DIR, "user_downloads")
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 
-# Ensure download directory exists
+
 if not os.path.exists(USER_DOWNLOADS_DIR):
     os.makedirs(USER_DOWNLOADS_DIR)
     logger.info(f"Создана директория для загрузок: {USER_DOWNLOADS_DIR}")
 
-# Set template folder
+
 if os.path.exists(TEMPLATES_DIR):
     app.template_folder = TEMPLATES_DIR
 else:
     logger.warning(f"Директория шаблонов {TEMPLATES_DIR} не найдена. Убедитесь, что index.html находится в правильном месте.")
 
-# FFmpeg path from environment or default
+
 FFMPEG_PATH_ENV = os.getenv('FFMPEG_PATH')
 FFMPEG_PATH = FFMPEG_PATH_ENV if FFMPEG_PATH_ENV else '/usr/bin/ffmpeg'
 
@@ -47,23 +47,23 @@ else:
         logger.warning(f"FFmpeg НЕ найден или недоступен по пути по умолчанию: {FFMPEG_PATH}.")
     logger.warning("FFmpeg не найден или недоступен. Конвертация в MP3/MP4 и добавление метаданных могут не работать корректно.")
 
-# Cookie file for YouTube
+
 COOKIES_PATH = os.getenv('COOKIES_PATH', 'youtube.com_cookies.txt')
 if not os.path.exists(COOKIES_PATH):
     logger.warning(f"Файл куки {COOKIES_PATH} не найден. Загрузка некоторых YouTube видео может быть ограничена.")
 
-# Watermark text
+
 WATERMARK_TEXT = "YouTube Music Downloader. Site created by Suleyman Aslanov"
 
-# --- Helper Functions ---
+
 def is_valid_url(url):
     """Basic URL validation."""
     regex = re.compile(
-        r'^(?:http|ftp)s?://' # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' # domain...
-        r'localhost|' # localhost...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
-        r'(?::\d+)?' # optional port
+        r'^(?:http|ftp)s?://' 
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' 
+        r'localhost|' 
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'
+        r'(?::\d+)?' 
         r'(?:/?|[/?]\S+)$', re.IGNORECASE)
     return re.match(regex, url) is not None
 
@@ -101,7 +101,7 @@ def blocking_yt_dlp_download(ydl_opts, url_to_download):
         logger.error(f"Неожиданная ошибка в blocking_yt_dlp_download для URL '{url_to_download}': {e}", exc_info=True)
         return None
 
-# --- Routes ---
+
 @app.route('/')
 def index():
     """Renders the main page."""
@@ -131,19 +131,19 @@ def download_audio_route():
     ydl_opts = {
         'outtmpl': output_template,
         'restrictfilenames': True,
-        'noplaylist': False, # Allow playlist downloads
-        'ignoreerrors': True, # Ignore errors for individual videos in a playlist
+        'noplaylist': False, 
+        'ignoreerrors': True, 
         'nocheckcertificate': True,
         'quiet': True,
         'no_warnings': True,
         'ffmpeg_location': FFMPEG_PATH if FFMPEG_IS_AVAILABLE else None,
-        'extract_flat': 'in_playlist', # Extract information for playlist entries without downloading them immediately
+        'extract_flat': 'in_playlist', 
         'skip_download': False,
     }
 
-    # Determine if it's a YouTube URL or SoundCloud URL
-    # Assuming googleusercontent.com/youtube.com/0 or youtube.com are indicators for YouTube.
-    # More robust check might involve URL parsing.
+   
+    
+    
     is_youtube = "youtube.com" in url or "youtu.be" in url
     is_soundcloud = "soundcloud.com" in url
 
@@ -174,7 +174,7 @@ def download_audio_route():
     elif requested_format == "mp4":
         if FFMPEG_IS_AVAILABLE:
             logger.info("FFmpeg доступен. Скачивание в MP4 720p.")
-            # Prioritize 720p MP4. If not available, fall back to best MP4, then any best.
+          
             ydl_opts['format'] = 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
             ydl_opts['postprocessors'] = [{
                 'key': 'FFmpegVideoConvertor',
