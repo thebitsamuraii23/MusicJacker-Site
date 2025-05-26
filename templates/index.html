@@ -6,10 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" data-translate-meta-description="metaDescriptionContent" content="Download music and video from YouTube videos and playlists in MP3 or MP4 format.">
     <meta name="theme-color" content="#0f172a">
-    <title>YouTube Music Downloader</title>
+    <title data-translate-key="pageTitle">YouTube Music Downloader</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -24,9 +23,8 @@
         body.overflow-hidden { /* Класс для предотвращения прокрутки body при открытом оверлее */
             overflow: hidden;
         }
-        body:lang(ar) {
-            font-family: 'Tajawal', sans-serif;
-        }
+        /* Удалены специфичные правила для body:lang(ar) */
+
 
         .night-sky-bg-main {
             position: fixed;
@@ -47,14 +45,14 @@
         }
         .star-main {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 255, 0.7); /* Вернули к предыдущей яркости */
             border-radius: 50%;
             animation: twinkleMain 3s infinite ease-in-out;
-            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5), 0 0 6px rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5), 0 0 6px rgba(255, 255, 255, 0.3); /* Вернули к предыдущему свечению */
         }
         @keyframes twinkleMain {
-            0%, 100% { opacity: 0.4; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.1); }
+            0%, 100% { opacity: 0.4; transform: scale(0.8); } /* Вернули к предыдущей непрозрачности */
+            50% { opacity: 1; transform: scale(1.1); } /* Вернули к предыдущему размеру */
             100% { opacity: 0.4; transform: scale(0.8); }
         }
         .moon-main {
@@ -63,7 +61,7 @@
             height: 100px;
             background-color: #f0f8ff;
             border-radius: 50%;
-            box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa;
+            box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa; /* Вернули к предыдущему свечению */
             top: 10%;
             left: 15%;
             animation: gentleDriftMain 15s ease-in-out infinite alternate, moonPhase 60s linear infinite;
@@ -77,7 +75,7 @@
             animation-delay: 0s, 0s, 0.5s;
         }
          @keyframes fadeInMoon {
-            to { opacity: 0.85; }
+            to { opacity: 0.85; } /* Вернули к предыдущей яркости луны */
         }
         @keyframes gentleDriftMain {
             0% { transform: translate(0, 0) scale(1); }
@@ -218,10 +216,6 @@
             list-style: disc;
             padding-left: 1.5rem;
         }
-        body:lang(ar) .info-content-card ul {
-            padding-left: 0;
-            padding-right: 1.5rem;
-        }
         .info-content-card code {
             background-color: rgb(51 65 85 / 0.7);
             padding: 0.1rem 0.4rem;
@@ -288,12 +282,6 @@
             color: #94a3b8;
             margin-left: 0.5rem;
         }
-        body:lang(ar) .file-download-status {
-            margin-left: 0;
-            margin-right: 0.5rem;
-        }
-        .file-download-status.downloading { color: #38bdf8; }
-        .file-download-status.completed { color: #22c55e; }
         .telegram-link-container { margin-top: 0.75rem; font-size: 0.875rem; color: #94a3b8; }
         .telegram-link-container a { color: #38bdf8; text-decoration: underline; }
         .telegram-link-container a:hover { color: #7dd3fc; }
@@ -318,16 +306,7 @@
             z-index: 110;
             backdrop-filter: blur(3px);
         }
-        body:lang(ar) .close-overlay-button {
-            right: auto;
-            left: 1.25rem;
-        }
-        .close-overlay-button:hover {
-            color: #f87171;
-            background-color: rgba(100, 65, 85, 0.7);
-            border-color: rgba(200,116,139,0.7);
-            transform: scale(1.1);
-        }
+        
     </style>
 </head>
 <body class="text-white min-h-screen flex flex-col items-center p-4 selection:bg-sky-500 selection:text-white">
@@ -350,7 +329,6 @@
                 <option value="es">Español</option>
                 <option value="az">Azərbaycanca</option>
                 <option value="tr">Türkçe</option>
-                <option value="ar">العربية</option>
             </select>
         </div>
     </div>
@@ -374,7 +352,7 @@
 
             <form id="downloadForm" class="space-y-6">
                 <div>
-                    <label for="youtube_url" data-translate-key="urlLabel" class="block text-sm font-medium text-slate-300 mb-2">YouTube Link:</label>
+                    <label for="youtube_url" data-translate-key="urlLabel" class="block text-sm font-medium text-slate-300 mb-2">YouTube/SoundCloud Link:</label>
                     <input type="url" id="youtube_url" name="youtube_url" required
                            class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out"
                            data-translate-placeholder="urlPlaceholder"
@@ -406,15 +384,13 @@
 
     </div>
     <footer class="app-footer text-center text-slate-500 text-sm">
-        <p>© <span id="year"></span> <span data-translate-key="footerCopyrightText">YouTube Music downloader. Site made by Suleyman Aslanov.</span></p>
+        <p data-translate-key="footerCopyrightText">© <span id="year"></span> YouTube Music downloader. Site made by Suleyman Aslanov.</p>
         <p class="text-xs mt-1" data-translate-key="footerWatermark">Developed By Suleyman Aslanov</p>
     </footer>
 
     <div id="infoSectionOverlay" class="overlay-section">
         <button id="closeInfoButton" class="close-overlay-button" aria-label="Close Info">×</button>
-        <div class="info-content-card">
-            <h2 data-translate-key="infoTitle">Information</h2>
-
+        <div class="info-content-card"> <h2 data-translate-key="infoTitle">Information</h2>
             <h3 data-translate-key="infoHowItWorksTitle">How This Site Works</h3>
             <p data-translate-key="infoHowItWorksPara1">This web application allows you to download audio/video from YouTube, SoundCloud or other videos/tracks or playlists. You simply paste the URL, choose your desired format (MP3 or MP4), and the server-side script processes your request.</p>
             <p data-translate-key="infoHowItWorksPara2">The backend uses the powerful <code>yt-dlp</code> library to fetch content information and extract the audio/video stream. If MP3 or MP4 format is selected, <code>ffmpeg</code> is used for conversion and to embed metadata.</p>
@@ -474,7 +450,7 @@
                 infoCreatorName: "This YouTube Music Downloader site was created by <strong>Suleyman Aslanov</strong>.",
                 headerH1: "Music Downloader",
                 headerP: "Paste a YouTube or SoundCloud video/track or playlist link",
-                urlLabel: "YouTube Link:",
+                urlLabel: "YouTube/SoundCloud Link:",
                 urlPlaceholder: "e.g., https://www.youtube.com/watch?v=... or https://soundcloud.com/track",
                 formatLabel: "Select format:",
                 formatMp3: "MP3 (recommended)",
@@ -566,9 +542,9 @@
                 infoLibYtdlp: "<strong>yt-dlp:</strong> Un programa de línea de comandos para descargar videos/audio de YouTube, SoundCloud y muchos otros sitios. Es un fork de youtube-dl con características adicionales y correcciones.",
                 infoLibFFmpeg: "<strong>FFmpeg:</strong> Una solución completa y multiplataforma para grabar, convertir y transmitir audio y video. Se utiliza aquí para la conversión de formato (a MP3/MP4) e incrustación de metadatos.",
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.",
-                infoLibJS: "<strong>JavaScript:</strong> Utilizado para la interactividad del frontend, cambio de idioma, animaciones y comunicación con la API del backend.",
+                infoLibJS: "<strong>JavaScript:</strong> Utilizado para la interactividad del frontend, cambio de idioma, animaciones y comunicación con el backend API.",
                 infoPythonCodeTitle: "Código Backend en Python",
-                infoPythonCodePara: "La lógica central del backend está escrita en Python utilizando el framework Flask. El script de Python (generalmente llamado <code>app.py</code>) maneja las solicitudes API, interactúa con <code>yt-dlp</code> y <code>ffmpeg</code>, gestiona el almacenamiento temporal de archivos y sirve los archivos. This code runs on the server and is not directly visible here, but it ensures the functionality of the downloader.",
+                infoPythonCodePara: "La lógica central del backend está escrita en Python utilizando el framework Flask. El script de Python (generalmente llamado <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the files. This code runs on the server and is not directly visible here, but it ensures the functionality of the downloader.",
                 copyrightTitle: "Derechos de Autor y Responsabilidad",
                 copyrightPara1: "Tenga en cuenta que la música y otro contenido de audio disponible en YouTube, SoundCloud y otras plataformas pueden estar protegidos por derechos de autor. Muchos artistas y creadores de contenido tienen licencias y términos de uso específicos para su trabajo. Es su responsabilidad asegurarse de tener los derechos o permisos necesarios antes de descargar cualquier contenido.",
                 copyrightPara2: "El desarrollador de este sitio proporciona esta herramienta para conveniencia y no es responsable del contenido que elija descargar ni de cómo lo utilice. Al utilizar este servicio, usted acepta que es el único responsable de sus acciones y de cumplir con todas las leyes de derechos de autor aplicables y los términos de servicio de los proveedores de contenido.",
@@ -583,14 +559,14 @@
                 formatMp4: "MP4 (video 720p)",
                 submitButton: "Descargar",
                 footerCopyrightText: "Descargador de música de YouTube, SoundCloud y otros sitios. Sitio hecho por Suleyman Aslanov.",
-                footerWatermark: "Desarrollado por Suleyman Aslanov",
+                footerWatermark: "Developed By Suleyman Aslanov",
                 statusErrorUrl: "Por favor, introduce una URL válida.",
                 statusProcessing: "Procesando enlace... Por favor, espera.",
                 statusSuccessHeader: "¡Listo! Iniciando descargas:",
                 statusDownloadLinkText: "Descargar {FORMAT}",
-                statusPostDownloadHint: "Si las descargas no comenzaron, revisa la configuración de ventanas emergentes del navegador o la ubicación de guardado de archivos.",
+                statusPostDownloadHint: "If downloads didn't start, check browser pop-up settings or file save location.",
                 statusErrorGeneric: "Error: {MESSAGE}",
-                statusNetworkError: "Ocurrió un error de red. Por favor, inténtalo de nuevo.",
+                statusNetworkError: "A network error occurred. Please try again.",
                 languageLabel: "Idioma:",
                 telegramSubscription: "Suscríbete al canal de Telegram de los desarrolladores:",
                 telegramBotAlternative: "Alternativa de bot de Telegram:",
@@ -663,27 +639,27 @@
                 infoHowItWorksPara2: "Arka uç, içerik bilgilerini almak ve ses/video akışını çıkarmak için güçlü <code>yt-dlp</code> kitaplığını kullanır. MP3 veya MP4 formatı seçilirse, dönüştürme ve meta veri gömme için <code>ffmpeg</code> kullanılır.",
                 infoHowItWorksPara3: "İndirilen dosya geçici olarak sunucuda saklanır ve ardından tarayıcınız üzerinden doğrudan indirmeniz için kullanıma sunulur. İndirme size sunulduktan sonra, yerden tasarruf etmek ve gizliliği sağlamak için dosya sunucudan otomatik olarak silinir.",
                 infoLibrariesTitle: "Kullanılan Temel Kitaplıklar ve Teknolojiler",
-                infoLibFlask: "<strong>Flask:</strong> Arka uç API'sini oluşturmak için kullanılan Python için bir mikro web çerçevesi.",
+                infoLibFlask: "<strong>Flask:</strong> Arka uç API'sini oluşturmak için Python için bir mikro web çerçevesi.",
                 infoLibYtdlp: "<strong>yt-dlp:</strong> Bir komut satırı programı to download videos/audio from YouTube, SoundCloud and many other sites. It's a fork of youtube-dl with additional features and fixes.",
                 infoLibFFmpeg: "<strong>FFmpeg:</strong> A complete, cross-platform solution to record, convert and stream audio and video. Used here for format conversion (to MP3/MP4) and meta data embedding.",
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.",
                 infoLibJS: "<strong>JavaScript:</strong> Ön uç etkileşimi, dil değiştirme, animasyonlar ve arka uç API ile iletişim için kullanılır.",
                 infoPythonCodeTitle: "Python Arka Uç Kodu",
-                infoPythonCodePara: "Temel arka uç mantığı, Flask çerçevesi kullanılarak Python ile yazılmıştır. Python betiği (genellikle <code>app.py</code> olarak adlandırılır) API isteklerini işler, <code>yt-dlp</code> и <code>ffmpeg</code> ile etkileşime girer, geçici dosya depolamasını yönetir ve dosyaları sunar. Bu kod sunucuda çalışır ve burada doğrudan görünmez, ancak indiricinin işlevselliğini sağlar.",
-                copyrightTitle: "Telif Hakkı ve Sorumluluk",
-                copyrightPara1: "Lütfen YouTube, SoundCloud ve diğer platformlarda bulunan müzik ve diğer ses içeriklerinin telif hakkıyla korunuyor olabileceğini unutmayın. Birçok sanatçı ve içerik oluşturucunun eserleri için özel lisansları ve kullanım koşulları vardır. Herhangi bir içeriği indirmeden önce gerekli haklara veya izinlere sahip olduğunuzdan emin olmak sizin sorumluluğunuzdadır.",
-                copyrightPara2: "Bu sitenin geliştiricisi, bu aracı kolaylık sağlamak amacıyla sunar ve indirmeyi seçtiğiniz içerikten veya onu nasıl kullandığınızdan sorumlu değildir. Bu hizmeti kullanarak, eylemlerinizden ve geçerli tüm telif hakkı yasalarına ve içerik sağlayıcıların hizmet şartlarına uymaktan yalnızca sizin sorumlu olduğunuzu kabul edersiniz.",
+                infoPythonCodePara: "Temel arka uç mantığı, Flask çerçevesi kullanılarak Python ile yazılmıştır. Python betiği (genellikle <code>app.py</code> olarak adlandırılır) API isteklerini işler, <code>yt-dlp</code> и <code>ffmpeg</code> ile etkileşime girer, geçici dosya depolamasını yönetir и dosyaları sunar. Bu kod sunucuda çalışır и здесь doğrudan görünmez, однако indiricinin işlevselliğini sağlar.",
+                copyrightTitle: "Telif Hakkı и Sorumluluk",
+                copyrightPara1: "Lütfen YouTube, SoundCloud и diğer platformlarda bulunan müzik и diğer ses içeriklerinin telif hakkıyla korunuyor olabileceğini unutmayın. Birçok sanatçı и içerik oluşturucunun eserleri için özel lisansları и kullanım koşulları vardır. Herhangi bir içeriği indirmeden önce gerekli haklara veya izinlere sahip olduğunuzdan emin olmak sizin sorumluluğunuzdadır.",
+                copyrightPara2: "Bu sitenin geliştiricisi, bu aracı kolaylık sağlamak amacıyla sunar и indirmeyi seçtiğiniz içerikten veya onu nasıl kullandığınızdan sorumlu değildir. Bu hizmeti kullanarak, eylemlerinizden и geçerli tüm telif hakkı yasalarına и içerik sağlayıcıların hizmet şartlarına uymaktan yalnızca sizin sorumlu olduğunuzu kabul edersiniz.",
                 infoCreatorTitle: "Oluşturan",
-                infoCreatorName: "Bu YouTube ve SoundCloud İndirici sitesi <strong>Suleyman Aslanov</strong> tarafından oluşturulmuştur.",
+                infoCreatorName: "Bu YouTube и SoundCloud İndirici sitesi <strong>Suleyman Aslanov</strong> tarafından oluşturulmuştur.",
                 headerH1: "Music Downloader",
-                headerP: "Bir YouTube video veya oynatma listesi bağlantısı yapıştırın",
+                headerP: "Bir YouTube video или oynatma listesi bağlantısı yapıştırın",
                 urlLabel: "Bağlantı:",
                 urlPlaceholder: "örneğin, https://www.youtube.com/watch?v=... или https://soundcloud.com/track",
                 formatLabel: "Format seçin:",
                 formatMp3: "MP3 (önerilir)",
                 formatMp4: "MP4 (video 720p)",
                 submitButton: "İndir",
-                footerCopyrightText: "YouTube, SoundCloud ve Diğer İndirici. Site Suleyman Aslanov tarafından yapıldı.",
+                footerCopyrightText: "YouTube, SoundCloud и Diğer İndirici. Site Suleyman Aslanov tarafından yapıldı.",
                 footerWatermark: "Suleyman Aslanov tarafından geliştirildi",
                 statusErrorUrl: "Lütfen geçerli bir URL girin.",
                 statusProcessing: "Bağlantı işleniyor... Lütfen bekleyin.",
