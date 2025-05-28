@@ -12,18 +12,18 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f172a; /* Темный фон */
-            color: #e2e8f0; /* Светлый текст */
+            background-color: #0f172a;
+            color: #e2e8f0; 
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
+            overflow-x: hidden; 
         }
-        body.overflow-hidden { /* Класс для предотвращения прокрутки body при открытом оверлее */
+        body.overflow-hidden { 
             overflow: hidden;
         }
-        /* Удалены специфичные правила для body:lang(ar) */
+        
 
 
         .night-sky-bg-main {
@@ -45,14 +45,14 @@
         }
         .star-main {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.7); /* Вернули к предыдущей яркости */
+            background-color: rgba(255, 255, 255, 0.7); 
             border-radius: 50%;
             animation: twinkleMain 3s infinite ease-in-out;
-            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5), 0 0 6px rgba(255, 255, 255, 0.3); /* Вернули к предыдущему свечению */
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5), 0 0 6px rgba(255, 255, 255, 0.3); 
         }
         @keyframes twinkleMain {
-            0%, 100% { opacity: 0.4; transform: scale(0.8); } /* Вернули к предыдущей непрозрачности */
-            50% { opacity: 1; transform: scale(1.1); } /* Вернули к предыдущему размеру */
+            0%, 100% { opacity: 0.4; transform: scale(0.8); } 
+            50% { opacity: 1; transform: scale(1.1); } 
             100% { opacity: 0.4; transform: scale(0.8); }
         }
         .moon-main {
@@ -61,7 +61,7 @@
             height: 100px;
             background-color: #f0f8ff;
             border-radius: 50%;
-            box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa; /* Вернули к предыдущему свечению */
+            box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa; 
             top: 10%;
             left: 15%;
             animation: gentleDriftMain 15s ease-in-out infinite alternate, moonPhase 60s linear infinite;
@@ -75,7 +75,7 @@
             animation-delay: 0s, 0s, 0.5s;
         }
          @keyframes fadeInMoon {
-            to { opacity: 0.85; } /* Вернули к предыдущей яркости луны */
+            to { opacity: 0.85; } 
         }
         @keyframes gentleDriftMain {
             0% { transform: translate(0, 0) scale(1); }
@@ -320,6 +320,7 @@
             <button id="infoButton" class="nav-button" data-translate-key="navInfoButton">Info</button>
             <button id="copyrightButton" class="nav-button" data-translate-key="navCopyrightButton">Copyright</button>
             <button id="updatesButton" class="nav-button" data-translate-key="navUpdatesButton">Updates (Blog)</button>
+            <button id="githubButton" class="nav-button" data-translate-key="navGithubButton">GitHub</button>
         </div>
         <div class="lang-switcher-container">
             <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Language:</label>
@@ -377,7 +378,7 @@
             <div id="statusArea" class="mt-8 text-center min-h-[60px]">
             </div>
             <div id="telegramLinkContainer" class="telegram-link-container text-center hidden">
-                 <p><span data-translate-key="telegramSubscription">Subscribe to Telegram Channel of developers:</span> <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer">@ytdlpdeveloper</a></p>
+                 <p><span data-translate-key="telegramSubscription">Subscribe to Telegram Channel of developers:</span> <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer">@ytdlpload_bot</a></p>
                  <p class="mt-2"><span data-translate-key="telegramBotAlternative">Telegram bot alternative:</span> <a href="https://t.me/ytdlpload_bot" target="_blank" rel="noopener noreferrer">@ytdlpload_bot</a></p>
             </div>
         </div>
@@ -430,6 +431,7 @@
                 navInfoButton: "Info",
                 navCopyrightButton: "Copyright",
                 navUpdatesButton: "Updates (Blog)",
+                navGithubButton: "GitHub",
                 infoTitle: "About This Site",
                 infoHowItWorksTitle: "How This Site Works",
                 infoHowItWorksPara1: "This web application allows you to download audio/video from YouTube, SoundCloud or other videos/tracks or playlists. You simply paste the URL, choose your desired format (MP3 or MP4), and the server-side script processes your request.",
@@ -481,6 +483,7 @@
                 navInfoButton: "Инфо",
                 navCopyrightButton: "Авторское право",
                 navUpdatesButton: "Обновления (Блог)",
+                navGithubButton: "GitHub",
                 infoTitle: "Об этом сайте",
                 infoHowItWorksTitle: "Как работает этот сайт",
                 infoHowItWorksPara1: "Это веб-приложение позволяет загружать аудио/видео из видео/треков или плейлистов YouTube, SoundCloud или других сайтов. Вы просто вставляете URL-адрес, выбираете желаемый формат (MP3 или MP4), и серверный скрипт обрабатывает ваш запрос.",
@@ -532,6 +535,7 @@
                 navInfoButton: "Info",
                 navCopyrightButton: "Copyright",
                 navUpdatesButton: "Actualizaciones (Blog)",
+                navGithubButton: "GitHub",
                 infoTitle: "Sobre este Sitio",
                 infoHowItWorksTitle: "Cómo Funciona Este Sitio",
                 infoHowItWorksPara1: "Esta aplicación web te permite descargar audio/video de videos/pistas o listas de reproducción de YouTube, SoundCloud u otros sitios. Simplemente pegas la URL, eliges tu formato deseado (MP3 o MP4), y el script del lado del servidor procesa tu solicitud.",
@@ -540,9 +544,9 @@
                 infoLibrariesTitle: "Bibliotecas Clave y Tecnologías Utilizadas",
                 infoLibFlask: "<strong>Flask:</strong> Un microframework web para Python, utilizado para construir la API del backend.",
                 infoLibYtdlp: "<strong>yt-dlp:</strong> Un programa de línea de comandos para descargar videos/audio de YouTube, SoundCloud y muchos otros sitios. Es un fork de youtube-dl con características adicionales y correcciones.",
-                infoLibFFmpeg: "<strong>FFmpeg:</strong> Una solución completa y multiplataforma para grabar, convertir y transmitir audio y video. Se utiliza aquí para la conversión de formato (a MP3/MP4) e incrustación de metadatos.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> Una solución completa y multiplataforma para grabar, convertir y transmitir audio y video. Se utiliza aquí para la conversión de formato (to MP3/MP4) e incrustación de metadatos.",
                 infoLibTailwind: "<strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.",
-                infoLibJS: "<strong>JavaScript:</strong> Utilizado para la interactividad del frontend, cambio de idioma, animaciones y comunicación con el backend API.",
+                infoLibJS: "<strong>JavaScript:</strong> Utilizado para la interactividad del frontend, cambio de idioma, animaciones y comunicación con the backend API.",
                 infoPythonCodeTitle: "Código Backend en Python",
                 infoPythonCodePara: "La lógica central del backend está escrita en Python utilizando el framework Flask. El script de Python (generalmente llamado <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the files. This code runs on the server and is not directly visible here, but it ensures the functionality of the downloader.",
                 copyrightTitle: "Derechos de Autor y Responsabilidad",
@@ -559,14 +563,14 @@
                 formatMp4: "MP4 (video 720p)",
                 submitButton: "Descargar",
                 footerCopyrightText: "Descargador de música de YouTube, SoundCloud y otros sitios. Sitio hecho por Suleyman Aslanov.",
-                footerWatermark: "Developed By Suleyman Aslanov",
+                footerWatermark: "Desarrollado por Suleyman Aslanov",
                 statusErrorUrl: "Por favor, introduce una URL válida.",
                 statusProcessing: "Procesando enlace... Por favor, espera.",
                 statusSuccessHeader: "¡Listo! Iniciando descargas:",
                 statusDownloadLinkText: "Descargar {FORMAT}",
                 statusPostDownloadHint: "If downloads didn't start, check browser pop-up settings or file save location.",
                 statusErrorGeneric: "Error: {MESSAGE}",
-                statusNetworkError: "A network error occurred. Please try again.",
+                statusNetworkError: "Ocurrió un error de red. Por favor, inténtalo de nuevo.",
                 languageLabel: "Idioma:",
                 telegramSubscription: "Suscríbete al canal de Telegram de los desarrolladores:",
                 telegramBotAlternative: "Alternativa de bot de Telegram:",
@@ -580,8 +584,9 @@
                 pageTitle: "Suleyman Aslanov tərəfindən YouTube, SoundCloud və digər saytlar üçün Yükləyici",
                 metaDescriptionContent: "YouTube, SoundCloud və digər saytlardan videolar/treklər və pleylistlərdən musiqi və video faylları MP3 və ya MP4 formatında asanlıqla yükləyin. Suleyman Aslanov tərəfindən yaradılıb.",
                 navInfoButton: "Məlumat",
-                navCopyrightButton: "Müəllif Hüququ",
+                navCopyrightButton: "Müəllif Hüquqları",
                 navUpdatesButton: "Yeniliklər (Bloq)",
+                navGithubButton: "GitHub",
                 infoTitle: "Bu Sayt Haqqında",
                 infoHowItWorksTitle: "Bu Sayt Necə İşləyir",
                 infoHowItWorksPara1: "Bu veb tətbiqi YouTube, SoundCloud və ya digər saytlardan videolar/treklər və ya pleylistlərdən audio/video yükləməyə imkan verir. Siz sadəcə URL-ni daxil edir, istədiyiniz formatını (MP3 və ya MP4) seçirsiniz və server tərəfi skripti emal edir.",
@@ -633,6 +638,7 @@
                 navInfoButton: "Bilgi",
                 navCopyrightButton: "Telif Hakkı",
                 navUpdatesButton: "Güncellemeler (Blog)",
+                navGithubButton: "GitHub",
                 infoTitle: "Bu Site Hakkında",
                 infoHowItWorksTitle: "Bu Site Nasıl Çalışır?",
                 infoHowItWorksPara1: "Bu web uygulaması, YouTube, SoundCloud veya diğer sitelerden videolar/şarkılar veya oynatma listelerinden ses/video indirmenizi sağlar. URL'yi yapıştırır, istediğiniz formatı (MP3 veya MP4) seçersiniz ve sunucu tarafı betiği isteğinizi işler.",
@@ -746,6 +752,7 @@
             const closeCopyrightButton = document.getElementById('closeCopyrightButton');
 
             const updatesButton = document.getElementById('updatesButton');
+            const githubButton = document.getElementById('githubButton'); // Получаем новую кнопку GitHub
 
             function setupOverlay(button, overlay, closeButton) {
                 if (button && overlay && closeButton) {
@@ -775,6 +782,13 @@
             if (updatesButton) {
                 updatesButton.addEventListener('click', () => {
                     window.open('https://artoflife2303.github.io/miniblog/', '_blank');
+                });
+            }
+
+            // Добавляем обработчик для новой кнопки GitHub
+            if (githubButton) {
+                githubButton.addEventListener('click', () => {
+                    window.open('https://github.com/ArtOfLife2303', '_blank');
                 });
             }
 
