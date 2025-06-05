@@ -12,18 +12,37 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #e2e8f0; 
+            background-color: #0f172a; /* Темный фон */
+            color: #e2e8f0; /* Светлый текст */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            overflow-x: hidden; 
+            overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
         }
-        body.overflow-hidden { 
+        body.overflow-hidden { /* Класс для предотвращения прокрутки body при открытом оверлее */
             overflow: hidden;
         }
-        
+        /* Стили для RTL (right-to-left) языков, таких как арабский */
+        body:lang(ar) {
+            font-family: 'Tajawal', sans-serif; /* Предполагаем, что Tajawal подходит для арабского */
+            text-align: right;
+        }
+        body:lang(ar) .text-left { /* Переопределяем text-left для арабского */
+            text-align: right;
+        }
+        body:lang(ar) ul { /* Отступы для списков в RTL */
+            padding-left: 0;
+            padding-right: 1.5rem;
+        }
+        body:lang(ar) .file-download-status { /* Отступы для статуса файла в RTL */
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+        body:lang(ar) .close-overlay-button { /* Позиционирование кнопки закрытия в RTL */
+            right: auto;
+            left: 1.25rem;
+        }
 
 
         .night-sky-bg-main {
@@ -45,14 +64,14 @@
         }
         .star-main {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.7); 
+            background-color: rgba(255, 255, 255, 0.7);
             border-radius: 50%;
             animation: twinkleMain 3s infinite ease-in-out;
-            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5), 0 0 6px rgba(255, 255, 255, 0.3); 
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5), 0 0 6px rgba(255, 255, 255, 0.3);
         }
         @keyframes twinkleMain {
-            0%, 100% { opacity: 0.4; transform: scale(0.8); } 
-            50% { opacity: 1; transform: scale(1.1); } 
+            0%, 100% { opacity: 0.4; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.1); }
             100% { opacity: 0.4; transform: scale(0.8); }
         }
         .moon-main {
@@ -61,7 +80,7 @@
             height: 100px;
             background-color: #f0f8ff;
             border-radius: 50%;
-            box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa; 
+            box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa;
             top: 10%;
             left: 15%;
             animation: gentleDriftMain 15s ease-in-out infinite alternate, moonPhase 60s linear infinite;
@@ -75,7 +94,7 @@
             animation-delay: 0s, 0s, 0.5s;
         }
          @keyframes fadeInMoon {
-            to { opacity: 0.85; } 
+            to { opacity: 0.85; }
         }
         @keyframes gentleDriftMain {
             0% { transform: translate(0, 0) scale(1); }
@@ -307,6 +326,50 @@
             backdrop-filter: blur(3px);
         }
         
+        /* Стили для результатов поиска */
+        #searchResults .result-item {
+            background-color: rgba(51, 65, 85, 0.5);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        #searchResults .result-item:hover {
+            background-color: rgba(71, 85, 105, 0.7);
+        }
+        #searchResults .result-item img {
+            width: 80px; /* Размер миниатюры */
+            height: 45px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            margin-right: 0.75rem;
+        }
+        #searchResults .result-item .details {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        #searchResults .result-item .title {
+            font-weight: 600;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #searchResults .result-item .info {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #searchResults .result-item .duration {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-left: 0.75rem;
+            flex-shrink: 0; /* Предотвращает сжатие длительности */
+        }
     </style>
 </head>
 <body class="text-white min-h-screen flex flex-col items-center p-4 selection:bg-sky-500 selection:text-white">
@@ -349,6 +412,25 @@
                 </div>
                 <h1 data-translate-key="headerH1" class="text-4xl sm:text-5xl font-extrabold text-sky-400 tracking-tight">Music Downloader</h1>
                 <p data-translate-key="headerP" class="text-slate-400 mt-3 text-lg">Paste a YouTube video or playlist link</p>
+            </div>
+
+            <!-- Секция поиска -->
+            <div class="search-section mb-6">
+                <label for="search_query" data-translate-key="searchLabel" class="block text-sm font-medium text-slate-300 mb-2">Поиск музыки/видео:</label>
+                <div class="flex space-x-2">
+                    <input type="text" id="search_query" name="search_query"
+                           class="flex-grow px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out"
+                           data-translate-placeholder="searchPlaceholder"
+                           placeholder="Например, Название песни, Имя исполнителя">
+                    <button type="button" id="searchButton" data-translate-key="searchButton"
+                            class="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow-md transition duration-200 ease-in-out">
+                        Поиск
+                    </button>
+                </div>
+                <p class="text-xs text-red-400 mt-2" data-translate-key="durationLimitInfo">Примечание: Контент длиннее 10 минут не может быть скачан.</p>
+                <div id="searchResults" class="mt-4 space-y-3 max-h-80 overflow-y-auto pr-2">
+                    <!-- Результаты поиска будут здесь -->
+                </div>
             </div>
 
             <form id="downloadForm" class="space-y-6">
@@ -475,7 +557,13 @@
                 fileStatusStarted: "Started! Check browser.",
                 durationLimitInfo: "Note: Content longer than 10 minutes cannot be downloaded.",
                 durationLimitError: "Content longer than 10 minutes cannot be downloaded.",
-                playlistDurationLimitError: "Playlist contains content longer than 10 minutes, which cannot be downloaded."
+                playlistDurationLimitError: "Playlist contains content longer than 10 minutes, which cannot be downloaded.",
+                searchLabel: "Search music/video:",
+                searchPlaceholder: "e.g., Song title, Artist name",
+                searchButton: "Search",
+                searchNoResults: "No results found. Try a different query.",
+                searchError: "Error during search: {MESSAGE}",
+                searchProcessing: "Searching..."
             },
             ru: {
                 pageTitle: "Загрузчик Музыки с YouTube, SoundCloud и других сайтов от Suleyman Aslanov",
@@ -527,7 +615,13 @@
                 fileStatusStarted: "Начато! Проверьте браузер.",
                 durationLimitInfo: "Примечание: Контент длиннее 10 минут не может быть скачан.",
                 durationLimitError: "Контент длиннее 10 минут не может быть скачан.",
-                playlistDurationLimitError: "Плейлист содержит контент длиннее 10 минут, который не может быть скачан."
+                playlistDurationLimitError: "Плейлист содержит контент длиннее 10 минут, который не может быть скачан.",
+                searchLabel: "Поиск музыки/видео:",
+                searchPlaceholder: "например, Название песни, Имя исполнителя",
+                searchButton: "Поиск",
+                searchNoResults: "Результатов не найдено. Попробуйте другой запрос.",
+                searchError: "Ошибка при поиске: {MESSAGE}",
+                searchProcessing: "Поиск..."
             },
             es: {
                 pageTitle: "Descargador de Música de YouTube, SoundCloud y otros sitios por Suleyman Aslanov",
@@ -550,7 +644,7 @@
                 infoPythonCodeTitle: "Código Backend en Python",
                 infoPythonCodePara: "La lógica central del backend está escrita en Python utilizando el framework Flask. El script de Python (generalmente llamado <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the files. This code runs on the server and is not directly visible here, but it ensures the functionality of the downloader.",
                 copyrightTitle: "Derechos de Autor y Responsabilidad",
-                copyrightPara1: "Tenga en cuenta que la música y otro contenido de audio disponible en YouTube, SoundCloud y otras plataformas pueden estar protegidos por derechos de autor. Muchos artistas y creadores de contenido tienen licencias y términos de uso específicos para su trabajo. Es su responsabilidad asegurarse de tener los derechos o permisos necesarios antes de descargar cualquier contenido.",
+                copyrightPara1: "Tenga en cuenta que la música y otro contenido de audio disponible en YouTube, SoundCloud y otras plataformas may be protected by copyright. Many artists and content creators have specific licenses and terms of use for their work. It is your responsibility to ensure that you have the necessary rights or permissions before downloading any content.",
                 copyrightPara2: "El desarrollador de este sitio proporciona esta herramienta para conveniencia y no es responsable del contenido que elija descargar ni de cómo lo utilice. Al utilizar este servicio, usted acepta que es el único responsable de sus acciones y de cumplir con todas las leyes de derechos de autor aplicables y los términos de servicio de los proveedores de contenido.",
                 infoCreatorTitle: "Creador",
                 infoCreatorName: "Este sitio de Descarga de Música de YouTube y SoundCloud fue creado por <strong>Suleyman Aslanov</strong>.",
@@ -568,7 +662,7 @@
                 statusProcessing: "Procesando enlace... Por favor, espera.",
                 statusSuccessHeader: "¡Listo! Iniciando descargas:",
                 statusDownloadLinkText: "Descargar {FORMAT}",
-                statusPostDownloadHint: "If downloads didn't start, check browser pop-up settings or file save location.",
+                statusPostDownloadHint: "Si las descargas no comenzaron, revisa la configuración de ventanas emergentes del navegador o la ubicación de guardado de archivos.",
                 statusErrorGeneric: "Error: {MESSAGE}",
                 statusNetworkError: "Ocurrió un error de red. Por favor, inténtalo de nuevo.",
                 languageLabel: "Idioma:",
@@ -578,14 +672,20 @@
                 fileStatusDownloading: "Descargando...",
                 fileStatusStarted: "¡Iniciado! Revisa el navegador.",
                 durationLimitInfo: "Nota: El contenido de más de 10 minutos no se puede descargar.",
-                playlistDurationLimitError: "La lista de reproducción contiene contenido de más de 10 minutos, que no se puede descargar."
+                playlistDurationLimitError: "La lista de reproducción contiene contenido de más de 10 minutos, que no se puede descargar.",
+                searchLabel: "Buscar música/video:",
+                searchPlaceholder: "ej., Título de la canción, Nombre del artista",
+                searchButton: "Buscar",
+                searchNoResults: "No se encontraron resultados. Intenta otra búsqueda.",
+                searchError: "Error durante la búsqueda: {MESSAGE}",
+                searchProcessing: "Buscando..."
             },
             az: {
                 pageTitle: "Suleyman Aslanov tərəfindən YouTube, SoundCloud və digər saytlar üçün Yükləyici",
                 metaDescriptionContent: "YouTube, SoundCloud və digər saytlardan videolar/treklər və pleylistlərdən musiqi və video faylları MP3 və ya MP4 formatında asanlıqla yükləyin. Suleyman Aslanov tərəfindən yaradılıb.",
                 navInfoButton: "Məlumat",
                 navCopyrightButton: "Müəllif Hüquqları",
-                navUpdatesButton: "Yeniliklər (Bloq)",
+                navUpdatesButton: "Yenilikler (Bloq)",
                 navGithubButton: "GitHub",
                 infoTitle: "Bu Sayt Haqqında",
                 infoHowItWorksTitle: "Bu Sayt Necə İşləyir",
@@ -630,7 +730,13 @@
                 fileStatusStarted: "Başladı! Brauzeri yoxlayın.",
                 durationLimitInfo: "Qeyd: 10 dəqiqədən uzun məzmun yüklənə bilməz.",
                 durationLimitError: "10 dəqiqədən uzun məzmun yüklənə bilməz.",
-                playlistDurationLimitError: "Pleylistdə 10 dəqiqədən uzun məzmun var, bu yüklənə bilməz."
+                playlistDurationLimitError: "Pleylistdə 10 dəqiqədən uzun məzmun var, bu yüklənə bilməz.",
+                searchLabel: "Musiqi/video axtarın:",
+                searchPlaceholder: "məsələn, Mahnı adı, İfaçı adı",
+                searchButton: "Axtar",
+                searchNoResults: "Nəticə tapılmadı. Başqa sorğu ilə cəhd edin.",
+                searchError: "Axtarış zamanı xəta: {MESSAGE}",
+                searchProcessing: "Axtarılır..."
             },
             tr: {
                 pageTitle: "Suleyman Aslanov'dan YouTube, SoundCloud ve Diğer Siteler İçin İndirici",
@@ -654,7 +760,7 @@
                 infoPythonCodePara: "Temel arka uç mantığı, Flask çerçevesi kullanılarak Python ile yazılmıştır. Python betiği (genellikle <code>app.py</code> olarak adlandırılır) API isteklerini işler, <code>yt-dlp</code> и <code>ffmpeg</code> ile etkileşime girer, geçici dosya depolamasını yönetir и dosyaları sunar. Bu kod sunucuda çalışır и здесь doğrudan görünmez, однако indiricinin işlevselliğini sağlar.",
                 copyrightTitle: "Telif Hakkı и Sorumluluk",
                 copyrightPara1: "Lütfen YouTube, SoundCloud и diğer platformlarda bulunan müzik и diğer ses içeriklerinin telif hakkıyla korunuyor olabileceğini unutmayın. Birçok sanatçı и içerik oluşturucunun eserleri için özel lisansları и kullanım koşulları vardır. Herhangi bir içeriği indirmeden önce gerekli haklara veya izinlere sahip olduğunuzdan emin olmak sizin sorumluluğunuzdadır.",
-                copyrightPara2: "Bu sitenin geliştiricisi, bu aracı kolaylık sağlamak amacıyla sunar и indirmeyi seçtiğiniz içerikten veya onu nasıl kullandığınızdan sorumlu değildir. Bu hizmeti kullanarak, eylemlerinizden и geçerli tüm telif hakkı yasalarına и içerik sağlayıcıların hizmet şartlarına uymaktan yalnızca sizin sorumlu olduğunuzu kabul edersiniz.",
+                copyrightPara2: "Bu sitenin geliştiricisi, bu aracı kolaylık sağlamak amacıyla sunar и indirmeyi seçtiğiniz içerikten veya onu nasıl kullandığınızdan sorumlu değildir. Bu hizmeti kullanarak, eylemlerinizden и geçerli tüm telif hakkı yasalarına и içerik sağlayıcıların hizmet şartlarına uymaktan yalnızca sizin sorumluluğunuzdadır.",
                 infoCreatorTitle: "Oluşturan",
                 infoCreatorName: "Bu YouTube и SoundCloud İndirici sitesi <strong>Suleyman Aslanov</strong> tarafından oluşturulmuştur.",
                 headerH1: "Music Downloader",
