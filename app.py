@@ -10,36 +10,36 @@ import yt_dlp
 
 load_dotenv()
 
-
+# --- Конфигурация ---
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
 logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+# Базовая директория приложения
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+# Директория для временных загрузок пользователей
 USER_DOWNLOADS_DIR = os.path.join(BASE_DIR, "user_downloads")
+# Директория для HTML-шаблонов
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
-
 
 if not os.path.exists(USER_DOWNLOADS_DIR):
     os.makedirs(USER_DOWNLOADS_DIR)
     logger.info(f"Создана директория для загрузок: {USER_DOWNLOADS_DIR}")
-
 
 if os.path.exists(TEMPLATES_DIR):
     app.template_folder = TEMPLATES_DIR
 else:
     logger.warning(f"Директория шаблонов {TEMPLATES_DIR} не найдена. Убедитесь, что index.html находится в правильном месте.")
 
-
+# Путь к FFmpeg, берется из переменной окружения FFMPEG_PATH, по умолчанию /usr/bin/ffmpeg
 FFMPEG_PATH_ENV = os.getenv('FFMPEG_PATH')
 FFMPEG_PATH = FFMPEG_PATH_ENV if FFMPEG_PATH_ENV else '/usr/bin/ffmpeg'
 
-FFMPEG_IS_AVAILABLE = os.path.exists(FFMPEG_PATH) and os.access(FFMPEG_PATH, os.X_OK)
-
+FFMPEG_IS_AVAILABLE = shutil.which(FFMPEG_PATH) is not None # Проверяем, находится ли ffmpeg в PATH
 if FFMPEG_IS_AVAILABLE:
-    logger.info(f"FFmpeg найден и доступен по пути: {FFMPEG_PATH}.")
+    logger.info(f"FFmpeg найден: {shutil.which(FFMPEG_PATH)}.")
 else:
     if FFMPEG_PATH_ENV:
         logger.error(f"FFmpeg НЕ найден или недоступен по пути, указанному в FFMPEG_PATH: {FFMPEG_PATH_ENV}.")
@@ -47,25 +47,41 @@ else:
         logger.warning(f"FFmpeg НЕ найден или недоступен по пути по умолчанию: {FFMPEG_PATH}.")
     logger.warning("FFmpeg не найден или недоступен. Конвертация в MP3/MP4 и добавление метаданных могут не работать корректно.")
 
-
-COOKIES_PATH = os.getenv('COOKIES_PATH', 'youtube.com_cookies.txt')
+# Путь к файлу куки для YouTube. Предполагается, что он лежит рядом с app.py.
+COOKIES_PATH = os.path.join(os.path.dirname(__file__), 'youtube.com_cookies.txt')
 if not os.path.exists(COOKIES_PATH):
     logger.warning(f"Файл куки {COOKIES_PATH} не найден. Загрузка некоторых YouTube видео может быть ограничена.")
 
-
+# Текст водяного знака для имени файла и метаданных
 WATERMARK_TEXT = "YouTube Music Downloader. Site created by Suleyman Aslanov"
 
+# Ограничение длительности контента (10 минут в секундах)
+DURATION_LIMIT_SECONDS = 600
+SEARCH_RESULTS_LIMIT = 10 # Лимит результатов поиска для поиска
 
+# --- Вспомогательные функции ---
 def is_valid_url(url):
-    """Basic URL validation."""
+    """Базовая валидация URL."""
     regex = re.compile(
-        r'^(?:http|ftp)s?://' 
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' 
-        r'localhost|' 
+        r'^(?:http|ftp)s?://'
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
+        r'localhost|'
         r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'
-        r'(?::\d+)?' 
+        r'(?::\d+)?'
         r'(?:/?|[/?]\S+)$', re.IGNORECASE)
     return re.match(regex, url) is not None
+
+def is_youtube_url(url):
+    """Проверка, является ли URL ссылкой на YouTube."""
+    return "youtube.com/" in url.lower() or "youtu.be/" in url.lower()
+
+def is_soundcloud_url(url):
+    """Проверка, является ли URL ссылкой на SoundCloud."""
+    return "soundcloud.com/" in url.lower()
+
+def is_tiktok_url(url):
+    """Проверка, является ли URL ссылкой на TikTok."""
+    return "tiktok.com/" in url.lower() or "vt.tiktok.com/" in url.lower()
 
 def blocking_yt_dlp_download(ydl_opts, url_to_download):
     """
@@ -91,20 +107,46 @@ def blocking_yt_dlp_download(ydl_opts, url_to_download):
             logger.warning(f"Запрошенный формат аудио/видео недоступен для URL '{url_to_download}'. Попытка загрузить лучший доступный формат.")
             return None
         if "unsupported url" in error_message or "unable to extract" in error_message:
-            raise Exception("Неподдерживаемый URL или не удалось извлечь информацию. Убедитесь, что ссылка корректна и поддерживается (YouTube, SoundCloud).")
-
-
+            raise Exception("Неподдерживаемый URL или не удалось извлечь информацию. Убедитесь, что ссылка корректна и поддерживается (YouTube, SoundCloud, TikTok).")
         logger.error(f"Неспецифичная ошибка загрузки yt-dlp для URL '{url_to_download}': {e}")
         return None
-
     except Exception as e:
         logger.error(f"Неожиданная ошибка в blocking_yt_dlp_download для URL '{url_to_download}': {e}", exc_info=True)
         return None
 
+def get_info_and_check_duration(url):
+    """Получает информацию о контенте и проверяет его длительность."""
+    logger.info(f"Получаю информацию о контенте: {url}")
+    info_extractor_opts = {
+        'skip_download': True,
+        'quiet': True,
+        'no_warnings': True,
+        'force_generic_extractor': True,
+        'cookiefile': COOKIES_PATH if os.path.exists(COOKIES_PATH) else None,
+    }
+    try:
+        with yt_dlp.YoutubeDL(info_extractor_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            
+            if info and info.get('_type') == 'playlist':
+                for entry in info.get('entries', []):
+                    if entry and entry.get('duration') and entry['duration'] > DURATION_LIMIT_SECONDS:
+                        raise ValueError(f"Плейлист содержит контент длиннее {DURATION_LIMIT_SECONDS/60} минут: {entry.get('title', 'Без названия')}")
+                return {"status": "success", "info": info}
+            elif info and info.get('duration') and info['duration'] > DURATION_LIMIT_SECONDS:
+                raise ValueError(f"Контент длиннее {DURATION_LIMIT_SECONDS/60} минут не может быть скачан: {info.get('title', 'Без названия')}")
+            return {"status": "success", "info": info}
+    except yt_dlp.utils.DownloadError as e:
+        logger.error(f"Ошибка yt-dlp при получении информации: {e}")
+        raise ValueError(f"Не удалось получить информацию о контенте: {e}")
+    except Exception as e:
+        logger.error(f"Неожиданная ошибка при проверке длительности: {e}")
+        raise ValueError(f"Произошла внутренняя ошибка при проверке длительности: {e}")
 
+# --- Маршруты Flask ---
 @app.route('/')
 def index():
-    """Renders the main page."""
+    """Рендерит главную страницу приложения."""
     try:
         return render_template('index.html')
     except Exception as e:
@@ -113,7 +155,7 @@ def index():
 
 @app.route('/api/download_audio', methods=['POST'])
 def download_audio_route():
-    """Handles the download request for audio/video."""
+    """Обрабатывает запрос на загрузку аудио/видео."""
     data = request.get_json()
     url = data.get('url')
     requested_format = data.get('format', 'mp3').lower()
@@ -126,36 +168,46 @@ def download_audio_route():
     os.makedirs(session_download_path, exist_ok=True)
     logger.info(f"Запрос на скачивание: URL='{url}', Формат='{requested_format}', Сессия='{session_id}'")
 
+    # --- Проверка ограничения по длительности перед фактической загрузкой ---
+    try:
+        duration_check_result = get_info_and_check_duration(url)
+        if duration_check_result["status"] == "error":
+            shutil.rmtree(session_download_path)
+            return jsonify(duration_check_result), 400
+    except Exception as e:
+        logger.error(f"Ошибка при проверке длительности: {e}", exc_info=True)
+        if os.path.exists(session_download_path):
+            shutil.rmtree(session_download_path)
+        return jsonify({"status": "error", "message": f"Произошла ошибка при проверке длительности: {e}"}), 500
+    # --- Конец проверки длительности ---
+
     output_template = os.path.join(session_download_path, f"%(title).75B - {WATERMARK_TEXT}.%(ext)s")
 
     ydl_opts = {
         'outtmpl': output_template,
         'restrictfilenames': True,
-        'noplaylist': False, 
-        'ignoreerrors': True, 
+        'noplaylist': False, # Разрешить загрузку плейлистов
+        'ignoreerrors': True, # Игнорировать ошибки для отдельных видео в плейлисте
         'nocheckcertificate': True,
         'quiet': True,
         'no_warnings': True,
         'ffmpeg_location': FFMPEG_PATH if FFMPEG_IS_AVAILABLE else None,
-        'extract_flat': 'in_playlist', 
+        'extract_flat': 'in_playlist',
         'skip_download': False,
     }
 
-   
-    
-    
-    is_youtube = "youtube.com" in url or "youtu.be" in url
-    is_soundcloud = "soundcloud.com" in url
-
-    if is_youtube:
-        ydl_opts['cookiefile'] = COOKIES_PATH if os.path.exists(COOKIES_PATH) else None
+    # Определение источника URL для специфических настроек (YouTube, SoundCloud, TikTok)
+    if is_youtube_url(url) and os.path.exists(COOKIES_PATH):
+        ydl_opts['cookiefile'] = COOKIES_PATH
         logger.info("Обнаружен YouTube URL. Применяются настройки cookie для YouTube.")
-    elif is_soundcloud:
+    elif is_soundcloud_url(url):
         logger.info("Обнаружен SoundCloud URL. Специфичные настройки cookie для SoundCloud не требуются для публичных треков.")
+    elif is_tiktok_url(url):
+        logger.info("Обнаружен TikTok URL. yt-dlp будет скачивать аудио из TikTok.")
     else:
         logger.info("Обнаружен другой URL. Настройки cookie не применяются.")
 
-
+    # Настройка опций yt-dlp в зависимости от запрошенного формата
     if requested_format == "mp3":
         if FFMPEG_IS_AVAILABLE:
             logger.info("FFmpeg доступен. Конвертация в MP3 с метаданными.")
@@ -174,7 +226,6 @@ def download_audio_route():
     elif requested_format == "mp4":
         if FFMPEG_IS_AVAILABLE:
             logger.info("FFmpeg доступен. Скачивание в MP4 720p.")
-          
             ydl_opts['format'] = 'bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
             ydl_opts['postprocessors'] = [{
                 'key': 'FFmpegVideoConvertor',
@@ -191,22 +242,19 @@ def download_audio_route():
             shutil.rmtree(session_download_path)
         return jsonify({"status": "error", "message": "Неподдерживаемый формат. Выберите MP3 или MP4."}), 400
 
-
+    # Очистка опций yt-dlp от пустых значений
     ydl_opts_cleaned = {k: v for k, v in ydl_opts.items() if v is not None}
     if 'postprocessors' in ydl_opts_cleaned and not ydl_opts_cleaned['postprocessors']:
         del ydl_opts_cleaned['postprocessors']
-
     if 'postprocessor_args' in ydl_opts_cleaned and 'postprocessors' not in ydl_opts_cleaned:
         del ydl_opts_cleaned['postprocessor_args']
     elif 'postprocessor_args' in ydl_opts_cleaned and not ydl_opts_cleaned['postprocessor_args']:
         del ydl_opts_cleaned['postprocessor_args']
 
-
     logger.debug(f"Финальные опции yt-dlp: {json.dumps(ydl_opts_cleaned, indent=2, ensure_ascii=False)}")
 
     try:
         info_dict = blocking_yt_dlp_download(ydl_opts_cleaned, url)
-
 
         if info_dict is None:
             logger.error(f"Не удалось получить info_dict для URL '{url}'. blocking_yt_dlp_download вернул None.")
@@ -216,12 +264,9 @@ def download_audio_route():
             return jsonify({"status": "error", "message": "Не удалось загрузить или получить информацию о контенте. Возможно, контент недоступен, защищен или возникла внутренняя ошибка."}), 500
 
         downloaded_files_list = []
-
         entries_to_check = []
-
         if '_type' in info_dict and info_dict['_type'] == 'playlist':
             logger.info(f"Обработка плейлиста: {info_dict.get('title', 'Без названия')}")
-
             entries_to_check = info_dict.get('entries', []) or []
         else:
             entries_to_check = [info_dict]
@@ -232,26 +277,19 @@ def download_audio_route():
                 continue
 
             actual_filepath = None
-
             if entry.get('requested_downloads'):
                 for req_download in entry['requested_downloads']:
                     if req_download and req_download.get('filepath') and os.path.exists(req_download['filepath']):
                         actual_filepath = req_download['filepath']
                         break
-
             if not actual_filepath and entry.get('filepath') and os.path.exists(entry['filepath']):
                 actual_filepath = entry['filepath']
 
             if actual_filepath:
                 filename = os.path.basename(actual_filepath)
-
                 file_title_raw = os.path.splitext(filename)[0]
                 file_title = file_title_raw.split(f" - {WATERMARK_TEXT}")[0].strip()
-
-
                 file_title = file_title.rsplit('[', 1)[0].strip() if '[' in file_title and file_title.endswith(']') else file_title
-
-
                 expected_path_in_session = os.path.join(session_download_path, filename)
                 if os.path.exists(expected_path_in_session):
                     downloaded_files_list.append({
@@ -264,12 +302,10 @@ def download_audio_route():
             else:
                 logger.warning(f"Не удалось определить путь к скачанному файлу для записи: '{entry.get('title', 'ID: '+str(entry.get('id')))}'. Возможно, элемент не был скачан или произошла ошибка при загрузке конкретного элемента плейлиста.")
 
-
         if not downloaded_files_list and os.path.exists(session_download_path) and any(os.scandir(session_download_path)):
             logger.warning("Файлы не извлечены из info_dict, сканируем директорию сессии (запасной вариант).")
             for f_name in os.listdir(session_download_path):
                 file_path_check = os.path.join(session_download_path, f_name)
-                # Removed '.flac' extension
                 if os.path.isfile(file_path_check) and f_name.lower().endswith(('.mp3', '.m4a', '.mp4', '.ogg', '.opus')):
                     base_name_for_title = os.path.splitext(f_name)[0]
                     title_part = base_name_for_title.split(f" - {WATERMARK_TEXT}")[0].strip()
@@ -301,7 +337,7 @@ def download_audio_route():
             user_message = "Ошибка конвертации. Возможно, проблема с FFmpeg на сервере. (Хотя FFmpeg найден, могла быть проблема с его использованием)"
         elif "private video" in str(e).lower() or "login required" in str(e).lower():
             user_message = "Это приватное видео или для доступа требуется вход."
-        elif "video unavailable" in str(e).lower():
+        elif "video unavailable" in str(e).lower() or "track unavailable" in str(e).lower():
             user_message = "Контент недоступен или был удален."
 
         return jsonify({"status": "error", "message": user_message}), 500
@@ -330,6 +366,86 @@ def serve_file(session_id, filename):
         return response
 
     return send_from_directory(directory, filename, as_attachment=True)
+
+@app.route('/api/search', methods=['POST'])
+def search_content_route():
+    """Обрабатывает поисковые запросы."""
+    data = request.get_json()
+    query = data.get('query')
+
+    if not query:
+        return jsonify({"status": "error", "message": "Поисковый запрос не указан."}), 400
+
+    search_results = []
+    search_opts = {
+        'skip_download': True,
+        'extract_flat': True,
+        'quiet': True,
+        'no_warnings': True,
+        'force_generic_extractor': True,
+        'default_search': 'ytsearch', 
+        'noplaylist': True, 
+        'dump_single_json': True, 
+    }
+
+    # Поиск на YouTube (10 результатов)
+    try:
+        with yt_dlp.YoutubeDL(search_opts) as ydl:
+            yt_info = ydl.extract_info(f"ytsearch{SEARCH_RESULTS_LIMIT}:{query}", download=False)
+            if yt_info and 'entries' in yt_info:
+                for entry in yt_info['entries']:
+                    if entry and entry.get('url'):
+                        search_results.append({
+                            "source": "YouTube",
+                            "title": entry.get('title', 'Без названия'),
+                            "url": entry.get('webpage_url'),
+                            "duration": entry.get('duration'),
+                            "thumbnail": entry.get('thumbnail'),
+                            "uploader": entry.get('uploader'),
+                            "id": entry.get('id')
+                        })
+    except Exception as e:
+        logger.error(f"Ошибка при поиске на YouTube: {e}")
+
+    # Поиск на SoundCloud (10 результатов)
+    try:
+        with yt_dlp.YoutubeDL(search_opts) as ydl:
+            sc_info = ydl.extract_info(f"scsearch{SEARCH_RESULTS_LIMIT}:{query}", download=False)
+            if sc_info and 'entries' in sc_info:
+                for entry in sc_info['entries']:
+                    if entry and entry.get('url'):
+                        search_results.append({
+                            "source": "SoundCloud",
+                            "title": entry.get('title', 'Без названия'),
+                            "url": entry.get('webpage_url'),
+                            "duration": entry.get('duration'),
+                            "thumbnail": entry.get('thumbnail'),
+                            "uploader": entry.get('uploader'),
+                            "id": entry.get('id')
+                        })
+    except Exception as e:
+        logger.error(f"Ошибка при поиске на SoundCloud: {e}")
+    
+    # Поиск на TikTok (5 результатов)
+    try:
+        with yt_dlp.YoutubeDL(search_opts) as ydl:
+            tiktok_info = ydl.extract_info(f"tiktoksearch5:{query}", download=False)
+            if tiktok_info and 'entries' in tiktok_info:
+                for entry in tiktok_info['entries']:
+                    if entry and entry.get('url'):
+                        search_results.append({
+                            "source": "TikTok",
+                            "title": entry.get('title', 'Без названия'),
+                            "url": entry.get('webpage_url'),
+                            "duration": entry.get('duration'),
+                            "thumbnail": entry.get('thumbnail'),
+                            "uploader": entry.get('uploader'),
+                            "id": entry.get('id')
+                        })
+    except Exception as e:
+        logger.error(f"Ошибка при поиске на TikTok: {e}")
+
+    return jsonify({"status": "success", "results": search_results})
 
 
 if __name__ == '__main__':
