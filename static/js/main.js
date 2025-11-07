@@ -1,0 +1,516 @@
+const translations = {
+            en: {
+                pageTitle: "YouTube, SoundCloud & Other Downloader by Suleyman Aslanov",
+                metaDescriptionContent: "Easily download music and video from YouTube, SoundCloud and other videos/tracks and playlists in MP3 or MP4 format. Created by Suleyman Aslanov.",
+                navInfoButton: "Info",
+                navCopyrightButton: "Copyright",
+                navUpdatesButton: "Updates (Blog)",
+                navGithubButton: "GitHub",
+                infoTitle: "About This Site",
+                infoHowItWorksTitle: "How This Site Works",
+                infoHowItWorksPara1: "This web application allows you to download audio/video from YouTube, SoundCloud or other videos/tracks or playlists. You simply paste the URL, choose your desired format (MP3 or MP4), and the server-side script processes your request.",
+                infoHowItWorksPara2: "The backend uses the powerful <code>yt-dlp</code> library to fetch content information and extract the audio/video stream. If MP3 or MP4 format is selected, <code>ffmpeg</code> is used for conversion and to embed metadata.",
+                infoHowItWorksPara3: "The downloaded file is temporarily stored on the server and then made available for you to download directly through your browser. After the download is served to you, the file is automatically deleted from the server to save space and ensure privacy.",
+                infoLibrariesTitle: "Key Libraries & Technologies Used",
+                infoLibFlask: "<strong>Flask:</strong> A micro web framework for Python, used to build the backend API.",
+                infoLibYtdlp: "<strong>yt-dlp:</strong> A command-line program to download videos/audio from YouTube, SoundCloud and many other sites. It's a fork of youtube-dl with additional features and fixes.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> A complete, cross-platform solution to record, convert and stream audio and video. Used here for format conversion (to MP3/MP4) and metadata embedding.",
+                infoLibTailwind: "<strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.",
+                infoLibJS: "<strong>JavaScript:</strong> Used for frontend interactivity, language switching, animations, and communication with the backend API.",
+                infoPythonCodeTitle: "Python Backend Code",
+                infoPythonCodePara: "The core backend logic is written in Python using the Flask framework. The Python script (typically named <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the files. This code runs on the server and is not directly visible here, but it ensures the functionality of the downloader.",
+                copyrightTitle: "Copyright & Responsibility",
+                copyrightPara1: "Please be aware that music and other audio content available on YouTube, SoundCloud and other platforms may be protected by copyright. Many artists and content creators have specific licenses and terms of use for their work. It is your responsibility to ensure that you have the necessary rights or permissions before downloading any content.",
+                copyrightPara2: "The developer of this site provides this tool for convenience and is not responsible for the content you choose to download or how you use it. By using this service, you agree that you are solely responsible for your actions and for complying with all applicable copyright laws and terms of service of the content providers.",
+                infoCreatorTitle: "Creator",
+                infoCreatorName: "This YouTube Music Downloader site was created by <strong>Suleyman Aslanov</strong>.",
+                headerH1: "Music Downloader",
+                headerP: "Paste a YouTube or SoundCloud video/track or playlist link",
+                urlLabel: "YouTube/SoundCloud Link:",
+                urlPlaceholder: "e.g., https://www.youtube.com/watch?v=... or https://soundcloud.com/track",
+                formatLabel: "Select format:",
+                formatMp3: "MP3 (recommended)",
+                formatMp4: "MP4 (video 720p)",
+                submitButton: "Download",
+                footerCopyrightText: "YouTube, SoundCloud & Other downloader. Site made by Suleyman Aslanov.",
+                footerWatermark: "Developed By Suleyman Aslanov",
+                statusErrorUrl: "Please enter a valid YouTube or SoundCloud URL.",
+                statusProcessing: "Processing link... Please wait.",
+                statusSuccessHeader: "Done! Initiating downloads:",
+                statusDownloadLinkText: "Download {FORMAT}",
+                statusPostDownloadHint: "If downloads didn't start, check browser pop-up settings or file save location.",
+                statusErrorGeneric: "Error: {MESSAGE}",
+                statusNetworkError: "A network error occurred. Please try again.",
+                languageLabel: "Language:",
+                telegramSubscription: "Subscribe to Telegram Channel of developers:",
+                telegramBotAlternative: "Telegram bot alternative:",
+                fileStatusPending: "Pending...",
+                fileStatusDownloading: "Downloading...",
+                fileStatusStarted: "Started! Check browser.",
+                durationLimitInfo: "Note: Content longer than 10 minutes cannot be downloaded.",
+                durationLimitError: "Content longer than 10 minutes cannot be downloaded.",
+                playlistDurationLimitError: "Playlist contains content longer than 10 minutes, which cannot be downloaded."
+            },
+            ru: {
+                pageTitle: "Загрузчик Музыки с YouTube, SoundCloud и других сайтов от Suleyman Aslanov",
+                metaDescriptionContent: "Легко скачивайте музыку и видео из видео/треков и плейлистов YouTube, SoundCloud и других сайтов в формате MP3 или MP4. Создано Suleyman Aslanov.",
+                navInfoButton: "Инфо",
+                navCopyrightButton: "Авторское право",
+                navUpdatesButton: "Обновления (Блог)",
+                navGithubButton: "GitHub",
+                infoTitle: "Об этом сайте",
+                infoHowItWorksTitle: "Как работает этот сайт",
+                infoHowItWorksPara1: "Это веб-приложение позволяет загружать аудио/видео из видео/треков или плейлистов YouTube, SoundCloud или других сайтов. Вы просто вставляете URL-адрес, выбираете желаемый формат (MP3 или MP4), и серверный скрипт обрабатывает ваш запрос.",
+                infoHowItWorksPara2: "Бэкенд использует мощную библиотеку <code>yt-dlp</code> для получения информации о контенте и извлечения аудио/видеопотока. Если выбран формат MP3 или MP4, для преобразования и встраивания метаданных используется <code>ffmpeg</code>.",
+                infoHowItWorksPara3: "Загруженный файл временно сохраняется на сервере, а затем становится доступным для прямой загрузки через ваш браузер. После того как файл передан вам, он автоматически удаляется с сервера для экономии места и обеспечения конфиденциальности.",
+                infoLibrariesTitle: "Ключевые библиотеки и технологии",
+                infoLibFlask: "<strong>Flask:</strong> Микрофреймворк для веб-разработки на Python, используемый для создания бэкенд API.",
+                infoLibYtdlp: "<strong>yt-dlp:</strong> Программа командной строки для загрузки видео/аудио с YouTube, SoundCloud и многих других сайтов. Это форк youtube-dl с дополнительными функциями и исправлениями.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> Полное кроссплатформенное решение для записи, преобразования и потоковой передачи аудио и видео. Здесь используется для конвертации форматов (в MP3/MP4) и встраивания метаданных.",
+                infoLibTailwind: "<strong>Tailwind CSS:</strong> Утилитарный CSS-фреймворк для быстрой разработки пользовательских интерфейсов.",
+                infoLibJS: "<strong>JavaScript:</strong> Используется для интерактивности фронтенда, переключения языков, анимаций и взаимодействия с бэкенд API.",
+                infoPythonCodeTitle: "Код бэкенда на Python",
+                infoPythonCodePara: "Основная логика бэкенда написана на Python с использованием фреймворка Flask. Python-скрипт (обычно с именем <code>app.py</code>) обрабатывает API-запросы, взаимодействует с <code>yt-dlp</code> и <code>ffmpeg</code>, управляет временным хранением файлов и отдает файлы. Этот код выполняется на сервере и здесь не отображается напрямую, но он обеспечивает работоспособность загрузчика.",
+                copyrightTitle: "Авторские права и ответственность",
+                copyrightPara1: "Пожалуйста, имейте в виду, что музыка и другой аудиоконтент, доступный на YouTube, SoundCloud и других платформах, может быть защищен авторским правом. Многие исполнители и создатели контента имеют особые лицензии и условия использования своих произведений. Вы несете ответственность за то, чтобы у вас были необходимые права или разрешения перед загрузкой любого контента.",
+                copyrightPara2: "Разработчик этого сайта предоставляет данный инструмент для удобства и не несет ответственности за контент, который вы решите загрузить, или за то, как вы его используете. Используя этот сервис, вы соглашаетесь с тем, что несете полную ответственность за свои действия и за соблюдение всех применимых законов об авторском праве и условий обслуживания поставщиков контента.",
+                infoCreatorTitle: "Создатель",
+                infoCreatorName: "Этот сайт для загрузки музыки с YouTube и SoundCloud был создан <strong>Suleyman Aslanov</strong>.",
+                headerH1: "Загрузчик Музыки",
+                headerP: "Вставьте ссылку на YouTube, SoundCloud или другое видео/трек или плейлист",
+                urlLabel: "Ссылка YouTube:",
+                urlPlaceholder: "например, https://www.youtube.com/watch?v=... или https://soundcloud.com/track",
+                formatLabel: "Выберите формат:",
+                formatMp3: "MP3 (рекомендуется)",
+                formatMp4: "MP4 (видео 720p)",
+                submitButton: "Скачать",
+                footerCopyrightText: "Загрузчик музыки YouTube, SoundCloud и других сайтов. Сайт сделан Suleyman Aslanov.",
+                footerWatermark: "Разработано Suleyman Aslanov",
+                statusErrorUrl: "Пожалуйста, введите корректную ссылку YouTube или SoundCloud.",
+                statusProcessing: "Обработка ссылки... Пожалуйста, подождите.",
+                statusSuccessHeader: "Готово! Начинаю загрузку файла(ов):",
+                statusDownloadLinkText: "Скачать {FORMAT}",
+                statusPostDownloadHint: "Если загрузка не началась, проверьте настройки блокировки всплывающих окон или место сохранения файлов.",
+                statusErrorGeneric: "Ошибка: {MESSAGE}",
+                statusNetworkError: "Произошла сетевая ошибка. Пожалуйста, попробуйте еще раз.",
+                languageLabel: "Язык:",
+                telegramSubscription: "Подпишитесь на Telegram канал разработчиков:",
+                telegramBotAlternative: "Альтернативный Telegram-бот:",
+                fileStatusPending: "В ожидании...",
+                fileStatusDownloading: "Загрузка...",
+                fileStatusStarted: "Начато! Проверьте браузер.",
+                durationLimitInfo: "Примечание: Контент длиннее 10 минут не может быть скачан.",
+                durationLimitError: "Контент длиннее 10 минут не может быть скачан.",
+                playlistDurationLimitError: "Плейлист содержит контент длиннее 10 минут, который не может быть скачан."
+            },
+            es: {
+                pageTitle: "Descargador de Música de YouTube, SoundCloud y otros sitios por Suleyman Aslanov",
+                metaDescriptionContent: "Descarga fácilmente música y video de videos/pistas y listas de reproducción de YouTube, SoundCloud y otros sitios en formato MP3 o MP4. Creado por Suleyman Aslanov.",
+                navInfoButton: "Info",
+                navCopyrightButton: "Copyright",
+                navUpdatesButton: "Actualizaciones (Blog)",
+                navGithubButton: "GitHub",
+                infoTitle: "Sobre este Sitio",
+                infoHowItWorksTitle: "Cómo Funciona Este Sitio",
+                infoHowItWorksPara1: "Esta aplicación web te permite descargar audio/video de videos/pistas o listas de reproducción de YouTube, SoundCloud u otros sitios. Simplemente pegas la URL, eliges tu formato deseado (MP3 o MP4), y el script del lado del servidor procesa tu solicitud.",
+                infoHowItWorksPara2: "El backend utiliza la potente biblioteca <code>yt-dlp</code> para obtener información del contenido y extraer el flujo de audio/video. Si se selecciona el formato MP3 o MP4, se utiliza <code>ffmpeg</code> para la conversión e incrustación de metadatos.",
+                infoHowItWorksPara3: "El archivo descargado se almacena temporalmente en el servidor y luego se pone a tu disposición para que lo descargues directamente a través de tu navegador. Después de que se te entrega la descarga, el archivo se elimina automáticamente del servidor para ahorrar espacio y garantizar la privacidad.",
+                infoLibrariesTitle: "Bibliotecas Clave y Tecnologías Utilizadas",
+                infoLibFlask: "<strong>Flask:</strong> Un microframework web para Python, utilizado para construir la API del backend.",
+                infoLibYtdlp: "<strong>yt-dlp:</strong> Un programa de línea de comandos para descargar videos/audio de YouTube, SoundCloud y muchos otros sitios. Es un fork de youtube-dl con características adicionales y correcciones.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> Una solución completa y multiplataforma para grabar, convertir y transmitir audio y video. Se utiliza aquí para la conversión de formato (to MP3/MP4) e incrustación de metadatos.",
+                infoLibTailwind: "<strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.",
+                infoLibJS: "<strong>JavaScript:</strong> Utilizado para la interactividad del frontend, cambio de idioma, animaciones y comunicación con the backend API.",
+                infoPythonCodeTitle: "Código Backend en Python",
+                infoPythonCodePara: "La lógica central del backend está escrita en Python utilizando el framework Flask. El script de Python (generalmente llamado <code>app.py</code>) handles API requests, interacts with <code>yt-dlp</code> and <code>ffmpeg</code>, manages temporary file storage, and serves the files. This code runs on the server and is not directly visible here, but it ensures the functionality of the downloader.",
+                copyrightTitle: "Derechos de Autor y Responsabilidad",
+                copyrightPara1: "Tenga en cuenta que la música y otro contenido de audio disponible en YouTube, SoundCloud y otras plataformas may be protected by copyright. Many artists and content creators have specific licenses and terms of use for their work. It is your responsibility to ensure that you have the necessary rights or permissions before downloading any content.",
+                copyrightPara2: "El desarrollador de este sitio proporciona esta herramienta para conveniencia y no es responsable del contenido que elija descargar ni de cómo lo utilice. Al utilizar este servicio, usted acepta que es el único responsable de sus acciones y de cumplir con todas las leyes de derechos de autor aplicables y los términos de servicio de los proveedores de contenido.",
+                infoCreatorTitle: "Creador",
+                infoCreatorName: "Este sitio de Descarga de Música de YouTube y SoundCloud fue creado por <strong>Suleyman Aslanov</strong>.",
+                headerH1: "Music Downloader",
+                headerP: "Pega un enlace de video/pista o lista de reproducción de YouTube, SoundCloud u otros sitios",
+                urlLabel: "YouTube Link:",
+                urlPlaceholder: "ej., https://www.youtube.com/watch?v=... o https://soundcloud.com/track",
+                formatLabel: "Seleccionar formato:",
+                formatMp3: "MP3 (recomendado)",
+                formatMp4: "MP4 (video 720p)",
+                submitButton: "Descargar",
+                footerCopyrightText: "Descargador de música de YouTube, SoundCloud y otros sitios. Sitio hecho por Suleyman Aslanov.",
+                footerWatermark: "Desarrollado por Suleyman Aslanov",
+                statusErrorUrl: "Por favor, introduce una URL válida.",
+                statusProcessing: "Procesando enlace... Por favor, espera.",
+                statusSuccessHeader: "¡Listo! Iniciando descargas:",
+                statusDownloadLinkText: "Descargar {FORMAT}",
+                statusPostDownloadHint: "Si las descargas no comenzaron, revisa la configuración de ventanas emergentes del navegador o la ubicación de guardado de archivos.",
+                statusErrorGeneric: "Error: {MESSAGE}",
+                statusNetworkError: "Ocurrió un error de red. Por favor, inténtalo de nuevo.",
+                languageLabel: "Idioma:",
+                telegramSubscription: "Suscríbete al canal de Telegram de los desarrolladores:",
+                telegramBotAlternative: "Alternativa de bot de Telegram:",
+                fileStatusPending: "Pendiente...",
+                fileStatusDownloading: "Descargando...",
+                fileStatusStarted: "¡Iniciado! Revisa el navegador.",
+                durationLimitInfo: "Nota: El contenido de más de 10 minutos no se puede descargar.",
+                playlistDurationLimitError: "La lista de reproducción contiene contenido de más de 10 minutos, que no se puede descargar."
+            },
+            az: {
+                pageTitle: "Suleyman Aslanov tərəfindən YouTube, SoundCloud və digər saytlar üçün Yükləyici",
+                metaDescriptionContent: "YouTube, SoundCloud və digər saytlardan videolar/treklər və pleylistlərdən musiqi və video faylları MP3 və ya MP4 formatında asanlıqla yükləyin. Suleyman Aslanov tərəfindən yaradılıb.",
+                navInfoButton: "Məlumat",
+                navCopyrightButton: "Müəllif Hüquqları",
+                navUpdatesButton: "Yenilikler (Bloq)",
+                navGithubButton: "GitHub",
+                infoTitle: "Bu Sayt Haqqında",
+                infoHowItWorksTitle: "Bu Sayt Necə İşləyir",
+                infoHowItWorksPara1: "Bu veb tətbiqi YouTube, SoundCloud və ya digər saytlardan videolar/treklər və ya pleylistlərdən audio/video yükləməyə imkan verir. Siz sadəcə URL-ni daxil edir, istədiyiniz formatını (MP3 və ya MP4) seçirsiniz və server tərəfi skripti emal edir.",
+                infoHowItWorksPara2: "Backend məzmun məlumatlarını əldə etmək və audio/video axınını çıxarmaq üçün güclü <code>yt-dlp</code> kitabxanasından istifadə edir. MP3 və ya MP4 formatı seçildikdə, konvertasiya və metadatanın daxil edilməsi üçün <code>ffmpeg</code> istifadə olunur.",
+                infoHowItWorksPara3: "Yüklənmiş fayl müvəqqəti olaraq serverdə saxlanılır və sonra brauzeriniz vasitəsilə birbaşa yükləmək üçün sizə təqdim olunur. Fayl sizə təqdim edildikdən sonra, yerə qənaət etmək və məxfiliyi təmin etmək üçün avtomatik olaraq serverdən silinir.",
+                infoLibrariesTitle: "Əsas Kitabxanalar və Texnologiyalar",
+                infoLibFlask: "<strong>Flask:</strong> Backend API qurmaq üçün istifadə olunan Python üçün mikro veb freymvorku.",
+                infoLibYtdlp: "<strong>yt-dlp:</strong> YouTube, SoundCloud və bir çox başqa saytlardan video/audio yükləmək üçün əmr sətiri proqramı. Bu, əlavə funksiyalar və düzəlişlərlə youtube-dl-in bir forkudur.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> Audio və video yazmaq, çevirmək və yayımlamaq üçün tam, çarpaz platformalı bir həll. Burada formatının çevrilməsi (MP3/MP4-a) və metadatanın daxil edilməsi üçün istifadə olunur.",
+                infoLibTailwind: "<strong>Tailwind CSS:</strong> Xüsusi istifadəçi interfeyslərini sürətlə qurmaq üçün utilitar CSS freymvorku.",
+                infoLibJS: "<strong>JavaScript:</strong> Frontend interaktivliyi, dil dəyişdirmə, animasiyalar və backend API ilə əlaqə üçün istifadə olunur.",
+                infoPythonCodeTitle: "Python Backend Kodu",
+                infoPythonCodePara: "Əsas backend məntiqi Flask freymvorkundan istifadə edərək Python-da yazılmışdır. Python skripti (adətən <code>app.py</code> adlanır) API sorğularını idarə edir, <code>yt-dlp</code> və <code>ffmpeg</code> ilə qarşılıqlı əlaqədə olur, müvəqqəti fayl saxlanmasını idarə edir və faylları təqdim edir. Bu kod serverdə işləyir və burada birbaşa görünmür, lakin yükləyicinin funksionallığını təmin edir.",
+                copyrightTitle: "Müəllif Hüquqları və Məsuliyyət",
+                copyrightPara1: "Nəzərə alın ki, YouTube, SoundCloud və digər platformalarda mövcud olan musiqi və digər audio məzmun müəllif hüquqları ilə qoruna bilər. Bir çox sənətçi və məzmun yaradıcısının əsərləri üçün xüsusi lisenziyaları və istifadə şərtləri var. Hər hansı bir məzmunu yükləməzdən əvvəl lazımi hüquqlara və ya icazələrə sahib olduğunuzdan əmin olmaq sizin məsuliyyətinizdir.",
+                copyrightPara2: "Bu saytın tərtibatçısı bu aləti rahatlıq üçün təqdim edir və yükləməyi seçdiyiniz məzmuna və ya ondan necə istifadə etdiyinizə görə məsuliyyət daşımır. Bu xidmətdən istifadə etməklə, hərəkətlərinizə və bütün tətbiq olunan müəllif hüquqları qanunlarına və məzmun təminatçılarının xidmət şərtlərininə riayət etməyə görə yalnız sizin məsuliyyət daşıdığınızı qəbul edirsiniz.",
+                infoCreatorTitle: "Yaradıcı",
+                infoCreatorName: "Bu YouTube və SoundCloud Yükləyicisi saytı <strong>Suleyman Aslanov</strong> tərəfindən yaradılmışdır.",
+                headerH1: "Musiqi Yükləyicisi",
+                headerP: "YouTube video və ya pleylist keçidini daxil edin",
+                urlLabel: "Keçid:",
+                urlPlaceholder: "məsələn, https://www.youtube.com/watch?v=... və ya https://soundcloud.com/track",
+                formatLabel: "Format seçin:",
+                formatMp3: "MP3 (tövsiyə olunur)",
+                formatMp4: "MP4 (video 720p)",
+                submitButton: "Yüklə",
+                footerCopyrightText: "YouTube, SoundCloud və digər saytlar üçün musiqi yükləyicisi. Sayt Suleyman Aslanov tərəfindən hazırlanıb.",
+                footerWatermark: "Suleyman Aslanov tərəfindən hazırlanıb",
+                statusErrorUrl: "Zəhmət olmasa, düzgün URL daxil edin.",
+                statusProcessing: "Keçid emal olunur... Zəhmət olmasa, gözləyin.",
+                statusSuccessHeader: "Hazırdır! Yükləmələr başlayır:",
+                statusDownloadLinkText: "{FORMAT} Yüklə",
+                statusPostDownloadHint: "Əgər yükləmələr başlamadısa, brauzerin pop-up parametrlərini və ya faylın yadda saxlanma yerini yoxlayın.",
+                statusErrorGeneric: "Xəta: {MESSAGE}",
+                statusNetworkError: "Şəbəkə xətası baş verdi. Zəhmət olmasa, yenidən cəhd edin.",
+                languageLabel: "Dil:",
+                telegramSubscription: "İstehsalçıların Telegram kanalına abunə olun:",
+                telegramBotAlternative: "Telegram bot alternativi:",
+                fileStatusPending: "Gözlənilir...",
+                fileStatusDownloading: "Yüklənir...",
+                fileStatusStarted: "Başladı! Brauzeri yoxlayın.",
+                durationLimitInfo: "Qeyd: 10 dəqiqədən uzun məzmun yüklənə bilməz.",
+                durationLimitError: "10 dəqiqədən uzun məzmun yüklənə bilməz.",
+                playlistDurationLimitError: "Pleylistdə 10 dəqiqədən uzun məzmun var, bu yüklənə bilməz."
+            },
+            tr: {
+                pageTitle: "Suleyman Aslanov'dan YouTube, SoundCloud ve Diğer Siteler İçin İndirici",
+                metaDescriptionContent: "YouTube, SoundCloud ve diğer sitelerden videolar/şarkılar ve çalma listelerinden MP3 veya MP4 formatında kolayca müzik ve video indirin. Suleyman Aslanov tarafından oluşturuldu.",
+                navInfoButton: "Bilgi",
+                navCopyrightButton: "Telif Hakkı",
+                navUpdatesButton: "Güncellemeler (Blog)",
+                navGithubButton: "GitHub",
+                infoTitle: "Bu Site Hakkında",
+                infoHowItWorksTitle: "Bu Site Nasıl Çalışır?",
+                infoHowItWorksPara1: "Bu web uygulaması, YouTube, SoundCloud veya diğer sitelerden videolar/şarkılar veya oynatma listelerinden ses/video indirmenizi sağlar. URL'yi yapıştırır, istediğiniz formatı (MP3 veya MP4) seçersiniz ve sunucu tarafı betiği isteğinizi işler.",
+                infoHowItWorksPara2: "Arka uç, içerik bilgilerini almak ve ses/video akışını çıkarmak için güçlü <code>yt-dlp</code> kitaplığını kullanır. MP3 veya MP4 formatı seçilirse, dönüştürme ve meta veri gömme için <code>ffmpeg</code> kullanılır.",
+                infoHowItWorksPara3: "İndirilen dosya geçici olarak sunucuda saklanır ve ardından tarayıcınız üzerinden doğrudan indirmeniz için kullanıma sunulur. İndirme size sunulduktan sonra, yerden tasarruf etmek ve gizliliği sağlamak için dosya sunucudan otomatik olarak silinir.",
+                infoLibrariesTitle: "Kullanılan Temel Kitaplıklar ve Teknolojiler",
+                infoLibFlask: "<strong>Flask:</strong> Arka uç API'sini oluşturmak için Python için bir mikro web çerçevesi.",
+                infoLibYtdlp: "<strong>yt-dlp:</strong> Bir komut satırı programı to download videos/audio from YouTube, SoundCloud and many other sites. It's a fork of youtube-dl with additional features and fixes.",
+                infoLibFFmpeg: "<strong>FFmpeg:</strong> A complete, cross-platform solution to record, convert and stream audio and video. Used here for format conversion (to MP3/MP4) and meta data embedding.",
+                infoLibTailwind: "<strong>Tailwind CSS:</strong> A utility-first CSS framework for rapidly building custom user interfaces.",
+                infoLibJS: "<strong>JavaScript:</strong> Ön uç etkileşimi, dil değiştirme, animasyonlar ve arka uç API ile iletişim için kullanılır.",
+                infoPythonCodeTitle: "Python Arka Uç Kodu",
+                infoPythonCodePara: "Temel arka uç mantığı, Flask çerçevesi kullanılarak Python ile yazılmıştır. Python betiği (genellikle <code>app.py</code> olarak adlandırılır) API isteklerini işler, <code>yt-dlp</code> и <code>ffmpeg</code> ile etkileşime girer, geçici dosya depolamasını yönetir и dosyaları sunar. Bu kod sunucuda çalışır и здесь doğrudan görünmez, однако indiricinin işlevselliğini sağlar.",
+                copyrightTitle: "Telif Hakkı и Sorumluluk",
+                copyrightPara1: "Lütfen YouTube, SoundCloud и diğer platformlarda bulunan müzik и diğer ses içeriklerinin telif hakkıyla korunuyor olabileceğini unutmayın. Birçok sanatçı и içerik oluşturucunun eserleri için özel lisansları и kullanım koşulları vardır. Herhangi bir içeriği indirmeden önce gerekli haklara veya izinlere sahip olduğunuzdan emin olmak sizin sorumluluğunuzdadır.",
+                copyrightPara2: "Bu sitenin geliştiricisi, bu aracı kolaylık sağlamak amacıyla sunar и indirmeyi seçtiğiniz içerikten veya onu nasıl kullandığınızdan sorumlu değildir. Bu hizmeti kullanarak, eylemlerinizden и geçerli tüm telif hakkı yasalarına и içerik sağlayıcıların hizmet şartlarına uymaktan yalnızca sizin sorumluluğunuzdadır.",
+                infoCreatorTitle: "Oluşturan",
+                infoCreatorName: "Bu YouTube и SoundCloud İndirici sitesi <strong>Suleyman Aslanov</strong> tarafından oluşturulmuştur.",
+                headerH1: "Music Downloader",
+                headerP: "Bir YouTube video или oynatma listesi bağlantısı yapıştırın",
+                urlLabel: "Bağlantı:",
+                urlPlaceholder: "örneğin, https://www.youtube.com/watch?v=... или https://soundcloud.com/track",
+                formatLabel: "Format seçin:",
+                formatMp3: "MP3 (önerilir)",
+                formatMp4: "MP4 (video 720p)",
+                submitButton: "İndir",
+                footerCopyrightText: "YouTube, SoundCloud и Diğer İndirici. Site Suleyman Aslanov tarafından yapıldı.",
+                footerWatermark: "Suleyman Aslanov tarafından geliştirildi",
+                statusErrorUrl: "Lütfen geçerli bir URL girin.",
+                statusProcessing: "Bağlantı işleniyor... Lütfen bekleyin.",
+                statusSuccessHeader: "Tamamlandı! İndirmeler başlatılıyor:",
+                statusDownloadLinkText: "{FORMAT} İndir",
+                statusPostDownloadHint: "İndirmeler başlamadıysa, tarayıcının pop-up ayarlarını veya dosya kaydetme konumunu kontrol edin.",
+                statusErrorGeneric: "Hata: {MESSAGE}",
+                statusNetworkError: "Bir ağ hatası oluştu. Lütfen tekrar deneyin.",
+                languageLabel: "Dil:",
+                telegramSubscription: "Geliştiricilerin Telegram Kanalına Abone Olun:",
+                telegramBotAlternative: "Telegram bot alternatifi:",
+                fileStatusPending: "Beklemede...",
+                fileStatusDownloading: "İndiriliyor...",
+                fileStatusStarted: "Başladı! Tarayıcıyı kontrol et.",
+                durationLimitInfo: "Not: 10 dakikadan uzun içerik indirilemez.",
+                durationLimitError: "10 dakikadan uzun içerik indirilemez.",
+                playlistDurationLimitError: "Çalma listesi 10 dakikadan uzun içerik barındırıyor, indirilemez."
+            }
+        };
+
+        let currentLanguage = 'ru';
+
+        function applyTranslations(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('preferredLanguage', lang);
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+            document.title = getTranslation('pageTitle', lang);
+
+            const metaDescElement = document.querySelector('meta[data-translate-meta-description]');
+            if (metaDescElement) {
+                metaDescElement.content = getTranslation('metaDescriptionContent', lang);
+            }
+
+            document.querySelectorAll('[data-translate-key]').forEach(element => {
+                const key = element.getAttribute('data-translate-key');
+                if (key === 'footerCopyrightText') {
+                    const yearSpan = `<span id="year">${new Date().getFullYear()}</span>`;
+                    element.innerHTML = getTranslation(key, lang).replace('<span id="year"></span>', yearSpan);
+                } else {
+                    element.innerHTML = getTranslation(key, lang);
+                }
+            });
+
+            document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                element.placeholder = getTranslation(key, lang);
+            });
+
+            const langSelector = document.getElementById('languageSelector');
+            if (langSelector) {
+                langSelector.value = lang;
+            }
+        }
+
+        function getTranslation(key, lang = currentLanguage, replacements = {}) {
+            let text = (translations[lang] && translations[lang][key]) ? translations[lang][key] : (translations.en[key] || key);
+            for (const placeholder in replacements) {
+                text = text.replace(`{${placeholder}}`, replacements[placeholder]);
+            }
+            return text;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const yearSpan = document.getElementById('year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+
+            const downloadForm = document.getElementById('downloadForm');
+            const statusArea = document.getElementById('statusArea');
+            const telegramLinkContainer = document.getElementById('telegramLinkContainer');
+            const youtubeUrlInput = document.getElementById('youtube_url');
+            const formatChoiceSelect = document.getElementById('format_choice');
+            const languageSelector = document.getElementById('languageSelector');
+
+            const infoButton = document.getElementById('infoButton');
+            const infoSectionOverlay = document.getElementById('infoSectionOverlay');
+            const closeInfoButton = document.getElementById('closeInfoButton');
+
+            const copyrightButton = document.getElementById('copyrightButton');
+            const copyrightSectionOverlay = document.getElementById('copyrightSectionOverlay');
+            const closeCopyrightButton = document.getElementById('closeCopyrightButton');
+
+            const updatesButton = document.getElementById('updatesButton');
+            const githubButton = document.getElementById('githubButton'); // Получаем новую кнопку GitHub
+
+            function setupOverlay(button, overlay, closeButton) {
+                if (button && overlay && closeButton) {
+                    button.addEventListener('click', () => {
+                        overlay.classList.add('visible');
+                        document.body.classList.add('overflow-hidden');
+                    });
+                    closeButton.addEventListener('click', () => {
+                        overlay.classList.remove('visible');
+                        document.body.classList.remove('overflow-hidden');
+                    });
+                    overlay.addEventListener('click', (event) => {
+                        if (event.target === overlay) {
+                            overlay.classList.remove('visible');
+                            document.body.classList.remove('overflow-hidden');
+                        }
+                    });
+                } else {
+                    console.error(`One or more elements for ${overlay ? overlay.id : 'an overlay'} functionality are missing:`,
+                        {button, overlay, closeButton });
+                }
+            }
+
+            setupOverlay(infoButton, infoSectionOverlay, closeInfoButton);
+            setupOverlay(copyrightButton, copyrightSectionOverlay, closeCopyrightButton);
+
+            if (updatesButton) {
+                updatesButton.addEventListener('click', () => {
+                    window.open('https://artoflife2303.github.io/miniblog/', '_blank');
+                });
+            }
+
+            // Добавляем обработчик для новой кнопки GitHub
+            if (githubButton) {
+                githubButton.addEventListener('click', () => {
+                    window.open('https://github.com/ArtOfLife2303', '_blank');
+                });
+            }
+
+
+            if (languageSelector) {
+                languageSelector.addEventListener('change', (event) => {
+                    applyTranslations(event.target.value);
+                });
+
+                const preferredLang = localStorage.getItem('preferredLanguage');
+                const browserLang = navigator.language.split('-')[0];
+                let initialLang = 'ru';
+
+                if (preferredLang && translations[preferredLang]) {
+                    initialLang = preferredLang;
+                } else if (translations[browserLang]) {
+                    initialLang = browserLang;
+                }
+                languageSelector.value = initialLang;
+                applyTranslations(initialLang);
+            }
+
+            if (downloadForm) {
+                downloadForm.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                    const url = youtubeUrlInput.value.trim();
+                    const format = formatChoiceSelect.value;
+
+                    if (telegramLinkContainer) telegramLinkContainer.classList.add('hidden');
+
+                    if (!url) {
+                        statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md status-message-item">${getTranslation('statusErrorUrl')}</p>`;
+                        return;
+                    }
+                     try {
+                        new URL(url);
+                    } catch (_) {
+                        statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md status-message-item">${getTranslation('statusErrorUrl')}</p>`;
+                        return;
+                    }
+
+                    statusArea.innerHTML = `
+                        <div class="flex flex-col justify-center items-center space-y-2 text-sky-400 p-3 status-message-item">
+                            <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-600 h-8 w-8 mb-2"></div>
+                            <span>${getTranslation('statusProcessing')}</span>
+                        </div>`;
+
+                    const submitButtonEl = document.getElementById('submitButton');
+                    if(submitButtonEl) {
+                        submitButtonEl.disabled = true;
+                        submitButtonEl.classList.add('opacity-50', 'cursor-not-allowed');
+                        submitButtonEl.classList.remove('hover:bg-sky-400', 'submit-button:hover');
+                    }
+
+                    try {
+                        const response = await fetch('/api/download_audio', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: url, format: format }),
+                        });
+
+                        const contentType = response.headers.get("content-type");
+                        if (!contentType || !contentType.includes("application/json")) {
+                            const errorText = await response.text();
+                            throw new Error(`Server returned an unexpected response: ${response.status} ${response.statusText}. ${errorText.substring(0,100)}`);
+                        }
+                        const data = await response.json();
+
+                        if (response.ok && data.status === 'success' && data.files && data.files.length > 0) {
+                            let filesListHtml = data.files.map((fileInfo, index) => `
+                                <li id="file-item-${index}" class="bg-slate-700/60 p-3.5 rounded-lg shadow status-message-item flex justify-between items-center" style="animation-delay: ${index * 0.12}s">
+                                    <span class="text-slate-300 block truncate" title="${fileInfo.title || ''}">${fileInfo.title || 'Untitled'} (${fileInfo.filename ? fileInfo.filename.split('.').pop().toUpperCase() : format.toUpperCase()})</span>
+                                    <span id="file-status-${index}" class="file-download-status">${getTranslation('fileStatusPending')}</span>
+                                </li>
+                            `).join('');
+
+                            statusArea.innerHTML = `
+                                <div class="status-message-item">
+                                    <p class="text-green-400 mb-3 text-lg">${getTranslation('statusSuccessHeader')}</p>
+                                    <ul id="downloadQueueList" class="space-y-2.5 text-left max-h-60 overflow-y-auto pr-2">${filesListHtml}</ul>
+                                    <p class="text-xs text-slate-500 mt-4">${getTranslation('statusPostDownloadHint')}</p>
+                                </div>
+                            `;
+                            if (telegramLinkContainer) telegramLinkContainer.classList.remove('hidden');
+
+                            (async () => {
+                                for (let i = 0; i < data.files.length; i++) {
+                                    const fileInfo = data.files[i];
+                                    const fileStatusSpan = document.getElementById(`file-status-${i}`);
+
+                                    if (fileStatusSpan) {
+                                        fileStatusSpan.textContent = getTranslation('fileStatusDownloading');
+                                        fileStatusSpan.className = 'file-download-status downloading';
+                                    }
+
+                                    const link = document.createElement('a');
+                                    link.href = fileInfo.download_url;
+                                    link.download = fileInfo.filename;
+                                    document.body.appendChild(link);
+                                    link.click();
+
+                                    await new Promise(resolve => setTimeout(resolve, 5000));
+                                    document.body.removeChild(link);
+
+                                    if (fileStatusSpan) {
+                                        fileStatusSpan.textContent = getTranslation('fileStatusStarted');
+                                        fileStatusSpan.className = 'file-download-status completed';
+                                    }
+
+                                    if (i < data.files.length - 1) {
+                                        await new Promise(resolve => setTimeout(resolve, 750));
+                                    }
+                                }
+                            })();
+
+                        } else {
+                            if (data.message && (data.message.includes("Контент длиннее 10 минут") || data.message.includes("Плейлист содержит контент длиннее 10 минут"))) {
+                                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md status-message-item">${data.message}</p>`;
+                            } else {
+                                statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md status-message-item">${getTranslation('statusErrorGeneric', currentLanguage, {MESSAGE: (data.message || 'Could not download file.')})}</p>`;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Fetch error:', error);
+                        statusArea.innerHTML = `<p class="text-red-400 p-3 bg-red-900/30 rounded-md status-message-item">${getTranslation('statusNetworkError')} (${error.message})}</p>`;
+                    } finally {
+                        if(submitButtonEl) {
+                            submitButtonEl.disabled = false;
+                            submitButtonEl.classList.remove('opacity-50', 'cursor-not-allowed');
+                            submitButtonEl.classList.add('hover:bg-sky-400');
+                        }
+                    }
+                });
+            } else {
+                console.error("Download form not found!");
+            }
+
+            const preferredLang = localStorage.getItem('preferredLanguage');
+            const browserLang = navigator.language.split('-')[0];
+            let initialLang = 'ru';
+
+            if (preferredLang && translations[preferredLang]) {
+                initialLang = preferredLang;
+            } else if (translations[browserLang]) {
+                initialLang = browserLang;
+            }
+            languageSelector.value = initialLang;
+            applyTranslations(initialLang);
+
+            console.log("Initial setup complete. Downloader should be visible.");
+        });
