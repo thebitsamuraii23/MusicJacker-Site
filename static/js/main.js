@@ -1,7 +1,7 @@
 const translations = {
             en: {
-                pageTitle: "YouTube, SoundCloud & Other Downloader by Suleyman Aslanov",
-                metaDescriptionContent: "Easily download music and video from YouTube, SoundCloud and other videos/tracks and playlists in MP3 or MP4 format. Created by Suleyman Aslanov.",
+                pageTitle: "YouTube, SoundCloud & Other Downloader by thebitsamurai",
+                metaDescriptionContent: "Easily download music and video from YouTube, SoundCloud and other videos/tracks and playlists in MP3 or MP4 format. Created by thebitsamurai.",
                 navInfoButton: "Info",
                 navCopyrightButton: "Copyright",
                 navUpdatesButton: "Updates (Blog)",
@@ -23,8 +23,8 @@ const translations = {
                 copyrightPara1: "Please be aware that music and other audio content available on YouTube, SoundCloud and other platforms may be protected by copyright. Many artists and content creators have specific licenses and terms of use for their work. It is your responsibility to ensure that you have the necessary rights or permissions before downloading any content.",
                 copyrightPara2: "The developer of this site provides this tool for convenience and is not responsible for the content you choose to download or how you use it. By using this service, you agree that you are solely responsible for your actions and for complying with all applicable copyright laws and terms of service of the content providers.",
                 infoCreatorTitle: "Creator",
-                infoCreatorName: "This YouTube Music Downloader site was created by <strong>Suleyman Aslanov</strong>.",
-                headerH1: "Music Downloader",
+                infoCreatorName: "This Music Jacker site was created by <strong>thebitsamurai</strong>.",
+                headerH1: "Music Jacker",
                 headerP: "Paste a YouTube or SoundCloud video/track or playlist link",
                 urlLabel: "YouTube/SoundCloud Link:",
                 urlPlaceholder: "e.g., https://www.youtube.com/watch?v=... or https://soundcloud.com/track",
@@ -32,8 +32,8 @@ const translations = {
                 formatMp3: "MP3 (recommended)",
                 formatMp4: "MP4 (video 720p)",
                 submitButton: "Download",
-                footerCopyrightText: "YouTube, SoundCloud & Other downloader. Site made by Suleyman Aslanov.",
-                footerWatermark: "Developed By Suleyman Aslanov",
+                footerCopyrightText: "YouTube, SoundCloud & Other downloader. Site made by thebitsamurai.",
+                footerWatermark: "Developed By thebitsamurai",
                 statusErrorUrl: "Please enter a valid YouTube or SoundCloud URL.",
                 statusProcessing: "Processing link... Please wait.",
                 statusSuccessHeader: "Done! Initiating downloads:",
@@ -52,8 +52,8 @@ const translations = {
                 playlistDurationLimitError: "Playlist contains content longer than 10 minutes, which cannot be downloaded."
             },
             ru: {
-                pageTitle: "Загрузчик Музыки с YouTube, SoundCloud и других сайтов от Suleyman Aslanov",
-                metaDescriptionContent: "Легко скачивайте музыку и видео из видео/треков и плейлистов YouTube, SoundCloud и других сайтов в формате MP3 или MP4. Создано Suleyman Aslanov.",
+                pageTitle: "Загрузчик Музыки с YouTube, SoundCloud и других сайтов от thebitsamurai",
+                metaDescriptionContent: "Легко скачивайте музыку и видео из видео/треков и плейлистов YouTube, SoundCloud и других сайтов в формате MP3 или MP4. Создано thebitsamurai.",
                 navInfoButton: "Инфо",
                 navCopyrightButton: "Авторское право",
                 navUpdatesButton: "Обновления (Блог)",
@@ -75,7 +75,7 @@ const translations = {
                 copyrightPara1: "Пожалуйста, имейте в виду, что музыка и другой аудиоконтент, доступный на YouTube, SoundCloud и других платформах, может быть защищен авторским правом. Многие исполнители и создатели контента имеют особые лицензии и условия использования своих произведений. Вы несете ответственность за то, чтобы у вас были необходимые права или разрешения перед загрузкой любого контента.",
                 copyrightPara2: "Разработчик этого сайта предоставляет данный инструмент для удобства и не несет ответственности за контент, который вы решите загрузить, или за то, как вы его используете. Используя этот сервис, вы соглашаетесь с тем, что несете полную ответственность за свои действия и за соблюдение всех применимых законов об авторском праве и условий обслуживания поставщиков контента.",
                 infoCreatorTitle: "Создатель",
-                infoCreatorName: "Этот сайт для загрузки музыки с YouTube и SoundCloud был создан <strong>Suleyman Aslanov</strong>.",
+                infoCreatorName: "Этот сайт для загрузки музыки с YouTube и SoundCloud был создан <strong>thebitsamurai</strong>.",
                 headerH1: "Загрузчик Музыки",
                 headerP: "Вставьте ссылку на YouTube, SoundCloud или другое видео/трек или плейлист",
                 urlLabel: "Ссылка YouTube:",
@@ -84,8 +84,8 @@ const translations = {
                 formatMp3: "MP3 (рекомендуется)",
                 formatMp4: "MP4 (видео 720p)",
                 submitButton: "Скачать",
-                footerCopyrightText: "Загрузчик музыки YouTube, SoundCloud и других сайтов. Сайт сделан Suleyman Aslanov.",
-                footerWatermark: "Разработано Suleyman Aslanov",
+                footerCopyrightText: "Загрузчик музыки YouTube, SoundCloud и других сайтов. Сайт сделан thebitsamurai.",
+                footerWatermark: "Разработано thebitsamurai",
                 statusErrorUrl: "Пожалуйста, введите корректную ссылку YouTube или SoundCloud.",
                 statusProcessing: "Обработка ссылки... Пожалуйста, подождите.",
                 statusSuccessHeader: "Готово! Начинаю загрузку файла(ов):",
@@ -104,8 +104,8 @@ const translations = {
                 playlistDurationLimitError: "Плейлист содержит контент длиннее 10 минут, который не может быть скачан."
             },
             es: {
-                pageTitle: "Descargador de Música de YouTube, SoundCloud y otros sitios por Suleyman Aslanov",
-                metaDescriptionContent: "Descarga fácilmente música y video de videos/pistas y listas de reproducción de YouTube, SoundCloud y otros sitios en formato MP3 o MP4. Creado por Suleyman Aslanov.",
+                pageTitle: "Descargador de Música de YouTube, SoundCloud y otros sitios por thebitsamurai",
+                metaDescriptionContent: "Descarga fácilmente música y video de videos/pistas y listas de reproducción de YouTube, SoundCloud y otros sitios en formato MP3 o MP4. Creado por thebitsamurai.",
                 navInfoButton: "Info",
                 navCopyrightButton: "Copyright",
                 navUpdatesButton: "Actualizaciones (Blog)",
@@ -127,8 +127,8 @@ const translations = {
                 copyrightPara1: "Tenga en cuenta que la música y otro contenido de audio disponible en YouTube, SoundCloud y otras plataformas may be protected by copyright. Many artists and content creators have specific licenses and terms of use for their work. It is your responsibility to ensure that you have the necessary rights or permissions before downloading any content.",
                 copyrightPara2: "El desarrollador de este sitio proporciona esta herramienta para conveniencia y no es responsable del contenido que elija descargar ni de cómo lo utilice. Al utilizar este servicio, usted acepta que es el único responsable de sus acciones y de cumplir con todas las leyes de derechos de autor aplicables y los términos de servicio de los proveedores de contenido.",
                 infoCreatorTitle: "Creador",
-                infoCreatorName: "Este sitio de Descarga de Música de YouTube y SoundCloud fue creado por <strong>Suleyman Aslanov</strong>.",
-                headerH1: "Music Downloader",
+                infoCreatorName: "Este sitio de Descarga de Música de YouTube y SoundCloud fue creado por <strong>thebitsamurai</strong>.",
+                headerH1: "Music Jacker",
                 headerP: "Pega un enlace de video/pista o lista de reproducción de YouTube, SoundCloud u otros sitios",
                 urlLabel: "YouTube Link:",
                 urlPlaceholder: "ej., https://www.youtube.com/watch?v=... o https://soundcloud.com/track",
@@ -136,8 +136,8 @@ const translations = {
                 formatMp3: "MP3 (recomendado)",
                 formatMp4: "MP4 (video 720p)",
                 submitButton: "Descargar",
-                footerCopyrightText: "Descargador de música de YouTube, SoundCloud y otros sitios. Sitio hecho por Suleyman Aslanov.",
-                footerWatermark: "Desarrollado por Suleyman Aslanov",
+                footerCopyrightText: "Descargador de música de YouTube, SoundCloud y otros sitios. Sitio hecho por thebitsamurai.",
+                footerWatermark: "Desarrollado por thebitsamurai",
                 statusErrorUrl: "Por favor, introduce una URL válida.",
                 statusProcessing: "Procesando enlace... Por favor, espera.",
                 statusSuccessHeader: "¡Listo! Iniciando descargas:",
@@ -155,8 +155,8 @@ const translations = {
                 playlistDurationLimitError: "La lista de reproducción contiene contenido de más de 10 minutos, que no se puede descargar."
             },
             az: {
-                pageTitle: "Suleyman Aslanov tərəfindən YouTube, SoundCloud və digər saytlar üçün Yükləyici",
-                metaDescriptionContent: "YouTube, SoundCloud və digər saytlardan videolar/treklər və pleylistlərdən musiqi və video faylları MP3 və ya MP4 formatında asanlıqla yükləyin. Suleyman Aslanov tərəfindən yaradılıb.",
+                pageTitle: "thebitsamurai tərəfindən YouTube, SoundCloud və digər saytlar üçün Yükləyici",
+                metaDescriptionContent: "YouTube, SoundCloud və digər saytlardan videolar/treklər və pleylistlərdən musiqi və video faylları MP3 və ya MP4 formatında asanlıqla yükləyin. thebitsamurai tərəfindən yaradılıb.",
                 navInfoButton: "Məlumat",
                 navCopyrightButton: "Müəllif Hüquqları",
                 navUpdatesButton: "Yenilikler (Bloq)",
@@ -178,7 +178,7 @@ const translations = {
                 copyrightPara1: "Nəzərə alın ki, YouTube, SoundCloud və digər platformalarda mövcud olan musiqi və digər audio məzmun müəllif hüquqları ilə qoruna bilər. Bir çox sənətçi və məzmun yaradıcısının əsərləri üçün xüsusi lisenziyaları və istifadə şərtləri var. Hər hansı bir məzmunu yükləməzdən əvvəl lazımi hüquqlara və ya icazələrə sahib olduğunuzdan əmin olmaq sizin məsuliyyətinizdir.",
                 copyrightPara2: "Bu saytın tərtibatçısı bu aləti rahatlıq üçün təqdim edir və yükləməyi seçdiyiniz məzmuna və ya ondan necə istifadə etdiyinizə görə məsuliyyət daşımır. Bu xidmətdən istifadə etməklə, hərəkətlərinizə və bütün tətbiq olunan müəllif hüquqları qanunlarına və məzmun təminatçılarının xidmət şərtlərininə riayət etməyə görə yalnız sizin məsuliyyət daşıdığınızı qəbul edirsiniz.",
                 infoCreatorTitle: "Yaradıcı",
-                infoCreatorName: "Bu YouTube və SoundCloud Yükləyicisi saytı <strong>Suleyman Aslanov</strong> tərəfindən yaradılmışdır.",
+                infoCreatorName: "Bu YouTube və SoundCloud Yükləyicisi saytı <strong>thebitsamurai</strong> tərəfindən yaradılmışdır.",
                 headerH1: "Musiqi Yükləyicisi",
                 headerP: "YouTube video və ya pleylist keçidini daxil edin",
                 urlLabel: "Keçid:",
@@ -187,8 +187,8 @@ const translations = {
                 formatMp3: "MP3 (tövsiyə olunur)",
                 formatMp4: "MP4 (video 720p)",
                 submitButton: "Yüklə",
-                footerCopyrightText: "YouTube, SoundCloud və digər saytlar üçün musiqi yükləyicisi. Sayt Suleyman Aslanov tərəfindən hazırlanıb.",
-                footerWatermark: "Suleyman Aslanov tərəfindən hazırlanıb",
+                footerCopyrightText: "YouTube, SoundCloud və digər saytlar üçün musiqi yükləyicisi. Sayt thebitsamurai tərəfindən hazırlanıb.",
+                footerWatermark: "thebitsamurai tərəfindən hazırlanıb",
                 statusErrorUrl: "Zəhmət olmasa, düzgün URL daxil edin.",
                 statusProcessing: "Keçid emal olunur... Zəhmət olmasa, gözləyin.",
                 statusSuccessHeader: "Hazırdır! Yükləmələr başlayır:",
@@ -207,8 +207,8 @@ const translations = {
                 playlistDurationLimitError: "Pleylistdə 10 dəqiqədən uzun məzmun var, bu yüklənə bilməz."
             },
             tr: {
-                pageTitle: "Suleyman Aslanov'dan YouTube, SoundCloud ve Diğer Siteler İçin İndirici",
-                metaDescriptionContent: "YouTube, SoundCloud ve diğer sitelerden videolar/şarkılar ve çalma listelerinden MP3 veya MP4 formatında kolayca müzik ve video indirin. Suleyman Aslanov tarafından oluşturuldu.",
+                pageTitle: "thebitsamurai'dan YouTube, SoundCloud ve Diğer Siteler İçin İndirici",
+                metaDescriptionContent: "YouTube, SoundCloud ve diğer sitelerden videolar/şarkılar ve çalma listelerinden MP3 veya MP4 formatında kolayca müzik ve video indirin. thebitsamurai tarafından oluşturuldu.",
                 navInfoButton: "Bilgi",
                 navCopyrightButton: "Telif Hakkı",
                 navUpdatesButton: "Güncellemeler (Blog)",
@@ -230,8 +230,8 @@ const translations = {
                 copyrightPara1: "Lütfen YouTube, SoundCloud и diğer platformlarda bulunan müzik и diğer ses içeriklerinin telif hakkıyla korunuyor olabileceğini unutmayın. Birçok sanatçı и içerik oluşturucunun eserleri için özel lisansları и kullanım koşulları vardır. Herhangi bir içeriği indirmeden önce gerekli haklara veya izinlere sahip olduğunuzdan emin olmak sizin sorumluluğunuzdadır.",
                 copyrightPara2: "Bu sitenin geliştiricisi, bu aracı kolaylık sağlamak amacıyla sunar и indirmeyi seçtiğiniz içerikten veya onu nasıl kullandığınızdan sorumlu değildir. Bu hizmeti kullanarak, eylemlerinizden и geçerli tüm telif hakkı yasalarına и içerik sağlayıcıların hizmet şartlarına uymaktan yalnızca sizin sorumluluğunuzdadır.",
                 infoCreatorTitle: "Oluşturan",
-                infoCreatorName: "Bu YouTube и SoundCloud İndirici sitesi <strong>Suleyman Aslanov</strong> tarafından oluşturulmuştur.",
-                headerH1: "Music Downloader",
+                infoCreatorName: "Bu YouTube и SoundCloud İndirici sitesi <strong>thebitsamurai</strong> tarafından oluşturulmuştur.",
+                headerH1: "Music Jacker",
                 headerP: "Bir YouTube video или oynatma listesi bağlantısı yapıştırın",
                 urlLabel: "Bağlantı:",
                 urlPlaceholder: "örneğin, https://www.youtube.com/watch?v=... или https://soundcloud.com/track",
@@ -239,8 +239,8 @@ const translations = {
                 formatMp3: "MP3 (önerilir)",
                 formatMp4: "MP4 (video 720p)",
                 submitButton: "İndir",
-                footerCopyrightText: "YouTube, SoundCloud и Diğer İndirici. Site Suleyman Aslanov tarafından yapıldı.",
-                footerWatermark: "Suleyman Aslanov tarafından geliştirildi",
+                footerCopyrightText: "YouTube, SoundCloud и Diğer İndirici. Site thebitsamurai tarafından yapıldı.",
+                footerWatermark: "thebitsamurai tarafından geliştirildi",
                 statusErrorUrl: "Lütfen geçerli bir URL girin.",
                 statusProcessing: "Bağlantı işleniyor... Lütfen bekleyin.",
                 statusSuccessHeader: "Tamamlandı! İndirmeler başlatılıyor:",
@@ -433,8 +433,11 @@ const translations = {
 
                         if (response.ok && data.status === 'success' && data.files && data.files.length > 0) {
                             let filesListHtml = data.files.map((fileInfo, index) => `
-                                <li id="file-item-${index}" class="bg-slate-700/60 p-3.5 rounded-lg shadow status-message-item flex justify-between items-center" style="animation-delay: ${index * 0.12}s">
-                                    <span class="text-slate-300 block truncate" title="${fileInfo.title || ''}">${fileInfo.title || 'Untitled'} (${fileInfo.filename ? fileInfo.filename.split('.').pop().toUpperCase() : format.toUpperCase()})</span>
+                                <li id="file-item-${index}" class="bg-slate-700/60 p-3.5 rounded-lg shadow status-message-item flex justify-between items-center gap-3" style="animation-delay: ${index * 0.12}s">
+                                    <div class="flex flex-col min-w-0">
+                                        <span class="text-slate-300 block truncate" title="${fileInfo.title || ''}">${fileInfo.title || 'Untitled'} (${fileInfo.filename ? fileInfo.filename.split('.').pop().toUpperCase() : format.toUpperCase()})</span>
+                                        ${fileInfo.artist ? `<span class="text-slate-400 text-xs truncate" title="${fileInfo.artist}">${fileInfo.artist}</span>` : ''}
+                                    </div>
                                     <span id="file-status-${index}" class="file-download-status">${getTranslation('fileStatusPending')}</span>
                                 </li>
                             `).join('');

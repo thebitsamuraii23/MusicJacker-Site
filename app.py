@@ -8,12 +8,24 @@ from flask import Flask, request, jsonify, render_template, send_from_directory,
 from dotenv import load_dotenv
 import yt_dlp
 
+try:
+    from mutagen.easyid3 import EasyID3
+    from mutagen.id3 import ID3NoHeaderError
+    from mutagen.mp3 import MP3
+    from mutagen.mp4 import MP4
+    MUTAGEN_AVAILABLE = True
+except ImportError:
+    MUTAGEN_AVAILABLE = False
+
 load_dotenv()
 
 # --- Конфигурация ---
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
 logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+if not MUTAGEN_AVAILABLE:
+    logger.warning("Библиотека mutagen не установлена. Теги исполнителя не будут добавлены в медиафайлы.")
 
 app = Flask(__name__)
 
@@ -53,11 +65,144 @@ if not os.path.exists(COOKIES_PATH):
     logger.warning(f"Файл куки {COOKIES_PATH} не найден. Загрузка некоторых YouTube видео может быть ограничена.")
 
 # Текст водяного знака для имени файла и метаданных
-WATERMARK_TEXT = "YouTube Music Downloader. Site created by Suleyman Aslanov"
+WATERMARK_TEXT = "The Music Jacker. Site created by thebitsamurai"
+GLOBAL_ARTIST_NAME = "Music Jacker (developed by thebitsamurai)"
 
 # Ограничение длительности контента (10 минут в секундах)
 DURATION_LIMIT_SECONDS = 600
 SEARCH_RESULTS_LIMIT = 10 # Лимит результатов поиска для поиска
+
+# --- Работа с названиями треков ---
+FILENAME_INVALID_CHARS = '<>:"/\\|?*\n\r\t'
+FILENAME_STRIP_TRANS = str.maketrans('', '', FILENAME_INVALID_CHARS)
+DEFAULT_TRACK_TITLE = "Track"
+
+
+def extract_track_metadata(entry):
+    """Пытается выделить название трека и артиста из данных yt-dlp."""
+    if not entry:
+        return DEFAULT_TRACK_TITLE, None
+
+    title = entry.get('title') or DEFAULT_TRACK_TITLE
+    preferred_track = entry.get('track') or entry.get('alt_title')
+    artist = entry.get('artist') or entry.get('creator') or entry.get('uploader') or entry.get('uploader_id') or entry.get('channel')
+
+    track_name = preferred_track or title
+
+    if not preferred_track and ' - ' in title:
+        possible_artist, possible_track = title.split(' - ', 1)
+        if possible_track.strip():
+            track_name = possible_track.strip()
+            if not artist:
+                artist = possible_artist.strip()
+
+    track_name = track_name.strip() if isinstance(track_name, str) else str(track_name)
+    artist = artist.strip() if isinstance(artist, str) else (str(artist).strip() if artist else None)
+
+    return track_name or DEFAULT_TRACK_TITLE, artist
+
+
+def compose_full_title(track_name, artist_name):
+    """Возвращает название, включающее артиста (если он есть)."""
+    track_part = track_name.strip() if isinstance(track_name, str) else str(track_name)
+    if artist_name:
+        artist_part = artist_name.strip() if isinstance(artist_name, str) else str(artist_name)
+        if artist_part:
+            return f"{artist_part} - {track_part}"
+    return track_part
+
+
+def normalize_title_for_filename(raw_title):
+    """Возвращает читаемое имя трека, сохраняя пробелы и убирая запрещенные символы."""
+    if not raw_title:
+        raw_title = DEFAULT_TRACK_TITLE
+    if not isinstance(raw_title, str):
+        raw_title = str(raw_title)
+
+    normalized = re.sub(r'\s+', ' ', raw_title).strip()
+    watermark_token = f" - {WATERMARK_TEXT}"
+    if watermark_token in normalized:
+        normalized = normalized.split(watermark_token)[0].strip()
+    normalized = ''.join(ch for ch in normalized if ch.isprintable())
+    normalized = normalized.translate(FILENAME_STRIP_TRANS)
+    if os.path.sep in normalized:
+        normalized = normalized.replace(os.path.sep, ' ')
+    if os.path.altsep:
+        normalized = normalized.replace(os.path.altsep, ' ')
+    normalized = normalized.strip('.')[:120].strip()
+    return normalized if normalized else DEFAULT_TRACK_TITLE
+
+
+def ensure_unique_filename(directory, desired_name, current_path=None):
+    """Гарантирует уникальность файла в директории, добавляя счётчик при необходимости."""
+    base, ext = os.path.splitext(desired_name)
+    candidate = desired_name
+    counter = 1
+
+    while True:
+        candidate_path = os.path.join(directory, candidate)
+        if not os.path.exists(candidate_path):
+            return candidate
+        if current_path and os.path.abspath(candidate_path) == os.path.abspath(current_path):
+            return candidate
+        candidate = f"{base} ({counter}){ext}"
+        counter += 1
+
+
+def prepare_readable_download(actual_filepath, entry_title):
+    """Переименовывает скачанный файл в более дружелюбный вариант с пробелами."""
+    if not actual_filepath or not os.path.exists(actual_filepath):
+        return actual_filepath, os.path.basename(actual_filepath) if actual_filepath else None, normalize_title_for_filename(entry_title)
+
+    directory = os.path.dirname(actual_filepath)
+    _, ext = os.path.splitext(actual_filepath)
+    clean_title = normalize_title_for_filename(entry_title or os.path.basename(actual_filepath))
+    desired_filename = f"{clean_title}{ext}"
+    desired_filename = ensure_unique_filename(directory, desired_filename, actual_filepath)
+    new_path = os.path.join(directory, desired_filename)
+
+    if os.path.abspath(actual_filepath) != os.path.abspath(new_path):
+        try:
+            os.rename(actual_filepath, new_path)
+            logger.debug(f"Файл переименован в '{new_path}' для сохранения читаемого названия.")
+            actual_filepath = new_path
+        except OSError as rename_error:
+            logger.warning(f"Не удалось переименовать файл '{actual_filepath}' в '{new_path}': {rename_error}")
+            desired_filename = os.path.basename(actual_filepath)
+
+    return actual_filepath, desired_filename, clean_title
+
+
+def apply_metadata_tags(file_path, title, artist):
+    """Записывает теги title/artist в итоговый файл, если доступен mutagen."""
+    if not MUTAGEN_AVAILABLE or not file_path or not os.path.exists(file_path):
+        return
+
+    title = title or DEFAULT_TRACK_TITLE
+    artist = artist or GLOBAL_ARTIST_NAME
+
+    try:
+        lowercase_path = file_path.lower()
+        if lowercase_path.endswith('.mp3'):
+            try:
+                audio = EasyID3(file_path)
+            except ID3NoHeaderError:
+                audio_file = MP3(file_path)
+                audio_file.add_tags()
+                audio_file.save()
+                audio = EasyID3(file_path)
+            audio['title'] = [title]
+            audio['artist'] = [artist]
+            audio['albumartist'] = [artist]
+            audio.save()
+        elif lowercase_path.endswith(('.m4a', '.mp4', '.m4v', '.aac')):
+            audio = MP4(file_path)
+            audio['\xa9nam'] = [title]
+            audio['\xa9ART'] = [artist]
+            audio['aART'] = [artist]
+            audio.save()
+    except Exception as tag_error:
+        logger.warning(f"Не удалось записать теги для '{file_path}': {tag_error}")
 
 # --- Вспомогательные функции ---
 def is_valid_url(url):
@@ -218,7 +363,10 @@ def download_audio_route():
                 'preferredquality': '192',
             }]
             ydl_opts['postprocessor_args'] = {
-                'FFmpegExtractAudio': ['-metadata', f'comment={WATERMARK_TEXT}']
+                'FFmpegExtractAudio': [
+                    '-metadata', f'comment={WATERMARK_TEXT}',
+                    '-metadata', f'artist={GLOBAL_ARTIST_NAME}'
+                ]
             }
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио (может быть не MP3).")
@@ -232,7 +380,10 @@ def download_audio_route():
                 'preferedformat': 'mp4',
             }]
             ydl_opts['postprocessor_args'] = {
-                'FFmpegVideoConvertor': ['-metadata', f'comment={WATERMARK_TEXT}']
+                'FFmpegVideoConvertor': [
+                    '-metadata', f'comment={WATERMARK_TEXT}',
+                    '-metadata', f'artist={GLOBAL_ARTIST_NAME}'
+                ]
             }
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее видео (может быть не MP4 720p).")
@@ -276,6 +427,8 @@ def download_audio_route():
                 logger.warning(f"Пропущена пустая или ошибочная запись в плейлисте (ID: {entry.get('id', 'N/A') if entry else 'N/A'})")
                 continue
 
+            track_name, artist_name = extract_track_metadata(entry)
+            display_title = compose_full_title(track_name, artist_name)
             actual_filepath = None
             if entry.get('requested_downloads'):
                 for req_download in entry['requested_downloads']:
@@ -286,19 +439,17 @@ def download_audio_route():
                 actual_filepath = entry['filepath']
 
             if actual_filepath:
-                filename = os.path.basename(actual_filepath)
-                file_title_raw = os.path.splitext(filename)[0]
-                file_title = file_title_raw.split(f" - {WATERMARK_TEXT}")[0].strip()
-                file_title = file_title.rsplit('[', 1)[0].strip() if '[' in file_title and file_title.endswith(']') else file_title
-                expected_path_in_session = os.path.join(session_download_path, filename)
-                if os.path.exists(expected_path_in_session):
+                actual_filepath, filename, _ = prepare_readable_download(actual_filepath, display_title)
+                if actual_filepath and os.path.exists(actual_filepath):
+                    apply_metadata_tags(actual_filepath, display_title, GLOBAL_ARTIST_NAME)
                     downloaded_files_list.append({
                         "filename": filename,
-                        "title": file_title if file_title else filename,
+                        "title": display_title,
+                        "artist": GLOBAL_ARTIST_NAME,
                         "download_url": f"/serve_file/{session_id}/{filename.replace('%', '%25')}"
                     })
                 else:
-                    logger.warning(f"Файл '{filename}' (ожидаемый путь: '{expected_path_in_session}', извлеченный путь: '{actual_filepath}') не найден в папке сессии. Проверьте outtmpl и права на запись.")
+                    logger.warning(f"Файл '{filename}' (ожидаемый путь: '{actual_filepath}') не найден в папке сессии. Проверьте outtmpl и права на запись.")
             else:
                 logger.warning(f"Не удалось определить путь к скачанному файлу для записи: '{entry.get('title', 'ID: '+str(entry.get('id')))}'. Возможно, элемент не был скачан или произошла ошибка при загрузке конкретного элемента плейлиста.")
 
@@ -310,10 +461,16 @@ def download_audio_route():
                     base_name_for_title = os.path.splitext(f_name)[0]
                     title_part = base_name_for_title.split(f" - {WATERMARK_TEXT}")[0].strip()
                     title_part = title_part.rsplit('[', 1)[0].strip() if '[' in title_part and title_part.endswith(']') else title_part
+                    prepared_path, prepared_name, prepared_title = prepare_readable_download(file_path_check, title_part)
+                    target_name = prepared_name if prepared_name else f_name
+                    title_value = title_part if title_part else prepared_title
+                    metadata_target_path = prepared_path if prepared_path else os.path.join(session_download_path, target_name)
+                    apply_metadata_tags(metadata_target_path, title_value, GLOBAL_ARTIST_NAME)
                     downloaded_files_list.append({
-                        "filename": f_name,
-                        "title": title_part if title_part else f_name,
-                        "download_url": f"/serve_file/{session_id}/{f_name.replace('%', '%25')}"
+                        "filename": target_name,
+                        "title": title_value if title_value else target_name,
+                        "artist": GLOBAL_ARTIST_NAME,
+                        "download_url": f"/serve_file/{session_id}/{target_name.replace('%', '%25')}"
                     })
 
         if not downloaded_files_list:
