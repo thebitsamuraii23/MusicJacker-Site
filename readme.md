@@ -18,7 +18,7 @@
 
 ## ⚙️ Быстрый старт
 ```bash
-git clone <repo-url>
+git clone https://github.com/thebitsamuraii23/MusicJacker-Site
 cd ytmusicdownloadersite
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -54,5 +54,3 @@ youtube.com_cookies.txt # Cookies для yt-dlp (опционально)
 <<<<<<< HEAD
 Created with ❤️ by thebitsamurai. Feel free to fork, улучшать и делиться! 🎶
 =======
-Created with ❤️ by Suleyman Aslanov. Feel free to fork, улучшать и делиться! 🎶
->>>>>>> 1da3be3 (additional updates and upgrades)
