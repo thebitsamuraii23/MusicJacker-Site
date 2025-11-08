@@ -4,15 +4,27 @@ import shutil
 import json
 import uuid
 import re
+import mimetypes
+import socket
+import base64
+from urllib.parse import urlparse, urlunparse, parse_qs
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
 from flask import Flask, request, jsonify, render_template, send_from_directory, after_this_request
 from dotenv import load_dotenv
 import yt_dlp
 
 try:
     from mutagen.easyid3 import EasyID3
-    from mutagen.id3 import ID3NoHeaderError
+    try:
+        EasyID3.RegisterTextKey('comment', 'COMM')
+    except Exception:
+        pass
+    from mutagen.id3 import ID3NoHeaderError, APIC
     from mutagen.mp3 import MP3
-    from mutagen.mp4 import MP4
+    from mutagen.mp4 import MP4, MP4Cover
+    from mutagen.oggopus import OggOpus
+    from mutagen.flac import Picture
     MUTAGEN_AVAILABLE = True
 except ImportError:
     MUTAGEN_AVAILABLE = False
@@ -67,10 +79,15 @@ if not os.path.exists(COOKIES_PATH):
 # Текст водяного знака для имени файла и метаданных
 WATERMARK_TEXT = "The Music Jacker. Site created by thebitsamurai"
 GLOBAL_ARTIST_NAME = "Music Jacker (developed by thebitsamurai)"
+DEFAULT_ALBUM_NAME = os.getenv('DEFAULT_ALBUM_NAME', "Music Jacker Downloads")
 
 # Ограничение длительности контента (10 минут в секундах)
 DURATION_LIMIT_SECONDS = 600
 SEARCH_RESULTS_LIMIT = 10 # Лимит результатов поиска для поиска
+PLAYLIST_DURATION_CHECK_LIMIT = int(os.getenv('PLAYLIST_DURATION_CHECK_LIMIT', '50'))
+
+THUMBNAIL_TIMEOUT_SECONDS = int(os.getenv('THUMBNAIL_TIMEOUT_SECONDS', '12'))
+MAX_THUMBNAIL_SIZE_BYTES = int(os.getenv('MAX_THUMBNAIL_SIZE_BYTES', str(5 * 1024 * 1024)))
 
 # --- Работа с названиями треков ---
 FILENAME_INVALID_CHARS = '<>:"/\\|?*\n\r\t'
@@ -149,6 +166,245 @@ def ensure_unique_filename(directory, desired_name, current_path=None):
         counter += 1
 
 
+def select_best_thumbnail_url(entry):
+    """Возвращает URL наилучшего доступного превью из entry yt-dlp."""
+    if not entry or not isinstance(entry, dict):
+        return None
+
+    thumbnails = entry.get('thumbnails') or []
+    if isinstance(thumbnails, list) and thumbnails:
+        def thumbnail_sort_key(th):
+            return (
+                th.get('preference') if th.get('preference') is not None else 0,
+                th.get('height') if th.get('height') is not None else 0,
+                th.get('width') if th.get('width') is not None else 0
+            )
+
+        for candidate in sorted(thumbnails, key=thumbnail_sort_key, reverse=True):
+            url = candidate.get('url')
+            if url:
+                return url
+
+    return entry.get('thumbnail')
+
+
+def _validate_youtube_id(candidate):
+    """Проверяет, что строка похожа на 11-символьный ID YouTube."""
+    if not candidate or not isinstance(candidate, str):
+        return None
+    candidate = candidate.strip()
+    return candidate if re.fullmatch(r'[A-Za-z0-9_-]{11}', candidate) else None
+
+
+def extract_youtube_video_id_from_url(url):
+    """Извлекает ID видео из URL YouTube/YouTube Music."""
+    if not url or not isinstance(url, str):
+        return None
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return None
+
+    netloc = parsed.netloc.lower()
+    path = parsed.path or ''
+
+    if 'youtu.be' in netloc:
+        video_id = path.strip('/').split('/')[0]
+        return _validate_youtube_id(video_id)
+
+    if 'youtube.com' in netloc or 'music.youtube.com' in netloc:
+        query_params = parse_qs(parsed.query or '')
+        if 'v' in query_params:
+            return _validate_youtube_id(query_params['v'][0])
+
+        path_parts = [part for part in path.split('/') if part]
+        for part in path_parts:
+            valid = _validate_youtube_id(part)
+            if valid:
+                return valid
+
+    return None
+
+
+def extract_youtube_video_id(entry):
+    """Извлекает ID YouTube видео из info_dict."""
+    if not entry or not isinstance(entry, dict):
+        return None
+
+    candidate = _validate_youtube_id(entry.get('id'))
+    if candidate:
+        return candidate
+
+    for key in ('original_url', 'webpage_url', 'url'):
+        candidate = extract_youtube_video_id_from_url(entry.get(key))
+        if candidate:
+            return candidate
+
+    return None
+
+
+def entry_is_from_youtube(entry):
+    """Проверяет, относится ли info_dict к YouTube/YouTube Music."""
+    if not entry or not isinstance(entry, dict):
+        return False
+
+    extractor = (entry.get('extractor_key') or entry.get('extractor') or '')
+    if isinstance(extractor, str) and 'youtube' in extractor.lower():
+        return True
+
+    for key in ('webpage_url', 'original_url', 'url'):
+        url = entry.get(key)
+        if isinstance(url, str) and (is_youtube_url(url) or is_ytmusic_url(url)):
+            return True
+
+    return False
+
+
+def build_youtube_thumbnail_candidates(entry):
+    """Возвращает список потенциальных URL обложек для YouTube видео."""
+    video_id = extract_youtube_video_id(entry)
+    if not video_id:
+        return []
+
+    base = f"https://i.ytimg.com/vi/{video_id}"
+    variants = [
+        "maxresdefault.jpg",
+        "sddefault.jpg",
+        "hqdefault.jpg",
+        "mqdefault.jpg",
+        "default.jpg",
+    ]
+    return [f"{base}/{variant}" for variant in variants]
+
+
+def infer_album_name(entry):
+    """Пытается определить название альбома из info_dict."""
+    entry = entry or {}
+    for key in ('album', 'album_name', 'album_title'):
+        value = entry.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+
+    playlist_type = entry.get('playlist_type')
+    playlist_title = entry.get('playlist_title')
+    if playlist_title and isinstance(playlist_title, str):
+        if playlist_type and isinstance(playlist_type, str) and playlist_type.lower() == 'album':
+            return playlist_title.strip()
+        if not any(entry.get(k) for k in ('album', 'album_name', 'album_title')):
+            return playlist_title.strip()
+
+    return DEFAULT_ALBUM_NAME
+
+
+def guess_mime_from_url(url, default='image/jpeg'):
+    """Пытается определить MIME-тип изображения по расширению URL."""
+    if not url:
+        return default
+    mime_type, _ = mimetypes.guess_type(url)
+    return mime_type or default
+
+
+def download_thumbnail_data(url):
+    """Скачивает изображение для обложки и возвращает (bytes, mime)."""
+    if not url:
+        return None, None
+
+    try:
+        request = Request(url, headers={'User-Agent': 'Mozilla/5.0 (Music Jacker)'})
+        with urlopen(request, timeout=THUMBNAIL_TIMEOUT_SECONDS) as response:
+            content_length = response.headers.get('Content-Length')
+            if content_length:
+                try:
+                    if int(content_length) > MAX_THUMBNAIL_SIZE_BYTES:
+                        logger.warning(f"Пропущено превью (слишком большое): {url}")
+                        return None, None
+                except ValueError:
+                    pass
+
+            data = response.read(MAX_THUMBNAIL_SIZE_BYTES + 1)
+            if len(data) > MAX_THUMBNAIL_SIZE_BYTES:
+                logger.warning(f"Пропущено превью (размер {len(data)} байт превышает лимит): {url}")
+                return None, None
+
+            content_type = response.headers.get('Content-Type')
+            if content_type:
+                content_type = content_type.split(';')[0].strip()
+            mime = content_type or guess_mime_from_url(url)
+            return data, mime
+    except (HTTPError, URLError, socket.timeout) as thumb_error:
+        logger.warning(f"Не удалось скачать превью '{url}': {thumb_error}")
+    except Exception as thumb_error:
+        logger.warning(f"Неожиданная ошибка при скачивании превью '{url}': {thumb_error}", exc_info=True)
+
+    return None, None
+
+
+def build_track_metadata(entry, track_name, artist_name):
+    """Формирует структуру метаданных и при необходимости скачивает обложку."""
+    entry = entry or {}
+    title_candidate = track_name or entry.get('title') or DEFAULT_TRACK_TITLE
+    original_artist = artist_name or entry.get('artist') or entry.get('creator') or entry.get('uploader') or entry.get('uploader_id')
+    album_candidate = infer_album_name(entry)
+    source_url = entry.get('webpage_url') or entry.get('url')
+    cover_candidates = []
+    cover_url = select_best_thumbnail_url(entry)
+    if cover_url:
+        cover_candidates.append(cover_url)
+
+    if entry_is_from_youtube(entry):
+        for candidate in build_youtube_thumbnail_candidates(entry):
+            if candidate and candidate not in cover_candidates:
+                cover_candidates.append(candidate)
+
+    metadata = {
+        "title": title_candidate,
+        "artist": GLOBAL_ARTIST_NAME,
+        "album": album_candidate,
+        "comment": WATERMARK_TEXT,
+        "source_url": source_url,
+        "cover_url": cover_candidates[0] if cover_candidates else None,
+        "cover_data": None,
+        "cover_mime": None,
+        "original_artist": original_artist,
+    }
+
+    if isinstance(metadata["title"], str):
+        metadata["title"] = metadata["title"].strip() or DEFAULT_TRACK_TITLE
+    else:
+        metadata["title"] = str(metadata["title"])
+
+    if isinstance(metadata["artist"], str):
+        metadata["artist"] = metadata["artist"].strip() or GLOBAL_ARTIST_NAME
+    else:
+        metadata["artist"] = str(metadata["artist"]) if metadata.get("artist") else GLOBAL_ARTIST_NAME
+
+    if isinstance(metadata["album"], str):
+        metadata["album"] = metadata["album"].strip() or DEFAULT_ALBUM_NAME
+    else:
+        metadata["album"] = str(metadata["album"]).strip() if metadata.get("album") else DEFAULT_ALBUM_NAME
+
+    if metadata.get("original_artist"):
+        if isinstance(metadata["original_artist"], str):
+            metadata["original_artist"] = metadata["original_artist"].strip()
+        else:
+            metadata["original_artist"] = str(metadata["original_artist"]).strip()
+        if metadata["original_artist"]:
+            metadata["comment"] = f"{WATERMARK_TEXT} | Original artist: {metadata['original_artist']}"
+        else:
+            metadata["original_artist"] = None
+
+    if MUTAGEN_AVAILABLE and cover_candidates:
+        for candidate_url in cover_candidates:
+            cover_data, cover_mime = download_thumbnail_data(candidate_url)
+            if cover_data:
+                metadata["cover_data"] = cover_data
+                metadata["cover_mime"] = cover_mime
+                metadata["cover_url"] = candidate_url
+                break
+
+    return metadata
+
+
 def prepare_readable_download(actual_filepath, entry_title):
     """Переименовывает скачанный файл в более дружелюбный вариант с пробелами."""
     if not actual_filepath or not os.path.exists(actual_filepath):
@@ -173,13 +429,18 @@ def prepare_readable_download(actual_filepath, entry_title):
     return actual_filepath, desired_filename, clean_title
 
 
-def apply_metadata_tags(file_path, title, artist):
-    """Записывает теги title/artist в итоговый файл, если доступен mutagen."""
+def apply_metadata_tags(file_path, metadata):
+    """Записывает расширенные теги (включая обложку) в итоговый аудиофайл."""
     if not MUTAGEN_AVAILABLE or not file_path or not os.path.exists(file_path):
         return
 
-    title = title or DEFAULT_TRACK_TITLE
-    artist = artist or GLOBAL_ARTIST_NAME
+    metadata = metadata or {}
+    title = metadata.get('title') or DEFAULT_TRACK_TITLE
+    artist = metadata.get('artist') or GLOBAL_ARTIST_NAME
+    album = metadata.get('album') or DEFAULT_ALBUM_NAME
+    comment = metadata.get('comment') or WATERMARK_TEXT
+    cover_data = metadata.get('cover_data')
+    cover_mime = metadata.get('cover_mime') or (guess_mime_from_url(metadata.get('cover_url')) if metadata.get('cover_url') else 'image/jpeg')
 
     try:
         lowercase_path = file_path.lower()
@@ -191,15 +452,68 @@ def apply_metadata_tags(file_path, title, artist):
                 audio_file.add_tags()
                 audio_file.save()
                 audio = EasyID3(file_path)
+
             audio['title'] = [title]
             audio['artist'] = [artist]
             audio['albumartist'] = [artist]
+            if album:
+                audio['album'] = [album]
+            audio['comment'] = [comment]
             audio.save()
+
+            if cover_data:
+                mp3_binary = MP3(file_path)
+                if mp3_binary.tags is None:
+                    mp3_binary.add_tags()
+                mp3_binary.tags.delall('APIC')
+                mp3_binary.tags.add(APIC(
+                    encoding=3,
+                    mime=cover_mime or 'image/jpeg',
+                    type=3,
+                    desc='Cover',
+                    data=cover_data
+                ))
+                mp3_binary.save()
+
         elif lowercase_path.endswith(('.m4a', '.mp4', '.m4v', '.aac')):
             audio = MP4(file_path)
             audio['\xa9nam'] = [title]
             audio['\xa9ART'] = [artist]
             audio['aART'] = [artist]
+            audio['\xa9alb'] = [album]
+            audio['desc'] = [comment]
+            audio['\xa9cmt'] = [comment]
+
+            if cover_data and cover_mime:
+                lower_mime = cover_mime.lower()
+                if 'png' in lower_mime:
+                    cover = MP4Cover(cover_data, imageformat=MP4Cover.FORMAT_PNG)
+                    audio['covr'] = [cover]
+                elif 'jpg' in lower_mime or 'jpeg' in lower_mime:
+                    cover = MP4Cover(cover_data, imageformat=MP4Cover.FORMAT_JPEG)
+                    audio['covr'] = [cover]
+                else:
+                    logger.debug(f"Пропущена обложка для '{file_path}': неподдерживаемый MIME {cover_mime}")
+
+            audio.save()
+        elif lowercase_path.endswith(('.opus', '.ogg')):
+            audio = OggOpus(file_path)
+            audio['title'] = [title]
+            audio['artist'] = [artist]
+            audio['albumartist'] = [artist]
+            audio['album'] = [album]
+            audio['comment'] = [comment]
+            if cover_data:
+                picture = Picture()
+                picture.data = cover_data
+                picture.type = 3
+                picture.mime = cover_mime or 'image/jpeg'
+                picture.desc = 'Cover'
+                picture.width = 0
+                picture.height = 0
+                picture.depth = 24
+                encoded_data = base64.b64encode(picture.write()).decode('ascii')
+                audio['metadata_block_picture'] = [encoded_data]
             audio.save()
     except Exception as tag_error:
         logger.warning(f"Не удалось записать теги для '{file_path}': {tag_error}")
@@ -219,6 +533,10 @@ def is_valid_url(url):
 def is_youtube_url(url):
     """Проверка, является ли URL ссылкой на YouTube."""
     return "youtube.com/" in url.lower() or "youtu.be/" in url.lower()
+
+def is_ytmusic_url(url):
+    """Проверка, принадлежит ли URL домену YouTube Music."""
+    return "music.youtube.com" in (url.lower() if isinstance(url, str) else "")
 
 def is_soundcloud_url(url):
     """Проверка, является ли URL ссылкой на SoundCloud."""
@@ -259,24 +577,44 @@ def blocking_yt_dlp_download(ydl_opts, url_to_download):
         logger.error(f"Неожиданная ошибка в blocking_yt_dlp_download для URL '{url_to_download}': {e}", exc_info=True)
         return None
 
-def get_info_and_check_duration(url):
-    """Получает информацию о контенте и проверяет его длительность."""
-    logger.info(f"Получаю информацию о контенте: {url}")
-    info_extractor_opts = {
+def build_info_extractor_opts(url):
+    """Формирует набор опций для предварительного получения информации и проверки длительности."""
+    opts = {
         'skip_download': True,
         'quiet': True,
         'no_warnings': True,
-        'force_generic_extractor': True,
-        'cookiefile': COOKIES_PATH if os.path.exists(COOKIES_PATH) else None,
     }
+
+    if os.path.exists(COOKIES_PATH):
+        opts['cookiefile'] = COOKIES_PATH
+
+    if PLAYLIST_DURATION_CHECK_LIMIT > 0:
+        opts['playlist_items'] = f"1-{PLAYLIST_DURATION_CHECK_LIMIT}"
+
+    if not (is_youtube_url(url) or is_soundcloud_url(url) or is_tiktok_url(url)):
+        opts['force_generic_extractor'] = True
+
+    return opts
+
+
+def get_info_and_check_duration(url):
+    """Получает информацию о контенте и проверяет его длительность."""
+    logger.info(f"Получаю информацию о контенте: {url}")
+    info_extractor_opts = build_info_extractor_opts(url)
     try:
         with yt_dlp.YoutubeDL(info_extractor_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             
             if info and info.get('_type') == 'playlist':
-                for entry in info.get('entries', []):
+                entries = info.get('entries') or []
+                for idx, entry in enumerate(entries, start=1):
                     if entry and entry.get('duration') and entry['duration'] > DURATION_LIMIT_SECONDS:
                         raise ValueError(f"Плейлист содержит контент длиннее {DURATION_LIMIT_SECONDS/60} минут: {entry.get('title', 'Без названия')}")
+                if PLAYLIST_DURATION_CHECK_LIMIT and entries:
+                    total = info.get('playlist_count') or len(entries)
+                    checked = min(len(entries), PLAYLIST_DURATION_CHECK_LIMIT)
+                    if total > checked:
+                        logger.debug(f"Проверено первых {checked} элементов из плейлиста (всего заявлено: {total}).")
                 return {"status": "success", "info": info}
             elif info and info.get('duration') and info['duration'] > DURATION_LIMIT_SECONDS:
                 raise ValueError(f"Контент длиннее {DURATION_LIMIT_SECONDS/60} минут не может быть скачан: {info.get('title', 'Без названия')}")
@@ -287,6 +625,26 @@ def get_info_and_check_duration(url):
     except Exception as e:
         logger.error(f"Неожиданная ошибка при проверке длительности: {e}")
         raise ValueError(f"Произошла внутренняя ошибка при проверке длительности: {e}")
+
+def normalize_supported_url(url):
+    """
+    Нормализует известные URL (например, YouTube Music) в совместимый вид для yt-dlp.
+    Пока что переводит music.youtube.com на www.youtube.com, так как контент идентичен.
+    """
+    if not url:
+        return url
+
+    if is_ytmusic_url(url):
+        try:
+            parsed = urlparse(url)
+            normalized = urlunparse(parsed._replace(netloc="www.youtube.com"))
+            logger.debug(f"URL YouTube Music нормализован до стандартного YouTube: {normalized}")
+            return normalized
+        except Exception as norm_error:
+            logger.warning(f"Не удалось нормализовать URL YouTube Music '{url}': {norm_error}")
+            return url
+
+    return url
 
 # --- Маршруты Flask ---
 @app.route('/')
@@ -307,6 +665,11 @@ def download_audio_route():
 
     if not url or not is_valid_url(url):
         return jsonify({"status": "error", "message": "Некорректный или отсутствующий URL."}), 400
+
+    normalized_url = normalize_supported_url(url)
+    if normalized_url != url:
+        logger.info("Обнаружен YouTube Music URL. Выполняю загрузку через стандартный YouTube эндпоинт.")
+        url = normalized_url
 
     session_id = str(uuid.uuid4())
     session_download_path = os.path.join(USER_DOWNLOADS_DIR, session_id)
@@ -371,6 +734,42 @@ def download_audio_route():
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио (может быть не MP3).")
             ydl_opts['format'] = 'bestaudio[ext=m4a]/bestaudio/best'
+    elif requested_format == "m4a":
+        if FFMPEG_IS_AVAILABLE:
+            logger.info("FFmpeg доступен. Конвертация в M4A с метаданными.")
+            ydl_opts['format'] = 'bestaudio/best'
+            ydl_opts['postprocessors'] = [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'm4a',
+                'preferredquality': '0',
+            }]
+            ydl_opts['postprocessor_args'] = {
+                'FFmpegExtractAudio': [
+                    '-metadata', f'comment={WATERMARK_TEXT}',
+                    '-metadata', f'artist={GLOBAL_ARTIST_NAME}'
+                ]
+            }
+        else:
+            logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио M4A без конвертации.")
+            ydl_opts['format'] = 'bestaudio[ext=m4a]/bestaudio/best'
+    elif requested_format == "opus":
+        if FFMPEG_IS_AVAILABLE:
+            logger.info("FFmpeg доступен. Конвертация в Opus с метаданными.")
+            ydl_opts['format'] = 'bestaudio/best'
+            ydl_opts['postprocessors'] = [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'opus',
+                'preferredquality': '192',
+            }]
+            ydl_opts['postprocessor_args'] = {
+                'FFmpegExtractAudio': [
+                    '-metadata', f'comment={WATERMARK_TEXT}',
+                    '-metadata', f'artist={GLOBAL_ARTIST_NAME}'
+                ]
+            }
+        else:
+            logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио с кодеком Opus без конвертации.")
+            ydl_opts['format'] = 'bestaudio[acodec=opus]/bestaudio/best'
     elif requested_format == "mp4":
         if FFMPEG_IS_AVAILABLE:
             logger.info("FFmpeg доступен. Скачивание в MP4 720p.")
@@ -391,7 +790,7 @@ def download_audio_route():
     else:
         if os.path.exists(session_download_path):
             shutil.rmtree(session_download_path)
-        return jsonify({"status": "error", "message": "Неподдерживаемый формат. Выберите MP3 или MP4."}), 400
+        return jsonify({"status": "error", "message": "Неподдерживаемый формат. Выберите MP3, M4A, Opus или MP4."}), 400
 
     # Очистка опций yt-dlp от пустых значений
     ydl_opts_cleaned = {k: v for k, v in ydl_opts.items() if v is not None}
@@ -429,6 +828,7 @@ def download_audio_route():
 
             track_name, artist_name = extract_track_metadata(entry)
             display_title = compose_full_title(track_name, artist_name)
+            metadata = build_track_metadata(entry, track_name, artist_name)
             actual_filepath = None
             if entry.get('requested_downloads'):
                 for req_download in entry['requested_downloads']:
@@ -441,11 +841,21 @@ def download_audio_route():
             if actual_filepath:
                 actual_filepath, filename, _ = prepare_readable_download(actual_filepath, display_title)
                 if actual_filepath and os.path.exists(actual_filepath):
-                    apply_metadata_tags(actual_filepath, display_title, GLOBAL_ARTIST_NAME)
+                    apply_metadata_tags(actual_filepath, metadata)
+                    response_metadata = {
+                        "title": metadata.get("title"),
+                        "artist": metadata.get("artist"),
+                        "original_artist": metadata.get("original_artist"),
+                        "album": metadata.get("album"),
+                        "thumbnail": metadata.get("cover_url"),
+                        "source_url": metadata.get("source_url")
+                    }
                     downloaded_files_list.append({
                         "filename": filename,
                         "title": display_title,
-                        "artist": GLOBAL_ARTIST_NAME,
+                        "artist": metadata.get("artist", GLOBAL_ARTIST_NAME),
+                        "thumbnail": metadata.get("cover_url"),
+                        "metadata": response_metadata,
                         "download_url": f"/serve_file/{session_id}/{filename.replace('%', '%25')}"
                     })
                 else:
@@ -465,11 +875,32 @@ def download_audio_route():
                     target_name = prepared_name if prepared_name else f_name
                     title_value = title_part if title_part else prepared_title
                     metadata_target_path = prepared_path if prepared_path else os.path.join(session_download_path, target_name)
-                    apply_metadata_tags(metadata_target_path, title_value, GLOBAL_ARTIST_NAME)
+                    fallback_metadata = {
+                        "title": title_value or prepared_title or DEFAULT_TRACK_TITLE,
+                        "artist": GLOBAL_ARTIST_NAME,
+                        "album": DEFAULT_ALBUM_NAME,
+                        "comment": WATERMARK_TEXT,
+                        "original_artist": None,
+                        "cover_data": None,
+                        "cover_mime": None,
+                        "cover_url": None,
+                        "source_url": None
+                    }
+                    apply_metadata_tags(metadata_target_path, fallback_metadata)
                     downloaded_files_list.append({
                         "filename": target_name,
                         "title": title_value if title_value else target_name,
                         "artist": GLOBAL_ARTIST_NAME,
+                        "original_artist": None,
+                        "thumbnail": None,
+                        "metadata": {
+                            "title": fallback_metadata["title"],
+                            "artist": fallback_metadata["artist"],
+                            "original_artist": None,
+                            "album": fallback_metadata["album"],
+                            "thumbnail": None,
+                            "source_url": None
+                        },
                         "download_url": f"/serve_file/{session_id}/{target_name.replace('%', '%25')}"
                     })
 
@@ -563,6 +994,25 @@ def search_content_route():
                         })
     except Exception as e:
         logger.error(f"Ошибка при поиске на YouTube: {e}")
+
+    # Поиск на YouTube Music (10 результатов)
+    try:
+        with yt_dlp.YoutubeDL(search_opts) as ydl:
+            ytm_info = ydl.extract_info(f"ytmusicsearch{SEARCH_RESULTS_LIMIT}:{query}", download=False)
+            if ytm_info and 'entries' in ytm_info:
+                for entry in ytm_info['entries']:
+                    if entry and entry.get('url'):
+                        search_results.append({
+                            "source": "YouTube Music",
+                            "title": entry.get('title', 'Без названия'),
+                            "url": entry.get('webpage_url') or entry.get('url'),
+                            "duration": entry.get('duration'),
+                            "thumbnail": entry.get('thumbnail'),
+                            "uploader": entry.get('uploader') or entry.get('artist'),
+                            "id": entry.get('id')
+                        })
+    except Exception as e:
+        logger.error(f"Ошибка при поиске на YouTube Music: {e}")
 
     # Поиск на SoundCloud (10 результатов)
     try:
