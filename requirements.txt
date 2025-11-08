@@ -2,3 +2,4 @@ Flask
 yt-dlp
 python-dotenv
 gunicorn
+mutagen
