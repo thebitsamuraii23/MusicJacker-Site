@@ -181,6 +181,223 @@
         </div>
     </section>
 
+<<<<<<< HEAD
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
+=======
+        @keyframes fluidGlow {
+            0% { transform: translate3d(0,0,0) scale(1); opacity: 0.35; }
+            100% { transform: translate3d(20px,-20px,0) scale(1.1); opacity: 0.55; }
+        }
+        @keyframes fluidBlob {
+            0% { transform: translate3d(0,0,0) rotate(0deg); }
+            50% { transform: translate3d(30px,-25px,0) rotate(12deg); }
+            100% { transform: translate3d(-10px,10px,0) rotate(-6deg); }
+        }
+
+        .lang-switcher-container,
+        .background-switcher-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            color: #cbd5e1;
+            letter-spacing: 0.08em;
+            font-size: 0.7rem;
+        }
+        .lang-switcher-container label,
+        .background-switcher-container label {
+            font-weight: 600;
+        }
+        .lang-switcher-container label {
+            text-transform: none;
+        }
+        .background-switcher-container label {
+            text-transform: uppercase;
+        }
+
+        .main-card {
+            background-color: rgba(30, 41, 59, 0.88);
+            backdrop-filter: blur(10px);
+            padding: 2rem 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+            width: 100%;
+            max-width: 580px;
+            margin-top: 8rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardEnterMain 0.7s 0.3s cubic-bezier(0.25,0.8,0.25,1) forwards;
+        }
+        @keyframes cardEnterMain {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .overlay-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            visibility: hidden;
+            opacity: 0;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            transition: opacity 0.3s ease-out, visibility 0s linear 0.3s;
+        }
+        .overlay-section.visible {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.3s ease-out, visibility 0s linear 0s;
+        }
+
+        .info-content-card {
+            background-color: rgba(45, 55, 72, 0.97);
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 700px;
+            width: calc(100% - 2rem);
+            color: #e2e8f0;
+            margin: auto;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .info-content-card h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 1.25rem;
+            text-align: center;
+        }
+        .info-content-card h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #7dd3fc;
+            margin-top: 1.25rem;
+            margin-bottom: 0.6rem;
+            border-bottom: 1px solid rgb(71 85 105 / 0.5);
+            padding-bottom: 0.4rem;
+        }
+        .info-content-card p, .info-content-card li {
+            font-size: 0.95rem;
+            line-height: 1.65;
+            margin-bottom: 0.6rem;
+        }
+        .info-content-card ul {
+            list-style: disc;
+            padding-left: 1.5rem;
+        }
+        .info-content-card code {
+            background-color: rgb(51 65 85 / 0.7);
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            color: #f0f0f0;
+        }
+
+        .loader { border-top-color: #0ea5e9; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .lang-switcher-container select,
+        .background-switcher-container select { padding: 0.6rem 1rem; border-radius: 0.5rem; border: 1px solid rgb(71 85 105 / 0.7); background-color: rgb(30 41 59 / 0.85); backdrop-filter: blur(6px); color: white; font-size: 0.875rem; transition: all 0.2s ease-in-out; min-width: 165px; }
+        .lang-switcher-container select:hover,
+        .background-switcher-container select:hover { border-color: #0ea5e9; background-color: rgb(51 65 85 / 0.9); }
+        @media (max-width: 640px) {
+            .header-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .lang-switcher-container select,
+            .background-switcher-container select {
+                width: 100%;
+            }
+            .background-switcher-container {
+                align-items: flex-start;
+            }
+        }
+        #statusArea ul::-webkit-scrollbar { width: 8px; }
+        #statusArea ul::-webkit-scrollbar-track { background: rgb(51 65 85); border-radius: 10px; }
+        #statusArea ul::-webkit-scrollbar-thumb { background: rgb(71 85 105); border-radius: 10px; }
+        #statusArea ul::-webkit-scrollbar-thumb:hover { background: #0ea5e9; }
+
+        input[type="url"]:focus, select:focus { box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.5); border-color: #0ea5e9 !important; }
+        .submit-button { transition: all 0.3s ease-out; }
+        .submit-button:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 12px 25px rgba(14, 165, 233, 0.25), 0 8px 10px rgba(14, 165, 233, 0.22); }
+        .submit-button:active { transform: translateY(-1px) scale(0.99); box-shadow: 0 5px 10px rgba(14, 165, 233, 0.2), 0 2px 4px rgba(14, 165, 233, 0.18); }
+        .status-message-item { opacity: 0; transform: translateY(10px); animation: fadeInItem 0.5s ease-out forwards; }
+        @keyframes fadeInItem { to { opacity: 1; transform: translateY(0); } }
+        .music-icon-animated svg line { stroke-dasharray: 50; stroke-dashoffset: 50; animation: drawLine 1.5s ease-out forwards infinite alternate; }
+        .music-icon-animated svg line:nth-child(1) { animation-delay: 0s; }
+        .music-icon-animated svg line:nth-child(2) { animation-delay: 0.2s; }
+        .music-icon-animated svg line:nth-child(3) { animation-delay: 0.4s; }
+        .music-icon-animated svg line:nth-child(4) { animation-delay: 0.6s; }
+        .music-icon-animated svg line:nth-child(5) { animation-delay: 0.8s; }
+        .music-icon-animated svg line:nth-child(6) { animation-delay: 1.0s; }
+        @keyframes drawLine { 50% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 0; transform: scaleY(0.3); } }
+
+        .main-card .text-center, .main-card form > div, .main-card .submit-button {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: formItemEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .main-card .text-center { animation-delay: 0.1s; }
+        .main-card form > div:nth-child(1) { animation-delay: 0.2s; }
+        .main-card form > div:nth-child(2) { animation-delay: 0.3s; }
+        .main-card .submit-button { animation-delay: 0.4s; }
+
+        @keyframes formItemEnter {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .app-footer {
+            opacity: 0;
+            animation: fadeInFooter 1s 0.5s ease-out forwards;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 0.75rem 1rem;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            z-index: 5;
+            width: 100%;
+        }
+        @keyframes fadeInFooter {
+            to { opacity: 1; }
+        }
+        .file-download-status {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-left: 0.5rem;
+        }
+        .telegram-link-container { margin-top: 0.75rem; font-size: 0.875rem; color: #94a3b8; }
+        .telegram-link-container a { color: #38bdf8; text-decoration: underline; }
+        .telegram-link-container a:hover { color: #7dd3fc; }
+
+        .close-overlay-button {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid rgba(100,116,139,0.5);
+            color: #cbd5e1;
+            font-size: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 110;
+            backdrop-filter: blur(3px);
+        }
+>>>>>>> 3d47b10 (feat: load translations from external JSON with lazy fetch)

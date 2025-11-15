@@ -7,6 +7,7 @@ import re
 import mimetypes
 import socket
 import base64
+import imghdr
 from urllib.parse import urlparse, urlunparse, parse_qs
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -76,9 +77,7 @@ COOKIES_PATH = os.path.join(os.path.dirname(__file__), 'youtube.com_cookies.txt'
 if not os.path.exists(COOKIES_PATH):
     logger.warning(f"Файл куки {COOKIES_PATH} не найден. Загрузка некоторых YouTube видео может быть ограничена.")
 
-# Текст водяного знака для имени файла и метаданных
-WATERMARK_TEXT = "The Music Jacker. Site created by thebitsamurai"
-GLOBAL_ARTIST_NAME = "Music Jacker (developed by thebitsamurai)"
+GLOBAL_ARTIST_NAME = os.getenv('DEFAULT_ARTIST_NAME', "Unknown Artist")
 DEFAULT_ALBUM_NAME = os.getenv('DEFAULT_ALBUM_NAME', "Music Jacker Downloads")
 
 # Ограничение длительности контента (10 минут в секундах)
@@ -137,9 +136,6 @@ def normalize_title_for_filename(raw_title):
         raw_title = str(raw_title)
 
     normalized = re.sub(r'\s+', ' ', raw_title).strip()
-    watermark_token = f" - {WATERMARK_TEXT}"
-    if watermark_token in normalized:
-        normalized = normalized.split(watermark_token)[0].strip()
     normalized = ''.join(ch for ch in normalized if ch.isprintable())
     normalized = normalized.translate(FILENAME_STRIP_TRANS)
     if os.path.sep in normalized:
@@ -166,6 +162,19 @@ def ensure_unique_filename(directory, desired_name, current_path=None):
         counter += 1
 
 
+def _thumbnail_sort_key(thumbnail):
+    if not isinstance(thumbnail, dict):
+        return (0, 0, 0)
+    preference = thumbnail.get('preference')
+    height = thumbnail.get('height')
+    width = thumbnail.get('width')
+    return (
+        preference if preference is not None else 0,
+        height if height is not None else 0,
+        width if width is not None else 0
+    )
+
+
 def select_best_thumbnail_url(entry):
     """Возвращает URL наилучшего доступного превью из entry yt-dlp."""
     if not entry or not isinstance(entry, dict):
@@ -173,15 +182,8 @@ def select_best_thumbnail_url(entry):
 
     thumbnails = entry.get('thumbnails') or []
     if isinstance(thumbnails, list) and thumbnails:
-        def thumbnail_sort_key(th):
-            return (
-                th.get('preference') if th.get('preference') is not None else 0,
-                th.get('height') if th.get('height') is not None else 0,
-                th.get('width') if th.get('width') is not None else 0
-            )
-
-        for candidate in sorted(thumbnails, key=thumbnail_sort_key, reverse=True):
-            url = candidate.get('url')
+        for candidate in sorted(thumbnails, key=_thumbnail_sort_key, reverse=True):
+            url = candidate.get('url') if isinstance(candidate, dict) else candidate
             if url:
                 return url
 
@@ -329,6 +331,10 @@ def download_thumbnail_data(url):
             content_type = response.headers.get('Content-Type')
             if content_type:
                 content_type = content_type.split(';')[0].strip()
+            if not content_type:
+                detected = imghdr.what(None, h=data)
+                if detected:
+                    content_type = f"image/{detected.lower()}"
             mime = content_type or guess_mime_from_url(url)
             return data, mime
     except (HTTPError, URLError, socket.timeout) as thumb_error:
@@ -347,20 +353,37 @@ def build_track_metadata(entry, track_name, artist_name):
     album_candidate = infer_album_name(entry)
     source_url = entry.get('webpage_url') or entry.get('url')
     cover_candidates = []
+    seen_covers = set()
+
+    def add_cover_candidate(url):
+        if url and isinstance(url, str) and url not in seen_covers:
+            cover_candidates.append(url)
+            seen_covers.add(url)
+
     cover_url = select_best_thumbnail_url(entry)
     if cover_url:
-        cover_candidates.append(cover_url)
+        add_cover_candidate(cover_url)
+
+    for key in ('thumbnail', 'thumbnail_url', 'thumbnail_webp', 'thumbnail_720_url', 'thumbnail_480_url'):
+        add_cover_candidate(entry.get(key))
+
+    thumbnails_list = entry.get('thumbnails') or []
+    if isinstance(thumbnails_list, list):
+        for candidate in sorted(thumbnails_list, key=_thumbnail_sort_key, reverse=True):
+            if isinstance(candidate, dict):
+                add_cover_candidate(candidate.get('url'))
+            else:
+                add_cover_candidate(candidate)
 
     if entry_is_from_youtube(entry):
         for candidate in build_youtube_thumbnail_candidates(entry):
-            if candidate and candidate not in cover_candidates:
-                cover_candidates.append(candidate)
+            add_cover_candidate(candidate)
 
     metadata = {
         "title": title_candidate,
-        "artist": GLOBAL_ARTIST_NAME,
+        "artist": original_artist or GLOBAL_ARTIST_NAME,
         "album": album_candidate,
-        "comment": WATERMARK_TEXT,
+        "comment": f"Source: {source_url}" if source_url else "",
         "source_url": source_url,
         "cover_url": cover_candidates[0] if cover_candidates else None,
         "cover_data": None,
@@ -388,10 +411,11 @@ def build_track_metadata(entry, track_name, artist_name):
             metadata["original_artist"] = metadata["original_artist"].strip()
         else:
             metadata["original_artist"] = str(metadata["original_artist"]).strip()
-        if metadata["original_artist"]:
-            metadata["comment"] = f"{WATERMARK_TEXT} | Original artist: {metadata['original_artist']}"
-        else:
+        if not metadata["original_artist"]:
             metadata["original_artist"] = None
+
+    metadata["artist"] = metadata.get("original_artist") or metadata.get("artist") or GLOBAL_ARTIST_NAME
+    metadata["comment"] = (metadata.get("comment") or "").strip()
 
     if MUTAGEN_AVAILABLE and cover_candidates:
         for candidate_url in cover_candidates:
@@ -403,6 +427,18 @@ def build_track_metadata(entry, track_name, artist_name):
                 break
 
     return metadata
+
+
+def build_thumbnail_preview(metadata):
+    """Возвращает data URI для встроенной обложки или исходный URL, если встроенных данных нет."""
+    if not metadata:
+        return None
+    cover_data = metadata.get('cover_data')
+    if cover_data:
+        cover_mime = metadata.get('cover_mime') or 'image/jpeg'
+        encoded = base64.b64encode(cover_data).decode('ascii')
+        return f"data:{cover_mime};base64,{encoded}"
+    return metadata.get('cover_url')
 
 
 def prepare_readable_download(actual_filepath, entry_title):
@@ -438,7 +474,7 @@ def apply_metadata_tags(file_path, metadata):
     title = metadata.get('title') or DEFAULT_TRACK_TITLE
     artist = metadata.get('artist') or GLOBAL_ARTIST_NAME
     album = metadata.get('album') or DEFAULT_ALBUM_NAME
-    comment = metadata.get('comment') or WATERMARK_TEXT
+    comment = metadata.get('comment') or ""
     cover_data = metadata.get('cover_data')
     cover_mime = metadata.get('cover_mime') or (guess_mime_from_url(metadata.get('cover_url')) if metadata.get('cover_url') else 'image/jpeg')
 
@@ -688,7 +724,7 @@ def download_audio_route():
             shutil.rmtree(session_download_path)
         return jsonify({"status": "error", "message": f"Произошла ошибка при проверке длительности: {e}"}), 500
 
-    output_template = os.path.join(session_download_path, f"%(title).75B - {WATERMARK_TEXT}.%(ext)s")
+    output_template = os.path.join(session_download_path, "%(title).75B.%(ext)s")
 
     ydl_opts = {
         'outtmpl': output_template,
@@ -722,12 +758,6 @@ def download_audio_route():
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
             }]
-            ydl_opts['postprocessor_args'] = {
-                'FFmpegExtractAudio': [
-                    '-metadata', f'comment={WATERMARK_TEXT}',
-                    '-metadata', f'artist={GLOBAL_ARTIST_NAME}'
-                ]
-            }
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио (может быть не MP3).")
             ydl_opts['format'] = 'bestaudio[ext=m4a]/bestaudio/best'
@@ -740,12 +770,6 @@ def download_audio_route():
                 'preferredcodec': 'm4a',
                 'preferredquality': '0',
             }]
-            ydl_opts['postprocessor_args'] = {
-                'FFmpegExtractAudio': [
-                    '-metadata', f'comment={WATERMARK_TEXT}',
-                    '-metadata', f'artist={GLOBAL_ARTIST_NAME}'
-                ]
-            }
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио M4A без конвертации.")
             ydl_opts['format'] = 'bestaudio[ext=m4a]/bestaudio/best'
@@ -758,12 +782,6 @@ def download_audio_route():
                 'preferredcodec': 'opus',
                 'preferredquality': '192',
             }]
-            ydl_opts['postprocessor_args'] = {
-                'FFmpegExtractAudio': [
-                    '-metadata', f'comment={WATERMARK_TEXT}',
-                    '-metadata', f'artist={GLOBAL_ARTIST_NAME}'
-                ]
-            }
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее аудио с кодеком Opus без конвертации.")
             ydl_opts['format'] = 'bestaudio[acodec=opus]/bestaudio/best'
@@ -775,12 +793,6 @@ def download_audio_route():
                 'key': 'FFmpegVideoConvertor',
                 'preferedformat': 'mp4',
             }]
-            ydl_opts['postprocessor_args'] = {
-                'FFmpegVideoConvertor': [
-                    '-metadata', f'comment={WATERMARK_TEXT}',
-                    '-metadata', f'artist={GLOBAL_ARTIST_NAME}'
-                ]
-            }
         else:
             logger.warning("FFmpeg не найден. Попытка скачать лучшее видео (может быть не MP4 720p).")
             ydl_opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
@@ -838,19 +850,20 @@ def download_audio_route():
                 actual_filepath, filename, _ = prepare_readable_download(actual_filepath, display_title)
                 if actual_filepath and os.path.exists(actual_filepath):
                     apply_metadata_tags(actual_filepath, metadata)
+                    thumbnail_preview = build_thumbnail_preview(metadata)
                     response_metadata = {
                         "title": metadata.get("title"),
                         "artist": metadata.get("artist"),
                         "original_artist": metadata.get("original_artist"),
                         "album": metadata.get("album"),
-                        "thumbnail": metadata.get("cover_url"),
+                        "thumbnail": thumbnail_preview,
                         "source_url": metadata.get("source_url")
                     }
                     downloaded_files_list.append({
                         "filename": filename,
                         "title": display_title,
                         "artist": metadata.get("artist", GLOBAL_ARTIST_NAME),
-                        "thumbnail": metadata.get("cover_url"),
+                        "thumbnail": thumbnail_preview,
                         "metadata": response_metadata,
                         "download_url": f"/serve_file/{session_id}/{filename.replace('%', '%25')}"
                     })
@@ -865,8 +878,9 @@ def download_audio_route():
                 file_path_check = os.path.join(session_download_path, f_name)
                 if os.path.isfile(file_path_check) and f_name.lower().endswith(('.mp3', '.m4a', '.mp4', '.ogg', '.opus')):
                     base_name_for_title = os.path.splitext(f_name)[0]
-                    title_part = base_name_for_title.split(f" - {WATERMARK_TEXT}")[0].strip()
-                    title_part = title_part.rsplit('[', 1)[0].strip() if '[' in title_part and title_part.endswith(']') else title_part
+                    title_part = base_name_for_title.strip()
+                    if '[' in title_part and title_part.endswith(']'):
+                        title_part = title_part.rsplit('[', 1)[0].strip()
                     prepared_path, prepared_name, prepared_title = prepare_readable_download(file_path_check, title_part)
                     target_name = prepared_name if prepared_name else f_name
                     title_value = title_part if title_part else prepared_title
@@ -875,7 +889,7 @@ def download_audio_route():
                         "title": title_value or prepared_title or DEFAULT_TRACK_TITLE,
                         "artist": GLOBAL_ARTIST_NAME,
                         "album": DEFAULT_ALBUM_NAME,
-                        "comment": WATERMARK_TEXT,
+                        "comment": "",
                         "original_artist": None,
                         "cover_data": None,
                         "cover_mime": None,
@@ -883,18 +897,19 @@ def download_audio_route():
                         "source_url": None
                     }
                     apply_metadata_tags(metadata_target_path, fallback_metadata)
+                    fallback_thumbnail = build_thumbnail_preview(fallback_metadata)
                     downloaded_files_list.append({
                         "filename": target_name,
                         "title": title_value if title_value else target_name,
                         "artist": GLOBAL_ARTIST_NAME,
                         "original_artist": None,
-                        "thumbnail": None,
+                        "thumbnail": fallback_thumbnail,
                         "metadata": {
                             "title": fallback_metadata["title"],
                             "artist": fallback_metadata["artist"],
                             "original_artist": None,
                             "album": fallback_metadata["album"],
-                            "thumbnail": None,
+                            "thumbnail": fallback_thumbnail,
                             "source_url": None
                         },
                         "download_url": f"/serve_file/{session_id}/{target_name.replace('%', '%25')}"
