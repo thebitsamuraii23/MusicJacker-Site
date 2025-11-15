@@ -141,6 +141,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             const githubButton = document.getElementById('githubButton');
             const backgroundSelector = document.getElementById('backgroundSelector');
             const backgroundModes = ['night', 'faulty-terminal', 'dot-grid', 'aurora', 'dither'];
+            const navContainer = document.querySelector('.top-nav-container');
+            const navToggleButton = document.getElementById('navToggleButton');
+
+            if (navContainer && navToggleButton) {
+                let navCollapsed = window.innerWidth <= 768;
+                const setNavCollapsed = (collapsed) => {
+                    navCollapsed = collapsed;
+                    navContainer.classList.toggle('nav-collapsed', collapsed);
+                    navToggleButton.setAttribute('aria-expanded', (!collapsed).toString());
+                    navToggleButton.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+                };
+                navToggleButton.addEventListener('click', () => setNavCollapsed(!navCollapsed));
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth <= 768 && !navCollapsed) {
+                        setNavCollapsed(true);
+                    }
+                });
+                setNavCollapsed(navCollapsed);
+            }
 
             function applyBackgroundChoice(mode) {
                 const normalized = backgroundModes.includes(mode) ? mode : 'night';
