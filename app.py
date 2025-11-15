@@ -18,7 +18,7 @@ try:
     from mutagen.easyid3 import EasyID3
     try:
         EasyID3.RegisterTextKey('comment', 'COMM')
-    except Exception:
+    except Exception:  
         pass
     from mutagen.id3 import ID3NoHeaderError, APIC
     from mutagen.mp3 import MP3
@@ -108,7 +108,7 @@ def extract_track_metadata(entry):
 
     if not preferred_track and ' - ' in title:
         possible_artist, possible_track = title.split(' - ', 1)
-        if possible_track.strip():
+        if possible_track.strip():     
             track_name = possible_track.strip()
             if not artist:
                 artist = possible_artist.strip()
@@ -687,15 +687,14 @@ def download_audio_route():
         if os.path.exists(session_download_path):
             shutil.rmtree(session_download_path)
         return jsonify({"status": "error", "message": f"Произошла ошибка при проверке длительности: {e}"}), 500
-    # --- Конец проверки длительности ---
 
     output_template = os.path.join(session_download_path, f"%(title).75B - {WATERMARK_TEXT}.%(ext)s")
 
     ydl_opts = {
         'outtmpl': output_template,
         'restrictfilenames': True,
-        'noplaylist': False, # Разрешить загрузку плейлистов
-        'ignoreerrors': True, # Игнорировать ошибки для отдельных видео в плейлисте
+        'noplaylist': False,
+        'ignoreerrors': True,
         'nocheckcertificate': True,
         'quiet': True,
         'no_warnings': True,
@@ -704,7 +703,6 @@ def download_audio_route():
         'skip_download': False,
     }
 
-    # Определение источника URL для специфических настроек (YouTube, SoundCloud, TikTok)
     if is_youtube_url(url) and os.path.exists(COOKIES_PATH):
         ydl_opts['cookiefile'] = COOKIES_PATH
         logger.info("Обнаружен YouTube URL. Применяются настройки cookie для YouTube.")
@@ -715,7 +713,6 @@ def download_audio_route():
     else:
         logger.info("Обнаружен другой URL. Настройки cookie не применяются.")
 
-    # Настройка опций yt-dlp в зависимости от запрошенного формата
     if requested_format == "mp3":
         if FFMPEG_IS_AVAILABLE:
             logger.info("FFmpeg доступен. Конвертация в MP3 с метаданными.")
@@ -792,7 +789,6 @@ def download_audio_route():
             shutil.rmtree(session_download_path)
         return jsonify({"status": "error", "message": "Неподдерживаемый формат. Выберите MP3, M4A, Opus или MP4."}), 400
 
-    # Очистка опций yt-dlp от пустых значений
     ydl_opts_cleaned = {k: v for k, v in ydl_opts.items() if v is not None}
     if 'postprocessors' in ydl_opts_cleaned and not ydl_opts_cleaned['postprocessors']:
         del ydl_opts_cleaned['postprocessors']
@@ -957,7 +953,6 @@ def serve_file(session_id, filename):
 
 @app.route('/api/search', methods=['POST'])
 def search_content_route():
-    """Обрабатывает поисковые запросы."""
     data = request.get_json()
     query = data.get('query')
 
@@ -976,7 +971,6 @@ def search_content_route():
         'dump_single_json': True, 
     }
 
-    # Поиск на YouTube (10 результатов)
     try:
         with yt_dlp.YoutubeDL(search_opts) as ydl:
             yt_info = ydl.extract_info(f"ytsearch{SEARCH_RESULTS_LIMIT}:{query}", download=False)
@@ -994,8 +988,6 @@ def search_content_route():
                         })
     except Exception as e:
         logger.error(f"Ошибка при поиске на YouTube: {e}")
-
-    # Поиск на YouTube Music (10 результатов)
     try:
         with yt_dlp.YoutubeDL(search_opts) as ydl:
             ytm_info = ydl.extract_info(f"ytmusicsearch{SEARCH_RESULTS_LIMIT}:{query}", download=False)
@@ -1014,7 +1006,6 @@ def search_content_route():
     except Exception as e:
         logger.error(f"Ошибка при поиске на YouTube Music: {e}")
 
-    # Поиск на SoundCloud (10 результатов)
     try:
         with yt_dlp.YoutubeDL(search_opts) as ydl:
             sc_info = ydl.extract_info(f"scsearch{SEARCH_RESULTS_LIMIT}:{query}", download=False)
@@ -1033,7 +1024,6 @@ def search_content_route():
     except Exception as e:
         logger.error(f"Ошибка при поиске на SoundCloud: {e}")
     
-    # Поиск на TikTok (5 результатов)
     try:
         with yt_dlp.YoutubeDL(search_opts) as ydl:
             tiktok_info = ydl.extract_info(f"tiktoksearch5:{query}", download=False)
