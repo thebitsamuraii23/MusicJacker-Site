@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html dir="ltr">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,35 +10,69 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-
 </head>
-<body class="text-white min-h-screen flex flex-col items-center p-4 selection:bg-sky-500 selection:text-white">
-
+<body class="text-white min-h-screen flex flex-col items-center p-4 selection:bg-sky-500 selection:text-white bg-mode-night">
     <div class="night-sky-bg-main">
         <div class="moon-main"></div>
-    </div>
-
-    <div class="top-nav-container">
-        <div class="top-nav-buttons">
-            <button id="infoButton" class="nav-button" data-translate-key="navInfoButton">Info</button>
-            <button id="copyrightButton" class="nav-button" data-translate-key="navCopyrightButton">Copyright</button>
-            <button id="updatesButton" class="nav-button" data-translate-key="navUpdatesButton">Updates (Blog)</button>
-            <button id="githubButton" class="nav-button" data-translate-key="navGithubButton">GitHub</button>
+        <div class="reactbits-bg-layer reactbits-dot-grid" data-bg-layer="dot-grid">
+            <div class="dot-grid-pattern"></div>
+            <div class="dot-grid-glow"></div>
         </div>
-        <div class="lang-switcher-container">
-            <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Language:</label>
-            <select id="languageSelector" title="Select Language">
-                <option value="en">English</option>
-                <option value="ru">Русский</option>
-                <option value="es">Español</option>
-                <option value="az">Azərbaycanca</option>
-                <option value="tr">Türkçe</option>
-            </select>
+        <div class="reactbits-bg-layer reactbits-faulty-terminal" data-bg-layer="faulty-terminal">
+            <div class="faulty-terminal-noise"></div>
+            <div class="faulty-terminal-scanline"></div>
+            <div class="faulty-terminal-glitch"></div>
+        </div>
+        <div class="reactbits-bg-layer reactbits-aurora" data-bg-layer="aurora">
+            <div class="aurora-band aurora-band-one"></div>
+            <div class="aurora-band aurora-band-two"></div>
+            <div class="aurora-stars"></div>
+        </div>
+        <div class="reactbits-bg-layer reactbits-dither" data-bg-layer="dither">
+            <div class="dither-overlay"></div>
         </div>
     </div>
 
-    <div class="app-container">
-        <div id="downloaderContent" class="main-card">
+    <header class="top-nav-container">
+        <div class="fluid-glass-nav">
+            <div class="fluid-blob one"></div>
+            <div class="fluid-blob two"></div>
+            <div class="fluid-blob three"></div>
+            <div class="fluid-nav-content">
+                <div class="top-nav-buttons">
+                    <button id="infoButton" class="nav-button" data-translate-key="navInfoButton">Info</button>
+                    <button id="copyrightButton" class="nav-button" data-translate-key="navCopyrightButton">Copyright</button>
+                    <button id="updatesButton" class="nav-button" data-translate-key="navUpdatesButton">Updates (Blog)</button>
+                    <button id="githubButton" class="nav-button" data-translate-key="navGithubButton">GitHub</button>
+                </div>
+                <div class="header-controls">
+                    <div class="lang-switcher-container">
+                        <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Language:</label>
+                        <select id="languageSelector" title="Select Language">
+                            <option value="en">English</option>
+                            <option value="ru">Русский</option>
+                            <option value="es">Español</option>
+                            <option value="az">Azərbaycanca</option>
+                            <option value="tr">Türkçe</option>
+                        </select>
+                    </div>
+                    <div class="background-switcher-container">
+                        <label for="backgroundSelector" data-translate-key="backgroundLabel">Background:</label>
+                        <select id="backgroundSelector" title="Select Background">
+                            <option value="night" data-translate-key="backgroundNight">Night Sky</option>
+                            <option value="faulty-terminal" data-translate-key="backgroundFaultyTerminal">Faulty Terminal</option>
+                            <option value="dot-grid" data-translate-key="backgroundDotGrid">Dot Grid</option>
+                            <option value="aurora" data-translate-key="backgroundAurora">Aurora</option>
+                            <option value="dither" data-translate-key="backgroundDither">Dither</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <section id="downloaderContent" class="main-card">
             <div class="text-center mb-8 sm:mb-10">
                 <div class="music-icon-animated inline-block mb-4">
                     <svg width="60" height="50" viewBox="0 0 60 50" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -57,16 +91,24 @@
             <form id="downloadForm" class="space-y-6">
                 <div>
                     <label for="youtube_url" data-translate-key="urlLabel" class="block text-sm font-medium text-slate-300 mb-2">YouTube/YouTube Music/SoundCloud Link:</label>
-                    <input type="url" id="youtube_url" name="youtube_url" required
-                           class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out"
-                           data-translate-placeholder="urlPlaceholder"
-                           placeholder="e.g., https://music.youtube.com/watch?v=... or https://soundcloud.com/track">
+                    <input
+                        type="url"
+                        id="youtube_url"
+                        name="youtube_url"
+                        required
+                        class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white placeholder-slate-500 focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out"
+                        data-translate-placeholder="urlPlaceholder"
+                        placeholder="e.g., https://music.youtube.com/watch?v=... or https://soundcloud.com/track"
+                    >
                 </div>
 
                 <div>
                     <label for="format_choice" data-translate-key="formatLabel" class="block text-sm font-medium text-slate-300 mb-2">Select format:</label>
-                    <select id="format_choice" name="format_choice"
-                            class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out">
+                    <select
+                        id="format_choice"
+                        name="format_choice"
+                        class="w-full px-4 py-3 bg-slate-700/70 border-2 border-slate-600 rounded-lg text-white focus:ring-0 focus:border-sky-500 transition duration-200 ease-in-out"
+                    >
                         <option value="mp3" selected data-translate-key="formatMp3">MP3 (recommended)</option>
                         <option value="m4a" data-translate-key="formatM4a">M4A (Apple AAC)</option>
                         <option value="opus" data-translate-key="formatOpus">Opus (high efficiency)</option>
@@ -74,29 +116,40 @@
                     </select>
                 </div>
 
-                <button type="submit" id="submitButton" data-translate-key="submitButton"
-                        class="submit-button w-full bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold py-3.5 px-4 rounded-lg shadow-lg focus:outline-none focus:ring-4 focus:ring-sky-500/50">
+                <button
+                    type="submit"
+                    id="submitButton"
+                    data-translate-key="submitButton"
+                    class="submit-button w-full bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold py-3.5 px-4 rounded-lg shadow-lg focus:outline-none focus:ring-4 focus:ring-sky-500/50"
+                >
                     Download
                 </button>
             </form>
 
-            <div id="statusArea" class="mt-8 text-center min-h-[60px]">
-            </div>
-            <div id="telegramLinkContainer" class="telegram-link-container text-center hidden">
-                 <p><span data-translate-key="telegramSubscription">Subscribe to Telegram Channel of developers:</span> <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer">@ytdlpdeveloper</a></p>
-                 <p class="mt-2"><span data-translate-key="telegramBotAlternative">Telegram bot alternative:</span> <a href="https://t.me/ytdlpload_bot" target="_blank" rel="noopener noreferrer">@ytdlpload_bot</a></p>
-            </div>
-        </div>
+            <div id="statusArea" class="mt-8 text-center min-h-[60px]"></div>
 
-    </div>
+            <div id="telegramLinkContainer" class="telegram-link-container text-center hidden">
+                <p>
+                    <span data-translate-key="telegramSubscription">Subscribe to Telegram Channel of developers:</span>
+                    <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer">@ytdlpdeveloper</a>
+                </p>
+                <p class="mt-2">
+                    <span data-translate-key="telegramBotAlternative">Telegram bot alternative:</span>
+                    <a href="https://t.me/ytdlpload_bot" target="_blank" rel="noopener noreferrer">@ytdlpload_bot</a>
+                </p>
+            </div>
+        </section>
+    </main>
+
     <footer class="app-footer text-center text-slate-500 text-sm">
         <p data-translate-key="footerCopyrightText">© <span id="year"></span> Music Jacker. Site made by thebitsamurai.</p>
         <p class="text-xs mt-1" data-translate-key="footerWatermark">Developed By thebitsamurai</p>
     </footer>
 
-    <div id="infoSectionOverlay" class="overlay-section">
+    <section id="infoSectionOverlay" class="overlay-section">
         <button id="closeInfoButton" class="close-overlay-button" aria-label="Close Info">×</button>
-        <div class="info-content-card"> <h2 data-translate-key="infoTitle">Information</h2>
+        <div class="info-content-card">
+            <h2 data-translate-key="infoTitle">Information</h2>
             <h3 data-translate-key="infoHowItWorksTitle">How This Site Works</h3>
             <p data-translate-key="infoHowItWorksPara1">This web application allows you to download audio/video from YouTube, SoundCloud or other videos/tracks or playlists. You simply paste the URL, choose your desired format (MP3, M4A, Opus or MP4), and the server-side script processes your request.</p>
             <p data-translate-key="infoHowItWorksPara2">The backend uses the powerful <code>yt-dlp</code> library to fetch content information and extract the audio/video stream. If MP3, M4A, Opus or MP4 format is selected, <code>ffmpeg</code> is used for conversion and to embed metadata.</p>
@@ -117,15 +170,17 @@
             <h3 data-translate-key="infoCreatorTitle">Creator</h3>
             <p data-translate-key="infoCreatorName">This Music Jacker site was created by <strong>thebitsamurai</strong>.</p>
         </div>
-    </div>
+    </section>
 
-    <div id="copyrightSectionOverlay" class="overlay-section">
+    <section id="copyrightSectionOverlay" class="overlay-section">
         <button id="closeCopyrightButton" class="close-overlay-button" aria-label="Close Copyright">×</button>
-        <div class="info-content-card"> <h2 data-translate-key="copyrightTitle">Copyright & Responsibility</h2>
+        <div class="info-content-card">
+            <h2 data-translate-key="copyrightTitle">Copyright & Responsibility</h2>
             <p data-translate-key="copyrightPara1">Please be aware that music and other audio content available on YouTube, SoundCloud and other platforms may be protected by copyright. Many artists and content creators have specific licenses and terms of use for their work. It is your responsibility to ensure that you have the necessary rights or permissions before downloading any content.</p>
             <p data-translate-key="copyrightPara2">The developer of this site provides this tool for convenience and is not responsible for the content you choose to download or how you use it. By using this service, you agree that you are solely responsible for your actions and for complying with all applicable copyright laws and terms of service of the content providers.</p>
         </div>
-    </div>
+    </section>
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

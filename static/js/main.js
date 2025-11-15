@@ -43,6 +43,12 @@ const translations = {
                 statusPostDownloadHint: "If downloads didn't start, check browser pop-up settings or file save location.",
                 statusErrorGeneric: "Error: {MESSAGE}",
                 statusNetworkError: "A network error occurred. Please try again.",
+                backgroundLabel: "Background:",
+                backgroundNight: "Night Sky",
+                backgroundFaultyTerminal: "Faulty Terminal",
+                backgroundDotGrid: "Dot Grid",
+                backgroundAurora: "Aurora",
+                backgroundDither: "Dither",
                 languageLabel: "Language:",
                 telegramSubscription: "Subscribe to Telegram Channel of developers:",
                 telegramBotAlternative: "Telegram bot alternative:",
@@ -97,6 +103,12 @@ const translations = {
                 statusPostDownloadHint: "Если загрузка не началась, проверьте настройки блокировки всплывающих окон или место сохранения файлов.",
                 statusErrorGeneric: "Ошибка: {MESSAGE}",
                 statusNetworkError: "Произошла сетевая ошибка. Пожалуйста, попробуйте еще раз.",
+                backgroundLabel: "Фон:",
+                backgroundNight: "Ночное небо",
+                backgroundFaultyTerminal: "Faulty Terminal",
+                backgroundDotGrid: "Сетка точек",
+                backgroundAurora: "Аврора",
+                backgroundDither: "Dither",
                 languageLabel: "Язык:",
                 telegramSubscription: "Подпишитесь на Telegram канал разработчиков:",
                 telegramBotAlternative: "Альтернативный Telegram-бот:",
@@ -151,6 +163,12 @@ const translations = {
                 statusPostDownloadHint: "Si las descargas no comenzaron, revisa la configuración de ventanas emergentes del navegador o la ubicación de guardado de archivos.",
                 statusErrorGeneric: "Error: {MESSAGE}",
                 statusNetworkError: "Ocurrió un error de red. Por favor, inténtalo de nuevo.",
+                backgroundLabel: "Fondo:",
+                backgroundNight: "Cielo nocturno",
+                backgroundFaultyTerminal: "Terminal defectuosa",
+                backgroundDotGrid: "Cuadrícula de puntos",
+                backgroundAurora: "Aurora",
+                backgroundDither: "Dither",
                 languageLabel: "Idioma:",
                 telegramSubscription: "Suscríbete al canal de Telegram de los desarrolladores:",
                 telegramBotAlternative: "Alternativa de bot de Telegram:",
@@ -204,6 +222,18 @@ const translations = {
                 statusPostDownloadHint: "Əgər yükləmələr başlamadısa, brauzerin pop-up parametrlərini və ya faylın yadda saxlanma yerini yoxlayın.",
                 statusErrorGeneric: "Xəta: {MESSAGE}",
                 statusNetworkError: "Şəbəkə xətası baş verdi. Zəhmət olmasa, yenidən cəhd edin.",
+                backgroundLabel: "Fon:",
+                backgroundNight: "Gecə səması",
+                backgroundFaultyTerminal: "Nasaz Terminal",
+                backgroundDotGrid: "Nöqtə şəbəkəsi",
+                backgroundAurora: "Aurora",
+                backgroundDither: "Dither",
+                backgroundLabel: "Arka plan:",
+                backgroundNight: "Gece gökyüzü",
+                backgroundFaultyTerminal: "Arızalı Terminal",
+                backgroundDotGrid: "Nokta ızgarası",
+                backgroundAurora: "Aurora",
+                backgroundDither: "Dither",
                 languageLabel: "Dil:",
                 telegramSubscription: "İstehsalçıların Telegram kanalına abunə olun:",
                 telegramBotAlternative: "Telegram bot alternativi:",
@@ -304,6 +334,9 @@ const translations = {
             if (langSelector) {
                 langSelector.value = lang;
             }
+
+            window.reactbitsCurrentLanguage = lang;
+            window.dispatchEvent(new CustomEvent('reactbits-language-change', { detail: lang }));
         }
 
         function getTranslation(key, lang = currentLanguage, replacements = {}) {
@@ -336,7 +369,40 @@ const translations = {
             const closeCopyrightButton = document.getElementById('closeCopyrightButton');
 
             const updatesButton = document.getElementById('updatesButton');
-            const githubButton = document.getElementById('githubButton'); // Получаем новую кнопку GitHub
+            const githubButton = document.getElementById('githubButton');
+            const backgroundSelector = document.getElementById('backgroundSelector');
+            const backgroundModes = ['night', 'faulty-terminal', 'dot-grid', 'aurora', 'dither'];
+
+            function applyBackgroundChoice(mode) {
+                const normalized = backgroundModes.includes(mode) ? mode : 'night';
+                backgroundModes.forEach(bg => document.body.classList.remove(`bg-mode-${bg}`));
+                document.body.classList.add(`bg-mode-${normalized}`);
+                if (backgroundSelector) {
+                    backgroundSelector.value = normalized;
+                }
+                try {
+                    localStorage.setItem('preferredBackground', normalized);
+                } catch (_) {
+                    // Ignore storage errors
+                }
+            }
+
+            let storedBackground = 'night';
+            try {
+                const savedBackground = localStorage.getItem('preferredBackground');
+                if (savedBackground) {
+                    storedBackground = savedBackground;
+                }
+            } catch (_) {
+                storedBackground = 'night';
+            }
+            applyBackgroundChoice(storedBackground);
+
+            if (backgroundSelector) {
+                backgroundSelector.addEventListener('change', (event) => {
+                    applyBackgroundChoice(event.target.value);
+                });
+            }
 
             function setupOverlay(button, overlay, closeButton) {
                 if (button && overlay && closeButton) {
@@ -365,14 +431,13 @@ const translations = {
 
             if (updatesButton) {
                 updatesButton.addEventListener('click', () => {
-                    window.open('https://artoflife2303.github.io/miniblog/', '_blank');
+                    window.open('https://thebitsamuraii23.github.io/miniblog/', '_blank');
                 });
             }
 
-            // Добавляем обработчик для новой кнопки GitHub
             if (githubButton) {
                 githubButton.addEventListener('click', () => {
-                    window.open('https://github.com/ArtOfLife2303', '_blank');
+                    window.open('https://github.com/thebitsamuraii23/MusicJacker-Site', '_blank');
                 });
             }
 
