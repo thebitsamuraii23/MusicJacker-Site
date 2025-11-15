@@ -748,6 +748,10 @@ body {
     </div>
 
     <header class="top-nav-container">
+        <button id="navToggleButton" class="nav-toggle-button" aria-label="Collapse navigation" aria-expanded="true">
+            <span class="icon-up">▲</span>
+            <span class="icon-down">▼</span>
+        </button>
         <div class="fluid-glass-nav">
             <div class="fluid-blob one"></div>
             <div class="fluid-blob two"></div>
@@ -1270,6 +1274,25 @@ const translations = {
             const githubButton = document.getElementById('githubButton');
             const backgroundSelector = document.getElementById('backgroundSelector');
             const backgroundModes = ['night', 'faulty-terminal', 'dot-grid', 'aurora', 'dither'];
+
+            const navContainer = document.querySelector('.top-nav-container');
+            const navToggleButton = document.getElementById('navToggleButton');
+            if (navContainer && navToggleButton) {
+                let navCollapsed = window.innerWidth <= 768;
+                const setNavCollapsed = (collapsed) => {
+                    navCollapsed = collapsed;
+                    navContainer.classList.toggle('nav-collapsed', collapsed);
+                    navToggleButton.setAttribute('aria-expanded', (!collapsed).toString());
+                    navToggleButton.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+                };
+                navToggleButton.addEventListener('click', () => setNavCollapsed(!navCollapsed));
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth <= 768 && !navCollapsed) {
+                        setNavCollapsed(true);
+                    }
+                });
+                setNavCollapsed(navCollapsed);
+            }
 
             const preferredLang = localStorage.getItem('preferredLanguage');
             const browserLang = navigator.language.split('-')[0];

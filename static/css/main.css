@@ -384,6 +384,7 @@ body {
             z-index: 50;
             padding: 1.25rem 1.5rem 0.5rem;
             pointer-events: none;
+            transition: transform 0.35s ease, opacity 0.35s ease;
         }
         .fluid-glass-nav {
             position: relative;
@@ -397,6 +398,41 @@ body {
             overflow: hidden;
             padding: 1.1rem 1.5rem;
             pointer-events: auto;
+            transition: transform 0.35s ease, opacity 0.35s ease;
+            }
+.top-nav-container.nav-collapsed .fluid-glass-nav {
+            transform: translateY(-120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .nav-toggle-button {
+            position: absolute;
+            right: 1rem;
+            top: 0.25rem;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.9);
+            color: #e2e8f0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.35);
+            cursor: pointer;
+            pointer-events: auto;
+            transition: background 0.2s ease, transform 0.2s ease, opacity 0.25s ease;
+            z-index: 60;
+        }
+        .nav-toggle-button:hover {
+            background: rgba(14, 165, 233, 0.9);
+            color: #0b1021;
+        }
+        .nav-toggle-button .icon-down { display: none; }
+        .top-nav-container.nav-collapsed .nav-toggle-button .icon-up { display: none; }
+        .top-nav-container.nav-collapsed .nav-toggle-button .icon-down { display: inline; }
+        .top-nav-container.nav-collapsed .nav-toggle-button {
+            transform: translateY(10px);
         }
         .fluid-glass-nav::before,
         .fluid-glass-nav::after {
