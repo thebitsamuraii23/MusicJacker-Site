@@ -136,6 +136,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const copyrightButton = document.getElementById('copyrightButton');
             const copyrightSectionOverlay = document.getElementById('copyrightSectionOverlay');
             const closeCopyrightButton = document.getElementById('closeCopyrightButton');
+            const shareButton = document.getElementById('shareButton');
+            const shareSectionOverlay = document.getElementById('shareSectionOverlay');
+            const closeShareButton = document.getElementById('closeShareButton');
+            const nativeShareButton = document.getElementById('nativeShareButton');
 
             const updatesButton = document.getElementById('updatesButton');
             const githubButton = document.getElementById('githubButton');
@@ -216,6 +220,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             setupOverlay(infoButton, infoSectionOverlay, closeInfoButton);
             setupOverlay(copyrightButton, copyrightSectionOverlay, closeCopyrightButton);
+            setupOverlay(shareButton, shareSectionOverlay, closeShareButton);
+
+            const shareUrl = window.location.origin || window.location.href;
+            if (nativeShareButton) {
+                nativeShareButton.addEventListener('click', async () => {
+                    const shareData = {
+                        title: getTranslation('shareNativeTitle'),
+                        text: getTranslation('shareNativeText'),
+                        url: shareUrl
+                    };
+                    try {
+                        if (navigator.share) {
+                            await navigator.share(shareData);
+                        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                            await navigator.clipboard.writeText(shareData.url);
+                            alert(getTranslation('shareClipboardFallback'));
+                        } else {
+                            alert(getTranslation('shareUnsupported'));
+                        }
+                    } catch (error) {
+                        console.error('Native share failed:', error);
+                        alert(getTranslation('shareFailed'));
+                    }
+                });
+            }
 
             if (updatesButton) {
                 updatesButton.addEventListener('click', () => {
