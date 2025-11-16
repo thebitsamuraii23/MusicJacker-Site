@@ -43,13 +43,14 @@
             <div class="fluid-blob one"></div>
             <div class="fluid-blob two"></div>
             <div class="fluid-blob three"></div>
-            <div class="fluid-nav-content">
-                <div class="top-nav-buttons">
-                    <button id="infoButton" class="nav-button" data-translate-key="navInfoButton">Info</button>
-                    <button id="copyrightButton" class="nav-button" data-translate-key="navCopyrightButton">Copyright</button>
-                    <button id="updatesButton" class="nav-button" data-translate-key="navUpdatesButton">Updates (Blog)</button>
-                    <button id="githubButton" class="nav-button" data-translate-key="navGithubButton">GitHub</button>
-                </div>
+                <div class="fluid-nav-content">
+                    <div class="top-nav-buttons">
+                        <button id="infoButton" class="nav-button" data-translate-key="navInfoButton">Info</button>
+                        <button id="copyrightButton" class="nav-button" data-translate-key="navCopyrightButton">Copyright</button>
+                        <button id="shareButton" class="nav-button" data-translate-key="navShareButton">Share</button>
+                        <button id="updatesButton" class="nav-button" data-translate-key="navUpdatesButton">Updates (Blog)</button>
+                        <button id="githubButton" class="nav-button" data-translate-key="navGithubButton">GitHub</button>
+                    </div>
                 <div class="header-controls">
                     <div class="lang-switcher-container">
                         <label for="languageSelector" data-translate-key="languageLabel">Language:</label>
@@ -183,6 +184,19 @@
             <h2 data-translate-key="copyrightTitle">Copyright & Responsibility</h2>
             <p data-translate-key="copyrightPara1">Please be aware that music and other audio content available on YouTube, SoundCloud and other platforms may be protected by copyright. Many artists and content creators have specific licenses and terms of use for their work. It is your responsibility to ensure that you have the necessary rights or permissions before downloading any content.</p>
             <p data-translate-key="copyrightPara2">The developer of this site provides this tool for convenience and is not responsible for the content you choose to download or how you use it. By using this service, you agree that you are solely responsible for your actions and for complying with all applicable copyright laws and terms of service of the content providers.</p>
+        </div>
+    </section>
+
+    <section id="shareSectionOverlay" class="overlay-section">
+        <button id="closeShareButton" class="close-overlay-button" aria-label="Close Share">×</button>
+        <div class="info-content-card share-card">
+            <h2 data-translate-key="shareTitle">Share Music Jacker</h2>
+            <p class="share-desc" data-translate-key="shareDescription">Scan the QR code or use the button below to open Music Jacker on another device.</p>
+            <div class="qr-display">
+                <img src="{{ url_for('static', filename='musicjackerqrcode.png') }}" alt="Music Jacker QR code" class="qr-image">
+            </div>
+            <button id="nativeShareButton" class="share-primary-button" data-translate-key="shareCta">Share</button>
+            <p class="share-hint" data-translate-key="shareNativeHint">If native sharing is unavailable, we will copy the link for you.</p>
         </div>
     </section>
 
