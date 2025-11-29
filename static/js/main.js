@@ -103,6 +103,8 @@ async function applyTranslations(lang) {
 
     window.reactbitsCurrentLanguage = normalized;
     window.dispatchEvent(new CustomEvent('reactbits-language-change', { detail: normalized }));
+    // update route-aware converter button label if present
+    try { updateConverterButtonForRoute(); } catch (e) {}
 }
 
 function getTranslation(key, lang = currentLanguage, replacements = {}) {
@@ -143,6 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const updatesButton = document.getElementById('updatesButton');
             const githubButton = document.getElementById('githubButton');
+            const converterButton = document.getElementById('converterButton');
             const backgroundSelector = document.getElementById('backgroundSelector');
             const backgroundModes = ['night', 'faulty-terminal', 'dot-grid', 'aurora', 'dither'];
             const navContainer = document.querySelector('.top-nav-container');
@@ -248,7 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (updatesButton) {
                 updatesButton.addEventListener('click', () => {
-                    window.open('https://thebitsamuraii23.github.io/miniblog/', '_blank');
+                    window.location.href = '/miniblog';
                 });
             }
 
@@ -257,6 +260,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     window.open('https://github.com/thebitsamuraii23/MusicJacker-Site', '_blank');
                 });
             }
+
+            function updateConverterButtonForRoute() {
+                if (!converterButton) return;
+                const onConverter = window.location.pathname === '/converter' || window.location.pathname.startsWith('/converter');
+                if (onConverter) {
+                    converterButton.setAttribute('data-translate-key', 'navMusicJackerButton');
+                    converterButton.onclick = () => { window.location.href = '/'; };
+                    try { converterButton.innerHTML = getTranslation('navMusicJackerButton'); } catch (e) {}
+                } else {
+                    converterButton.setAttribute('data-translate-key', 'navConverterButton');
+                    converterButton.onclick = () => { window.location.href = '/converter'; };
+                    try { converterButton.innerHTML = getTranslation('navConverterButton'); } catch (e) {}
+                }
+            }
+            if (converterButton) updateConverterButtonForRoute();
 
 
             let storedPreferredLanguage = null;

@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=GA4_ID_PLACEHOLDER"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'GA4_ID_PLACEHOLDER');
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,6 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='musicjacker.jpg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
 </head>
 <body class="text-white min-h-screen flex flex-col items-center p-4 selection:bg-sky-500 selection:text-white bg-mode-night">
     <div class="night-sky-bg-main">
@@ -50,6 +60,7 @@
                         <button id="shareButton" class="nav-button" data-translate-key="navShareButton">Share</button>
                         <button id="updatesButton" class="nav-button" data-translate-key="navUpdatesButton">Updates (Blog)</button>
                         <button id="githubButton" class="nav-button" data-translate-key="navGithubButton">GitHub</button>
+                        <button id="converterButton" class="nav-button" data-translate-key="navConverterButton">Converter</button>
                     </div>
                 <div class="header-controls">
                     <div class="lang-switcher-container">

@@ -762,6 +762,7 @@ body {
                     <button id="copyrightButton" class="nav-button" data-translate-key="navCopyrightButton">Copyright</button>
                     <button id="updatesButton" class="nav-button" data-translate-key="navUpdatesButton">Updates (Blog)</button>
                     <button id="githubButton" class="nav-button" data-translate-key="navGithubButton">GitHub</button>
+                    <button id="converterButton" class="nav-button" data-translate-key="navConverterButton">Converter</button>
                 </div>
                 <div class="header-controls">
                     <div class="lang-switcher-container">
@@ -1363,13 +1364,19 @@ const translations = {
 
             if (updatesButton) {
                 updatesButton.addEventListener('click', () => {
-                    window.open('https://thebitsamuraii23.github.io/miniblog/', '_blank');
+                    // Open the embedded miniblog within the same site under /miniblog
+                    window.location.href = '/miniblog';
                 });
             }
 
             if (githubButton) {
                 githubButton.addEventListener('click', () => {
                     window.open('https://github.com/thebitsamuraii23/MusicJacker-Site', '_blank');
+                });
+            }
+            if (typeof converterButton !== 'undefined' && converterButton) {
+                converterButton.addEventListener('click', () => {
+                    window.location.href = '/converter';
                 });
             }
 

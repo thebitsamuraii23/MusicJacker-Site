@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate-key="pageTitle">Блог Разработчика - DevVibes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; 
+            color: #e2e8f0; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+        }
+
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /
+        .fade-in-1 { animation-delay: 0.1s; }
+        .fade-in-2 { animation-delay: 0.2s; }
+        .fade-in-3 { animation-delay: 0.3s; }
+        .fade-in-4 { animation-delay: 0.4s; }
+        .fade-in-5 { animation-delay: 0.5s; }
+        .fade-in-6 { animation-delay: 0.6s; }
+        .fade-in-7 { animation-delay: 0.7s; }
+        .fade-in-8 { animation-delay: 0.8s; }
+        .fade-in-9 { animation-delay: 0.9s; }
+        .fade-in-10 { animation-delay: 1.0s; }
+
+
+        
+        .post-card {
+            background-color: #1e293b; 
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        
+        .btn-primary {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: #0ea5e9; 
+            color: #1a202c; 
+            font-weight: 600;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #38bdf8;
+            transform: translateY(-2px);
+        }
+
+        
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background-color: #334155;
+        }
+
+        
+        .post-image {
+            width: 100%;
+            height: 200px; 
+            object-fit: cover; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0ea5e9;
+        }
+
+        
+        .modal-content {
+            background-color: #1e293b;
+            border-radius: 1rem;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+            max-width: 768px; 
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            padding: 2rem;
+        }
+        .modal-close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .modal-close-button:hover {
+            color: #f87171;
+        }
+
+        
+        .lang-switcher-container select {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgb(71 85 105 / 0.7);
+            background-color: rgb(30 41 59 / 0.85);
+            backdrop-filter: blur(6px);
+            color: white;
+            font-size: 0.875rem;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .lang-switcher-container select:hover {
+            border-color: #0ea5e9;
+            background-color: rgb(51 65 85 / 0.9);
+        }
+
+       
+        .filter-button {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px; 
+            background-color: #334155;
+            color: #cbd5e1;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .filter-button:hover {
+            background-color: #475569;
+            border-color: #0ea5e9;
+            color: #ffffff;
+        }
+        .filter-button.active {
+            background-color: #0ea5e9;
+            color: #1a202c;
+            font-weight: 600;
+            border-color: #0ea5e9;
+        }
+
+        
+        .night-sky-bg-main {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0b1021, #111827, #1e293b);
+            background-size: 300% 300%;
+            animation: gradientBGMain 30s ease infinite;
+            z-index: -2;
+            overflow: hidden;
+        }
+        @keyframes gradientBGMain {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .star-main {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.7); 
+            border-radius: 50%;
+            animation: twinkleMain 3s infinite ease-in-out;
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5), 0 0 6px rgba(255, 255, 255, 0.3); 
+        }
+        @keyframes twinkleMain {
+            0%, 100% { opacity: 0.4; transform: scale(0.8); } 
+            50% { opacity: 1; transform: scale(1.1); } 
+            100% { opacity: 0.4; transform: scale(0.8); }
+        }
+        .moon-main {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: #f0f8ff;
+            border-radius: 50%;
+            box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa; 
+            top: 10%;
+            left: 15%;
+            animation: gentleDriftMain 15s ease-in-out infinite alternate, moonPhase 60s linear infinite;
+            opacity: 0;
+            animation-fill-mode: forwards;
+            animation-name: gentleDriftMain, moonPhase, fadeInMoon;
+            animation-duration: 15s, 60s, 2s;
+            animation-timing-function: ease-in-out, linear, ease-out;
+            animation-iteration-count: infinite, infinite, 1;
+            animation-direction: alternate, normal, normal;
+            animation-delay: 0s, 0s, 0.5s;
+        }
+         @keyframes fadeInMoon {
+            to { opacity: 0.85; } 
+        }
+        @keyframes gentleDriftMain {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, 10px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes moonPhase {
+            0% { box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa, inset -10px 0 15px rgba(0,0,0,0.1); }
+            50% { box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa, inset 5px 0 15px rgba(0,0,0,0.05); }
+            100% { box-shadow: 0 0 25px #f0f8ff, 0 0 40px #add8e6, 0 0 60px #87cefa, inset -10px 0 15px rgba(0,0,0,0.1); }
+        }
+
+        .reactbits-bg-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            z-index: -1;
+        }
+        body.bg-mode-dot-grid .reactbits-bg-layer[data-bg-layer="dot-grid"],
+        body.bg-mode-faulty-terminal .reactbits-bg-layer[data-bg-layer="faulty-terminal"],
+        body.bg-mode-aurora .reactbits-bg-layer[data-bg-layer="aurora"],
+        body.bg-mode-dither .reactbits-bg-layer[data-bg-layer="dither"] {
+            opacity: 1;
+        }
+
+        .reactbits-dot-grid {
+            mix-blend-mode: lighten;
+            overflow: hidden;
+            background: radial-gradient(circle at top center, rgba(56, 189, 248, 0.2), transparent 55%);
+        }
+        .reactbits-dot-grid .dot-grid-pattern {
+            position: absolute;
+            inset: -200px;
+            background-image:
+                radial-gradient(rgba(148, 163, 184, 0.55) 1px, transparent 1px),
+                radial-gradient(rgba(148, 163, 184, 0.25) 1px, transparent 1px);
+            background-size: 28px 28px, 28px 28px;
+            background-position: 0 0, 14px 14px;
+            opacity: 0.7;
+            animation: dotGridDrift 22s linear infinite;
+        }
+        .dot-grid-glow {
+            position: absolute;
+            inset: -30%;
+            background: conic-gradient(from 120deg, rgba(56, 189, 248, 0.25), rgba(14, 165, 233, 0.1), rgba(59, 130, 246, 0.3), rgba(56, 189, 248, 0.15));
+            filter: blur(140px);
+            animation: dotGridPulse 16s ease-in-out infinite;
+        }
+        @keyframes dotGridDrift {
+            0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+            50% { transform: translate3d(40px, -40px, 0) rotate(1deg); }
+            100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+        }
+        @keyframes dotGridPulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            40% { opacity: 0.85; transform: scale(1.08); }
+        }
+
+        .reactbits-faulty-terminal {
+            overflow: hidden;
+            background: radial-gradient(circle at 30% 20%, rgba(74, 222, 128, 0.3), transparent 50%),
+                        radial-gradient(circle at 80% 0%, rgba(16, 185, 129, 0.35), transparent 45%),
+                        #03140d;
+        }
+        .reactbits-faulty-terminal::before,
+        .reactbits-faulty-terminal::after {
+            content: "";
+            position: absolute;
+            width: 70%;
+            height: 2px;
+            left: 15%;
+            background: linear-gradient(90deg, rgba(34, 197, 94, 0), rgba(34, 197, 94, 0.8), rgba(34, 197, 94, 0));
+            filter: blur(0.5px);
+            opacity: 0.5;
+            animation: faultyBlink 5s ease-in-out infinite;
+        }
+        .reactbits-faulty-terminal::before { top: 25%; }
+        .reactbits-faulty-terminal::after { bottom: 20%; animation-delay: 2s; }
+        .faulty-terminal-noise {
+            position: absolute;
+            inset: 0;
+            background-image: repeating-linear-gradient(0deg, rgba(16, 94, 80, 0.2) 0px, rgba(16, 94, 80, 0.2) 2px, transparent 2px, transparent 4px);
+            opacity: 0.9;
+            animation: faultyNoise 0.9s steps(2) infinite;
+        }
+        .faulty-terminal-scanline {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(34, 197, 94, 0.35) 45%, transparent 80%);
+            mix-blend-mode: screen;
+            animation: faultyScanline 4s linear infinite;
+        }
+        .faulty-terminal-glitch {
+            position: absolute;
+            inset: -20%;
+            background: conic-gradient(from 220deg, rgba(34, 197, 94, 0.25), transparent 60%);
+            animation: faultyGlitch 5s linear infinite;
+        }
+        @keyframes faultyNoise {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+            100% { transform: translateY(0); }
+        }
+        @keyframes faultyScanline {
+            0% { transform: translateY(-100%); opacity: 0; }
+            20% { opacity: 0.8; }
+            50% { opacity: 0.2; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+        @keyframes faultyBlink {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.8; }
+        }
+        @keyframes faultyGlitch {
+            0% { transform: translate3d(0,0,0) scale(1); opacity: 0.2; }
+            50% { transform: translate3d(-8px, 6px, 0) scale(1.03); opacity: 0.45; }
+            100% { transform: translate3d(0,0,0) scale(1); opacity: 0.2; }
+        }
+
+        .reactbits-aurora {
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 5%, rgba(76, 29, 149, 0.4), transparent 60%);
+        }
+        .aurora-band {
+            position: absolute;
+            width: 180%;
+            height: 50%;
+            left: -40%;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.3), rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.3));
+            filter: blur(100px);
+            opacity: 0.8;
+            transform: skewY(-8deg);
+            animation: auroraDrift 20s ease-in-out infinite alternate;
+        }
+        .aurora-band-one { top: 0%; animation-duration: 18s; }
+        .aurora-band-two { top: 45%; animation-duration: 26s; animation-delay: 2s; }
+        .aurora-stars {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px);
+            background-size: 100px 100px;
+            animation: auroraStars 35s linear infinite;
+            opacity: 0.45;
+        }
+        @keyframes auroraDrift {
+            0% { transform: translate3d(-10%, -5%, 0) skewY(-6deg); }
+            50% { transform: translate3d(8%, 6%, 0) skewY(-12deg); }
+            100% { transform: translate3d(-5%, 0%, 0) skewY(-9deg); }
+        }
+        @keyframes auroraStars {
+            from { transform: translate3d(0,0,0); }
+            to { transform: translate3d(-60px, -40px, 0); }
+        }
+
+        .reactbits-dither {
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 85% 15%, rgba(254, 215, 170, 0.25), transparent 50%),
+                radial-gradient(circle at 10% 80%, rgba(96, 165, 250, 0.25), transparent 45%),
+                #050810;
+        }
+        .reactbits-dither::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle, rgba(248, 250, 252, 0.12) 1px, transparent 1px),
+                radial-gradient(circle, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+            background-size: 4px 4px, 6px 6px;
+            mix-blend-mode: lighten;
+            opacity: 0.5;
+            animation: ditherDrift 40s linear infinite;
+        }
+        .dither-overlay {
+            position: absolute;
+            inset: -20%;
+            background: conic-gradient(from 0deg, rgba(255, 255, 255, 0.08), rgba(248, 113, 113, 0.25), rgba(59, 130, 246, 0.2), rgba(255, 255, 255, 0.08));
+            mix-blend-mode: screen;
+            animation: ditherPulse 28s ease-in-out infinite;
+        }
+        @keyframes ditherDrift {
+            from { transform: translate3d(0,0,0); }
+            to { transform: translate3d(50px, -50px, 0); }
+        }
+        @keyframes ditherPulse {
+            0% { transform: rotate(0deg) scale(1); opacity: 0.35; }
+            50% { transform: rotate(180deg) scale(1.1); opacity: 0.65; }
+            100% { transform: rotate(360deg) scale(1); opacity: 0.35; }
+        }
+
+        .top-nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 50;
+            padding: 1.25rem 1.5rem 0.5rem;
+            pointer-events: none;
+        }
+        .fluid-glass-nav {
+            position: relative;
+            width: 100%;
+            max-width: 1100px;
+            border-radius: 1.75rem;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: radial-gradient(circle at 20% 20%, rgba(94, 234, 212, 0.12), transparent 45%),
+                        linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.75));
+            box-shadow: 0 20px 60px rgba(2, 6, 23, 0.55);
+            overflow: hidden;
+            padding: 1.1rem 1.5rem;
+            pointer-events: auto;
+        }
+        .fluid-glass-nav::before,
+        .fluid-glass-nav::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle at 10% 10%, rgba(14, 165, 233, 0.35), transparent 50%);
+            opacity: 0.4;
+            filter: blur(40px);
+            animation: fluidGlow 18s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+        .fluid-glass-nav::after {
+            background: radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.25), transparent 55%);
+            animation-delay: 6s;
+            pointer-events: none;
+        }
+        .fluid-blob {
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border-radius: 45% 55% 60% 40%;
+            filter: blur(50px);
+            opacity: 0.45;
+            mix-blend-mode: screen;
+            animation: fluidBlob 16s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .fluid-blob.one {
+            background: rgba(56, 189, 248, 0.35);
+            top: -60px;
+            left: -40px;
+        }
+        .fluid-blob.two {
+            background: rgba(147, 197, 253, 0.35);
+            bottom: -70px;
+            right: 5%;
+            animation-delay: 4s;
+        }
+        .fluid-blob.three {
+            background: rgba(248, 113, 113, 0.25);
+            top: 10%;
+            right: 35%;
+            animation-delay: 8s;
+        }
+        .fluid-nav-content {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+        .top-nav-left {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1.25rem;
+        }
+        .top-nav-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .nav-button {
+            padding: 0.65rem 1.35rem;
+            background-color: rgba(56, 78, 126, 0.45);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+            box-shadow: inset 0 0 0 rgba(14, 165, 233, 0);
+        }
+        .nav-button:hover {
+            background-color: rgba(56, 189, 248, 0.18);
+            border-color: rgba(125, 211, 252, 0.65);
+            color: white;
+            box-shadow: inset 0 0 20px rgba(14, 165, 233, 0.35);
+        }
+        .background-switcher-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.7rem;
+        }
+        .background-switcher-container label {
+            font-weight: 600;
+        }
+        .background-switcher-container select,
+        .lang-switcher-container select {
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgb(71 85 105 / 0.7);
+            background-color: rgb(30 41 59 / 0.85);
+            backdrop-filter: blur(6px);
+            color: white;
+            font-size: 0.875rem;
+            transition: all 0.2s ease-in-out;
+            min-width: 150px;
+        }
+        .background-switcher-container select:hover,
+        .lang-switcher-container select:hover {
+            border-color: #0ea5e9;
+            background-color: rgb(51 65 85 / 0.9);
+        }
+
+        @keyframes fluidGlow {
+            0% { transform: translate3d(0,0,0) scale(1); opacity: 0.35; }
+            100% { transform: translate3d(20px,-20px,0) scale(1.1); opacity: 0.55; }
+        }
+        @keyframes fluidBlob {
+            0% { transform: translate3d(0,0,0) rotate(0deg); }
+            50% { transform: translate3d(30px,-25px,0) rotate(12deg); }
+            100% { transform: translate3d(-10px,10px,0) rotate(-6deg); }
+        }
+        @media (max-width: 768px) {
+            .fluid-nav-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .top-nav-left {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .top-nav-buttons {
+                justify-content: center;
+            }
+            .header-controls {
+                width: 100%;
+            }
+        }
+
+        body.bg-mode-faulty-terminal {
+            color: #d1fae5;
+            background-color: #03150d;
+        }
+        body.bg-mode-aurora {
+            color: #f5e1ff;
+        }
+        body.bg-mode-faulty-terminal .post-card {
+            background-color: rgba(1, 32, 20, 0.92);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        body.bg-mode-aurora .post-card {
+            background-color: rgba(30, 27, 75, 0.92);
+            border: 1px solid rgba(192, 132, 252, 0.35);
+        }
+        body.bg-mode-dither .post-card {
+            background-color: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(252, 211, 77, 0.25);
+        }
+        body.bg-mode-faulty-terminal .btn-primary {
+            background-color: rgba(16, 185, 129, 0.9);
+            color: #022c22;
+        }
+        body.bg-mode-aurora .btn-primary {
+            background-color: rgba(147, 51, 234, 0.85);
+            color: #fef3ff;
+        }
+        body.bg-mode-night .moon-main,
+        body.bg-mode-dot-grid .moon-main {
+            opacity: 0.85;
+            transform: scale(1);
+        }
+        body.bg-mode-faulty-terminal .moon-main,
+        body.bg-mode-aurora .moon-main,
+        body.bg-mode-dither .moon-main {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+    </style>
+</head>
+<body class="flex flex-col bg-mode-night">
+    <div class="night-sky-bg-main">
+        <div class="moon-main"></div>
+        <div class="reactbits-bg-layer reactbits-dot-grid" data-bg-layer="dot-grid">
+            <div class="dot-grid-pattern"></div>
+            <div class="dot-grid-glow"></div>
+        </div>
+        <div class="reactbits-bg-layer reactbits-faulty-terminal" data-bg-layer="faulty-terminal">
+            <div class="faulty-terminal-noise"></div>
+            <div class="faulty-terminal-scanline"></div>
+            <div class="faulty-terminal-glitch"></div>
+        </div>
+        <div class="reactbits-bg-layer reactbits-aurora" data-bg-layer="aurora">
+            <div class="aurora-band aurora-band-one"></div>
+            <div class="aurora-band aurora-band-two"></div>
+            <div class="aurora-stars"></div>
+        </div>
+        <div class="reactbits-bg-layer reactbits-dither" data-bg-layer="dither">
+            <div class="dither-overlay"></div>
+        </div>
+    </div>
+
+    <header class="top-nav-container">
+        <div class="fluid-glass-nav">
+            <div class="fluid-blob one"></div>
+            <div class="fluid-blob two"></div>
+            <div class="fluid-blob three"></div>
+            <div class="fluid-nav-content">
+                <div class="top-nav-left">
+                    <h1 class="text-3xl font-extrabold text-emerald-400">
+                        <a href="#home" class="hover:text-emerald-300 transition-colors">DevVibes</a>
+                    </h1>
+                    <div class="top-nav-buttons">
+                        <a href="#home" class="nav-button" data-translate-key="navHome">Главная</a>
+                        <a href="#posts" class="nav-button" data-translate-key="navPosts">Посты</a>
+                    </div>
+                </div>
+                <div class="header-controls">
+                    <div class="lang-switcher-container">
+                        <label for="languageSelector" class="sr-only" data-translate-key="languageLabel">Язык:</label>
+                        <select id="languageSelector" title="Select Language">
+                            <option value="ru">Русский</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    <div class="background-switcher-container">
+                        <label for="backgroundSelector" data-translate-key="backgroundLabel">Background:</label>
+                        <select id="backgroundSelector" title="Select Background">
+                            <option value="night" data-translate-key="backgroundNight">Night Sky</option>
+                            <option value="faulty-terminal" data-translate-key="backgroundFaultyTerminal">Faulty Terminal</option>
+                            <option value="dot-grid" data-translate-key="backgroundDotGrid">Dot Grid</option>
+                            <option value="aurora" data-translate-key="backgroundAurora">Aurora</option>
+                            <option value="dither" data-translate-key="backgroundDither">Dither</option>
+                        </select>
+                    </div>
+                    <button id="musicJackerButton" class="nav-button" data-translate-key="navMusicJackerButton">Music Jacker</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto mt-24 p-6 flex-grow">
+        <section id="home" class="min-h-[calc(100vh-180px)] flex flex-col justify-center items-center text-center py-16">
+            <h2 class="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight fade-in-3" data-translate-key="homeTitle">
+                Привет! Это <span class="text-emerald-400">DevVibes</span>
+            </h2>
+            <p class="text-xl text-slate-300 max-w-2xl mb-8 fade-in-4" data-translate-key="homeDescription">
+                Это мой личный блог, где я делюсь обновлениями о своих проектах,
+                особенно о боте <a href="https://t.me/ytdlpload_bot" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">@ytdlpload_bot</a>
+                и сайте <a href="https://bit.ly/musicjacker" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">bit.ly/musicjacker</a>:
+                новые функции, улучшения, технические решения и мысли о разработке.
+            </p>
+            <a href="#posts" class="btn-primary fade-in-5" data-translate-key="homeViewPostsButton">Посмотреть посты</a>
+        </section>
+
+        <section id="posts" class="py-16">
+            <h2 class="text-4xl font-bold text-white mb-8 text-center fade-in-1" data-translate-key="postsHeader">
+                Последние Обновления
+            </h2>
+
+            <div id="post-filters" class="flex flex-wrap justify-center gap-4 mb-12 fade-in-2">
+                <button class="filter-button active" data-filter="all" data-translate-key="filterAll">Все</button>
+                <button class="filter-button" data-filter="бот" data-translate-key="filterBot">Бот</button>
+                <button class="filter-button" data-filter="сайт" data-translate-key="filterWebsite">Сайт</button>
+                <button class="filter-button" data-filter="обновление" data-translate-key="filterUpdate">Обновление</button>
+                <button class="filter-button" data-filter="разработка" data-translate-key="filterDev">Разработка</button>
+            </div>
+
+            <div id="posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+                <p id="no-posts-message" class="text-slate-400 text-center col-span-full" data-translate-key="noPostsMessage" style="display: none;">Пока нет постов. Добавьте свой первый пост!</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-900 py-6 px-6 md:px-12 text-center text-slate-400 text-sm">
+        <div class="container mx-auto">
+            <p data-translate-key="footerCopyrightText">&copy; <span id="current-year"></span> DevVibes. Все права защищены.</p>
+            <p class="mt-2" data-translate-key="footerMadeForDevs">Создано с GitHub Pages для разработчиков.</p>
+            <p class="mt-2" data-translate-key="telegramChannelLinkText">Telegram-канал: <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">@ytdlpdevelopera></p>
+        </div>
+    </footer>
+
+    <script>
+        
+        const postsData = [
+            {
+                id: 0,
+                title: {
+                    ru: "Новый Интерфейс DevVibes!",
+                    en: "New DevVibes Interface!"
+                },
+                date: "2025-05-29",
+                excerpt: {
+                    ru: "Мы рады представить совершенно новый, более крутой и анимированный интерфейс DevVibes! Надеемся, вам понравится.",
+                    en: "We are excited to present the completely new, cooler, and more animated DevVibes interface! We hope you like it."
+                },
+                content: {
+                    ru: `
+                        <p class="text-slate-300 mb-4">
+                            Привет всем! Сегодня мы запускаем **полностью обновленный интерфейс** нашего блога DevVibes.
+                            Мы сделали его гораздо более современным,
+                            визуально привлекательным и анимированным.
+                        </p>
+                        <p class="text-slate-300 mb-4">
+                            Теперь сайт выглядит гораздо круче, с плавными переходами, улучшенной типографикой
+                            и, конечно же, с возвращенными звездами и луной на заднем фоне, которые придают ему особую атмосферу.
+                        </p>
+                        <p class="text-slate-300">
+                            Мы очень надеемся, что новый дизайн сделает чтение наших обновлений еще более приятным.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/facc15?text=New+DevVibes+UI" alt="Новый интерфейс DevVibes" class="w-full h-48 object-cover rounded-lg my-4">
+                    `,
+                    en: `
+                        <p class="text-slate-300 mb-4">
+                            Hello everyone! Today we are launching a **completely redesigned interface** for our DevVibes blog.
+                            We made it much more modern,
+                            visually appealing, and animated.
+                        </p>
+                        <p class="text-slate-300 mb-4">
+                            The site now looks much cooler, with smooth transitions, improved typography,
+                            and, of course, with the returned stars and moon in the background, which give it a special atmosphere.
+                        </p>
+                        <p class="text-slate-300">
+                            We truly hope that the new design will make reading our updates even more enjoyable.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/facc15?text=New+DevVibes+UI" alt="New DevVibes UI" class="w-full h-48 object-cover rounded-lg my-4">
+                    `
+                },
+                thumbnail: "https://placehold.co/600x200/1a202c/facc15?text=New+DevVibes+UI",
+                tags: ["обновление", "сайт", "новости"]
+            },
+            {
+                id: 1, 
+                title: {
+                    ru: "Новая Функция: Поиск Музыки из YouTube в Боте!",
+                    en: "New Feature: YouTube Music Search in Bot!"
+                },
+                date: "2025-05-28", 
+                excerpt: {
+                    ru: "Теперь Telegram-бот @ytdlpload_bot умеет искать музыку из YouTube по названию и отправляет её вам в MP3 формате. Пока это локализовано только для русского языка.",
+                    en: "Now the Telegram bot @ytdlpload_bot can search for music from YouTube by title and automatically send it to you in MP3 format. Currently, this function is localized for Russian only."
+                },
+                content: {
+                    ru: `
+                        <p class="text-slate-300 mb-4">
+                            Всем привет! У меня отличные новости для пользователей нашего Telegram-бота <a href="https://t.me/ytdlpload_bot" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">@ytdlpload_bot</a>.
+                            Мы добавили новую, очень удобную функцию: **поиск музыки из YouTube прямо в боте!**
+                        </p>
+                        <p class="text-slate-300 mb-4">
+                            Теперь вам не нужно сначала искать ссылку на YouTube. Просто отправьте боту команду <code>/search</code>,
+                            затем введите название трека или исполнителя, и бот сам найдет подходящие результаты на YouTube
+                            и предложит их для скачивания в формате MP3.
+                        </p>
+                        <p class="text-slate-300 mb-4">
+                            Пока что эта функция локализована только для русского языка, но мы работаем над тем,
+                            чтобы в скором времени она стала доступна и для других языков.
+                            Надеюсь, вам понравится это обновление!
+                        </p>
+                        <p class="text-slate-300">
+                            Также не забывайте про наш сайт <a href="https://bit.ly/musicjacker" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">bit.ly/musicjacker</a>
+                            и наш Telegram-канал: <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">@ytdlpload_bot</a>.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/60a5fa?text=Bot+Search+Update" alt="Поиск музыки в боте" class="w-full h-48 object-cover rounded-lg my-4">
+                    `,
+                    en: `
+                        <p class="text-slate-300 mb-4">
+                            Hello everyone! I have great news for the users of our Telegram bot <a href="https://t.me/ytdlpload_bot" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">@ytdlpload_bot</a>.
+                            We've added a new, very convenient feature: **YouTube music search directly in the bot!**
+                        </p>
+                        <p class="text-slate-300 mb-4">
+                            Now you don't need to find a YouTube link first. Just send the bot the <code>/search</code> command,
+                            then enter the track title or artist, and the bot will find suitable results on YouTube
+                            and offer them for download in MP3 format.
+                        </p>
+                        <p class="text-slate-300 mb-4">
+                            Currently, this function is localized for Russian only, but we are working on making it
+                            available for other languages soon.
+                            I hope you enjoy this update!
+                        </p>
+                        <p class="text-slate-300">
+                            Also, don't forget about our website <a href="https://bit.ly/musicjacker" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">bit.ly/musicjacker</a>
+                            and our Telegram channel: <a href="https://t.me/ytdlpdeveloper" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">@ytdlpdeveloper</a>.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/60a5fa?text=Bot+Search+Update" alt="Bot Music Search" class="w-full h-48 object-cover rounded-lg my-4">
+                    `
+                },
+                thumbnail: "https://placehold.co/600x200/1a202c/60a5fa?text=Bot+Search+Update",
+                tags: ["обновление", "бот", "сайт", "новости"]
+            },
+            {
+                id: 2, 
+                title: {
+                    ru: "Советы по Оптимизации Производительности Бота",
+                    en: "Tips for Optimizing Bot Performance"
+                },
+                date: "2025-03-01",
+                excerpt: {
+                    ru: "Производительность — ключ к успеху любого бота. В этом посте я поделюсь несколькими практическими советами, которые помогут вам оптимизировать работу вашего бота и обеспечить его стабильность.",
+                    en: "Performance is key to any bot's success. In this post, I'll share some practical tips to help you optimize your bot's performance and ensure its stability."
+                },
+                content: {
+                    ru: `
+                        <p class="text-slate-300 mb-4">
+                            Медленный бот может отпугнуть пользователей. Вот несколько стратегий, которые мы используем для поддержания высокой производительности:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-300 mb-4 pl-4">
+                            <li><strong>Асинхронное программирование:</strong> Используйте <code>asyncio</code> для обработки множества запросов одновременно.</li>
+                            <li><strong>Оптимизация запросов к API:</strong> Кешируйте данные и минимизируйте количество внешних запросов.</li>
+                            <li><strong>Эффективное использование ресурсов:</strong> Мониторьте потребление памяти и CPU, оптимизируйте алгоритмы.</li>
+                            <li><strong>Масштабирование:</strong> Рассмотрите возможность использования бессерверных функций или контейнеров для автоматического масштабирования.</li>
+                        </ul>
+                        <p class="text-slate-300">
+                            Помните, что оптимизация — это непрерывный процесс. Регулярно анализируйте логи и метрики, чтобы выявлять узкие места.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/38bdf8?text=Optimization+Tips" alt="Советы по оптимизации" class="w-full h-48 object-cover rounded-lg my-4">
+                    `,
+                    en: `
+                        <p class="text-slate-300 mb-4">
+                            A slow bot can deter users. Here are some strategies we use to maintain high performance:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-300 mb-4 pl-4">
+                            <li><strong>Asynchronous programming:</strong> Use <code>asyncio</code> to handle multiple requests simultaneously.</li>
+                            <li><strong>API request optimization:</strong> Cache data and minimize external requests.</li>
+                            <li><strong>Efficient resource utilization:</strong> Monitor memory and CPU consumption, optimize algorithms.</li>
+                            <li><strong>Scaling:</strong> Consider using serverless functions or containers for automatic scaling.</li>
+                        </ul>
+                        <p class="text-slate-300">
+                            Remember that optimization is a continuous process. Regularly analyze logs and metrics to identify bottlenecks.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/38bdf8?text=Optimization+Tips" alt="Optimization Tips" class="w-full h-48 object-cover rounded-lg my-4">
+                    `
+                },
+                thumbnail: "https://placehold.co/600x200/1a202c/38bdf8?text=Optimization+Tips",
+                tags: ["оптимизация", "производительность", "советы", "разработка"]
+            },
+            {
+                id: 3, 
+                title: {
+                    ru: "Открытый Исходный Код: Приглашаем к Сотрудничеству!",
+                    en: "Open Source: We Invite You to Collaborate!"
+                },
+                date: "2025-01-20",
+                excerpt: {
+                    ru: "Мы верим в силу сообщества и открытого исходного кода. Теперь часть нашего бота доступна на GitHub, и мы приглашаем всех желающих присоединиться к разработке.",
+                    en: "We believe in the power of community and open source. Part of our bot is now available on GitHub, and we invite everyone to join the development."
+                },
+                content: {
+                    ru: `
+                        <p class="text-slate-300 mb-4">
+                            Преимущества открытого исходного кода:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-300 mb-4 pl-4">
+                            <li><strong>Прозрачность:</strong> Каждый может видеть, как работает бот.</li>
+                            <li><strong>Совместная разработка:</strong> Возможность для сообщества вносить свой вклад и предлагать улучшения.</li>
+                            <li><strong>Обучение:</strong> Отличная возможность для начинающих разработчиков изучить реальный проект.</li>
+                        </ul>
+                        <p class="text-slate-300">
+                            Мы будем рады любому вкладу — от исправления ошибок до добавления новых функций.
+                            Присоединяйтесь к нашему репозиторию на GitHub!
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/a78bfa?text=Open+Source+Project" alt="Открытый исходный код" class="w-full h-48 object-cover rounded-lg my-4">
+                    `,
+                    en: `
+                        <p class="text-slate-300 mb-4">
+                            Benefits of open source:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-300 mb-4 pl-4">
+                            <li><strong>Transparency:</strong> Everyone can see how the bot works.</li>
+                            <li><strong>Collaborative development:</strong> Opportunity for the community to contribute and suggest improvements.</li>
+                            <li><strong>Learning:</strong> A great opportunity for aspiring developers to study a real project.</li>
+                        </ul>
+                        <p class="text-slate-300">
+                            We welcome any contribution — from bug fixes to adding new features.
+                            Join our repository on GitHub!
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/a78bfa?text=Open+Source+Project" alt="Open Source Project" class="w-full h-48 object-cover rounded-lg my-4">
+                    `
+                },
+                thumbnail: "https://placehold.co/600x200/1a202c/a78bfa?text=Open+Source+Project",
+                tags: ["open_source", "GitHub", "сообщество", "разработка"]
+            },
+            {
+                id: 4, 
+                title: {
+                    ru: "Как Мы Обрабатываем Ошибки: Стратегии и Инструменты",
+                    en: "How We Handle Errors: Strategies and Tools"
+                },
+                date: "2024-12-05",
+                excerpt: {
+                    ru: "Обработка ошибок — это неотъемлемая часть разработки надежного бота. В этом посте я расскажу о наших стратегиях и инструментах для эффективного выявления и устранения багов.",
+                    en: "Error handling is an integral part of developing a reliable bot. In this post, I'll talk about our strategies and tools for effectively identifying and eliminating bugs."
+                },
+                content: {
+                    ru: `
+                        <p class="text-slate-300 mb-4">
+                            Мы используем комплексный подход к обработке ошибок, который включает:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-300 mb-4 pl-4">
+                            <li><strong>Централизованное логирование:</strong> Все логи собираются в одном месте для удобного анализа.</li>
+                            <li><strong>Системы мониторинга:</strong> Автоматические уведомления о критических ошибках и аномалиях.</li>
+                            <li><strong>Автоматизированное тестирование:</strong> Юнит-тесты и интеграционные тесты для предотвращения регрессий.</li>
+                            <li><strong>Постмортемы:</strong> Анализ причин серьезных инцидентов для предотвращения их повторения.</li>
+                        </ul>
+                        <p class="text-slate-300">
+                            Надежная обработка ошибок позволяет нам быстро реагировать на проблемы и поддерживать высокий уровень доступности бота.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/ef4444?text=Error+Debugging" alt="Обработка ошибок" class="w-full h-48 object-cover rounded-lg my-4">
+                    `,
+                    en: `
+                        <p class="text-slate-300 mb-4">
+                            We use a comprehensive approach to error handling, which includes:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-300 mb-4 pl-4">
+                            <li><strong>Centralized logging:</strong> All logs are collected in one place for easy analysis.</li>
+                            <li><strong>Monitoring systems:</strong> Automatic notifications of critical errors and anomalies.</li>
+                            <li><strong>Automated testing:</strong> Unit tests and integration tests to prevent regressions.</li>
+                            <li><strong>Post-mortems:</strong> Analysis of the causes of serious incidents to prevent their recurrence.</li>
+                        </ul>
+                        <p class="text-slate-300">
+                            Reliable error handling allows us to quickly respond to problems and maintain a high level of bot availability.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/ef4444?text=Error+Debugging" alt="Error Debugging" class="w-full h-48 object-cover rounded-lg my-4">
+                    `
+                },
+                thumbnail: "https://placehold.co/600x200/1a202c/ef4444?text=Error+Debugging",
+                tags: ["ошибки", "тестирование", "мониторинг", "разработка"]
+            },
+            {
+                id: 5, 
+                title: {
+                    ru: "Будущее DevVibes: Планы и Видение",
+                    en: "The Future of DevVibes: Plans and Vision"
+                },
+                date: "2025-06-01",
+                excerpt: {
+                    ru: "Что дальше для DevVibes? В этом посте я поделюсь своими планами и видением развития этого блога и связанных с ним проектов.",
+                    en: "What's next for DevVibes? In this post, I'll share my plans and vision for the development of this blog and related projects."
+                },
+                content: {
+                    ru: `
+                        <p class="text-slate-300 mb-4">
+                            Я стремлюсь сделать DevVibes не просто местом для обновлений, но и платформой для обмена знаниями.
+                            В планах:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-300 mb-4 pl-4">
+                            <li><strong>Больше технических статей:</strong> Глубокие погружения в архитектуру бота и сайта.</li>
+                            <li><strong>Интерактивные демонстрации:</strong> Возможность попробовать некоторые функции прямо в браузере.</li>
+                            <li><strong>Раздел Q&A:</strong> Ответы на часто задаваемые вопросы от сообщества.</li>
+                        </ul>
+                        <p class="text-slate-300">
+                            Ваши идеи и предложения всегда приветствуются! Давайте строить будущее DevVibes вместе.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/60a5fa?text=Future+Visions" alt="Будущие планы" class="w-full h-48 object-cover rounded-lg my-4">
+                    `,
+                    en: `
+                        <p class="text-slate-300 mb-4">
+                            I strive to make DevVibes not just a place for updates, but also a platform for knowledge sharing.
+                            Our plans include:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-300 mb-4 pl-4">
+                            <li><strong>More technical articles:</strong> Deep dives into the architecture of the bot and website.</li>
+                            <li><strong>Interactive demos:</strong> The ability to try out some features directly in the browser.</li>
+                            <li><strong>Q&A section:</strong> Answers to frequently asked questions from the community.</li>
+                        </ul>
+                        <p class="text-slate-300">
+                            Your ideas and suggestions are always welcome! Let's build the future of DevVibes together.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/60a5fa?text=Future+Visions" alt="Future Visions" class="w-full h-48 object-cover rounded-lg my-4">
+                    `
+                },
+                thumbnail: "https://placehold.co/600x200/1a202c/60a5fa?text=Future+Visions",
+                tags: ["планы", "будущее", "сообщество"]
+            },
+            {
+                id: 6,
+                title: {
+                    ru: "За кулисами: Инфраструктура Бота",
+                    en: "Behind the Scenes: Bot Infrastructure"
+                },
+                date: "2025-05-10",
+                excerpt: {
+                    ru: "Как работает наш бот под капотом? В этом посте я расскажу об инфраструктуре, которая обеспечивает его стабильность и масштабируемость.",
+                    en: "How does our bot work under the hood? In this post, I'll talk about the infrastructure that ensures its stability and scalability."
+                },
+                content: {
+                    ru: `
+                        <p class="text-slate-300 mb-4">
+                            Наш бот работает на облачной инфраструктуре, используя:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-300 mb-4 pl-4">
+                            <li><strong>Google Cloud Run:</strong> Для бессерверного развертывания и автоматического масштабирования.</li>
+                            <li><strong>Firestore:</strong> Для хранения пользовательских данных и настроек.</li>
+                            <li><strong>Pub/Sub:</strong> Для асинхронной обработки задач и событий.</li>
+                        </ul>
+                        <p class="text-slate-300">
+                            Такой подход позволяет нам сосредоточиться на разработке функций, не беспокоясь об управлении серверами.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/f97316?text=Bot+Infrastructure" alt="Инфраструктура бота" class="w-full h-48 object-cover rounded-lg my-4">
+                    `,
+                    en: `
+                        <p class="text-slate-300 mb-4">
+                            Our bot runs on cloud infrastructure, using:
+                        </p>
+                        <ul class="list-disc list-inside text-slate-300 mb-4 pl-4">
+                            <li><strong>Google Cloud Run:</strong> For serverless deployment and automatic scaling.</li>
+                            <li><strong>Firestore:</strong> For storing user data and settings.</li>
+                            <li><strong>Pub/Sub:</strong> For asynchronous task and event processing.</li>
+                        </ul>
+                        <p class="text-slate-300">
+                            This approach allows us to focus on developing features without worrying about server management.
+                        </p>
+                        <img src="https://placehold.co/600x200/1a202c/f97316?text=Bot+Infrastructure" alt="Bot Infrastructure" class="w-full h-48 object-cover rounded-lg my-4">
+                    `
+                },
+                thumbnail: "https://placehold.co/600x200/1a202c/f97316?text=Bot+Infrastructure",
+                tags: ["инфраструктура", "облако", "Cloud_Run", "разработка"]
+            }
+        ];
+
+        
+        const translations = {
+            ru: {
+                pageTitle: "Блог Разработчика - DevVibes",
+                navHome: "Главная",
+                navPosts: "Посты",
+                homeTitle: "Привет! Это <span class=\"text-emerald-400\">DevVibes</span>",
+                homeDescription: "Это мой личный блог, где я делюсь обновлениями о своих проектах, особенно о боте <a href=\"https://t.me/ytdlpload_bot\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-emerald-400 hover:underline\">@ytdlpload_bot</a> и сайте <a href=\"https://bit.ly/musicjacker\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-emerald-400 hover:underline\">bit.ly/musicjacker</a>: новые функции, улучшения, технические решения и мысли о разработке.",
+                homeViewPostsButton: "Посмотреть посты",
+                postsHeader: "Последние Обновления",
+                filterAll: "Все",
+                filterBot: "Бот",
+                filterWebsite: "Сайт",
+                filterUpdate: "Обновление",
+                filterDev: "Разработка",
+                readMoreButton: "Читать далее",
+                tagsLabel: "Теги:",
+                noPostsMessage: "Пока нет постов. Добавьте свой первый пост!",
+                footerCopyrightText: "&copy; <span id=\"current-year\"></span> DevVibes. Все права защищены.",
+                footerMadeForDevs: "Создано с GitHub Pages для разработчиков.",
+                telegramChannelLinkText: "Telegram-канал: <a href=\"https://t.me/ytdlpdeveloper\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-emerald-400 hover:underline\">@ytdlpdeveloper</a>",
+                languageLabel: "Язык:",
+                backgroundLabel: "Фон:",
+                backgroundNight: "Ночное небо",
+                backgroundFaultyTerminal: "Faulty Terminal",
+                backgroundDotGrid: "Сетка точек",
+                backgroundAurora: "Аврора",
+                backgroundDither: "Dither"
+                ,navMusicJackerButton: "Music Jacker"
+            },
+            en: {
+                pageTitle: "Developer Blog - DevVibes",
+                navHome: "Home",
+                navPosts: "Posts",
+                homeTitle: "Hello! This is <span class=\"text-emerald-400\">DevVibes</span>",
+                homeDescription: "This is my personal blog where I share updates about my projects, especially about the bot <a href=\"https://t.me/ytdlpload_bot\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-emerald-400 hover:underline\">@ytdlpload_bot</a> and the website <a href=\"https://bit.ly/musicjacker\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-emerald-400 hover:underline\">bit.ly/musicjacker</a>: new features, improvements, technical solutions, and development thoughts.",
+                homeViewPostsButton: "View Posts",
+                postsHeader: "Latest Updates",
+                filterAll: "All",
+                filterBot: "Bot",
+                filterWebsite: "Website",
+                filterUpdate: "Update",
+                filterDev: "Development",
+                readMoreButton: "Read more",
+                tagsLabel: "Tags:",
+                noPostsMessage: "No posts yet. Add your first post!",
+                footerCopyrightText: "&copy; <span id=\"current-year\"></span> DevVibes. All rights reserved.",
+                footerMadeForDevs: "Made with GitHub Pages for developers.",
+                telegramChannelLinkText: "Telegram channel: <a href=\"https://t.me/ytdlpdeveloper\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-emerald-400 hover:underline\">@ytdlpload_bot</a>",
+                languageLabel: "Language:",
+                backgroundLabel: "Background:",
+                backgroundNight: "Night Sky",
+                backgroundFaultyTerminal: "Faulty Terminal",
+                backgroundDotGrid: "Dot Grid",
+                backgroundAurora: "Aurora",
+                backgroundDither: "Dither"
+                ,navMusicJackerButton: "Music Jacker"
+            }
+        };
+
+        
+        let currentLanguage = 'ru'; 
+        let currentBackgroundMode = 'night';
+        const backgroundModes = ['night', 'faulty-terminal', 'dot-grid', 'aurora', 'dither'];
+
+        
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            
+            return new Date(dateString).toLocaleDateString(currentLanguage === 'ru' ? 'ru-RU' : 'en-US', options);
+        }
+
+        // Вспомогательная функция для получения перевода
+        function getTranslation(key, lang = currentLanguage) {
+            return translations[lang] && translations[lang][key] ? translations[lang][key] : (translations.en[key] || key);
+        }
+
+        
+        function applyTranslations(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('preferredLanguage', lang); 
+            document.documentElement.lang = lang; 
+
+            
+            document.querySelectorAll('[data-translate-key]').forEach(element => {
+                const key = element.getAttribute('data-translate-key');
+                element.innerHTML = getTranslation(key, lang); 
+            });
+
+            
+            document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                element.placeholder = getTranslation(key, lang);
+            });
+
+          
+            const currentYearSpan = document.getElementById('current-year');
+            if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear();
+            }
+
+            
+            loadPosts();
+            updateFilterButtons();
+            applyBackgroundChoice(currentBackgroundMode);
+        }
+
+        function applyBackgroundChoice(mode) {
+            const normalized = backgroundModes.includes(mode) ? mode : 'night';
+            backgroundModes.forEach(bg => document.body.classList.remove(`bg-mode-${bg}`));
+            document.body.classList.add(`bg-mode-${normalized}`);
+            currentBackgroundMode = normalized;
+            const selector = document.getElementById('backgroundSelector');
+            if (selector) {
+                selector.value = normalized;
+            }
+            try {
+                localStorage.setItem('preferredBackgroundDevVibes', normalized);
+            } catch (_) {
+                // ignore storage errors
+            }
+        }
+
+        
+        function loadPosts(filterTag = 'all') {
+            const postsGrid = document.getElementById('posts-grid');
+            if (!postsGrid) return; 
+
+            postsGrid.innerHTML = ''; 
+
+            const filteredPosts = filterTag === 'all'
+                ? postsData
+                : postsData.filter(post => post.tags && post.tags.includes(filterTag));
+
+            const noPostsMessageElement = document.getElementById('no-posts-message');
+
+            if (filteredPosts.length === 0) {
+                if (noPostsMessageElement) {
+                    postsGrid.appendChild(noPostsMessageElement);
+                    noPostsMessageElement.style.display = 'block'; 
+                }
+                return;
+            } else {
+                if (noPostsMessageElement) {
+                    noPostsMessageElement.style.display = 'none'; 
+                }
+            }
+
+
+            filteredPosts.forEach((post, index) => {
+                const postElement = document.createElement('div');
+                
+                postElement.className = `post-card fade-in fade-in-${Math.min(index + 1, 10)}`; 
+                postElement.innerHTML = `
+                    <img src="${post.thumbnail}" alt="${getTranslation('tagsLabel', currentLanguage)}: ${post.tags.join(', ')}" class="post-image">
+                    <div class="p-6 flex flex-col justify-between flex-grow">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-white mb-2">${post.title[currentLanguage] || post.title.en || post.title.ru}</h3>
+                            <p class="text-slate-400 text-sm mb-3">${formatDate(post.date)}</p>
+                            <p class="text-slate-300 mb-4">${post.excerpt[currentLanguage] || post.excerpt.en || post.excerpt.ru}</p>
+                        </div>
+                        <button onclick="showPostDetails(${post.id})" class="text-sky-400 hover:underline font-medium self-start mt-auto">${getTranslation('readMoreButton')}</button>
+                    </div>
+                `;
+                postsGrid.appendChild(postElement);
+            });
+        }
+
+      
+        function updateFilterButtons(activeTag = 'all') {
+            document.querySelectorAll('#post-filters .filter-button').forEach(button => {
+                if (button.dataset.filter === activeTag) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        
+        function showPostDetails(postId) {
+            const post = postsData.find(p => p.id === postId);
+            if (!post) return;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50';
+            overlay.innerHTML = `
+                <div class="modal-content">
+                    <button class="modal-close-button" onclick="this.parentNode.parentNode.remove()">×</button>
+                    <img src="${post.thumbnail}" alt="${getTranslation('tagsLabel', currentLanguage)}: ${post.tags.join(', ')}" class="w-full h-48 object-cover rounded-lg mb-6">
+                    <h2 class="text-3xl font-bold text-emerald-400 mb-3">${post.title[currentLanguage] || post.title.en || post.title.ru}</h2>
+                    <p class="text-slate-400 text-sm mb-4">${formatDate(post.date)}</p>
+                    <div class="text-slate-300 leading-relaxed">${post.content[currentLanguage] || post.content.en || post.content.ru}</div>
+                    <div class="mt-6 text-sm text-slate-500">
+                        ${getTranslation('tagsLabel')} ${post.tags.map(tag => `<span class="inline-block bg-slate-700 rounded-full px-3 py-1 text-xs font-semibold text-slate-300 mr-2 mb-2">#${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            });
+        }
+
+       
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const currentYearSpan = document.getElementById('current-year');
+            if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear();
+            }
+
+           
+            const languageSelector = document.getElementById('languageSelector');
+            if (languageSelector) {
+                languageSelector.addEventListener('change', (event) => {
+                    applyTranslations(event.target.value);
+                });
+
+                
+                const preferredLang = localStorage.getItem('preferredLanguage');
+                const browserLang = navigator.language.split('-')[0];
+                let initialLang = 'ru'; 
+
+                if (preferredLang && translations[preferredLang]) {
+                    initialLang = preferredLang;
+                } else if (translations[browserLang]) {
+                    initialLang = browserLang;
+                }
+                languageSelector.value = initialLang;
+                applyTranslations(initialLang); 
+            } else {
+               
+                loadPosts();
+            }
+
+            const backgroundSelector = document.getElementById('backgroundSelector');
+            let storedBackground = 'night';
+            try {
+                const saved = localStorage.getItem('preferredBackgroundDevVibes');
+                if (saved) {
+                    storedBackground = saved;
+                }
+            } catch (_) {
+                storedBackground = 'night';
+            }
+            applyBackgroundChoice(storedBackground);
+            if (backgroundSelector) {
+                backgroundSelector.addEventListener('change', (event) => {
+                    applyBackgroundChoice(event.target.value);
+                });
+            }
+
+            // Music Jacker button: return to normal site UI
+            const musicJackerButton = document.getElementById('musicJackerButton');
+            if (musicJackerButton) {
+                musicJackerButton.addEventListener('click', () => {
+                    window.location.href = '/';
+                });
+            }
+
+            
+            document.querySelectorAll('#post-filters .filter-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const filterTag = e.target.dataset.filter;
+                    loadPosts(filterTag);
+                    updateFilterButtons(filterTag);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
