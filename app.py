@@ -14,6 +14,9 @@ from urllib.error import URLError, HTTPError
 from flask import Flask, request, jsonify, render_template, send_from_directory, after_this_request
 from dotenv import load_dotenv
 import yt_dlp
+import threading
+import subprocess
+import time
 
 try:
     from mutagen.easyid3 import EasyID3
@@ -84,6 +87,9 @@ DEFAULT_ALBUM_NAME = os.getenv('DEFAULT_ALBUM_NAME', "Music Jacker Downloads")
 DURATION_LIMIT_SECONDS = 600
 SEARCH_RESULTS_LIMIT = 10 # Лимит результатов поиска для поиска
 PLAYLIST_DURATION_CHECK_LIMIT = int(os.getenv('PLAYLIST_DURATION_CHECK_LIMIT', '50'))
+
+# Job store holds background conversion jobs: { job_id: {status,progress,message,session_id,output_filename} }
+conversion_jobs = {}
 
 THUMBNAIL_TIMEOUT_SECONDS = int(os.getenv('THUMBNAIL_TIMEOUT_SECONDS', '12'))
 MAX_THUMBNAIL_SIZE_BYTES = int(os.getenv('MAX_THUMBNAIL_SIZE_BYTES', str(5 * 1024 * 1024)))
@@ -1058,6 +1064,248 @@ def search_content_route():
         logger.error(f"Ошибка при поиске на TikTok: {e}")
 
     return jsonify({"status": "success", "results": search_results})
+
+@app.route('/miniblog')
+def miniblog():
+    """Рендерит страницу блога."""
+    try:
+        return render_template('miniblog-standalone.html')
+    except Exception as e:
+        logger.error(f"Ошибка при рендеринге miniblog-standalone.html: {e}.", exc_info=True)
+        return "Ошибка: Шаблон блога не найден. Обратитесь к администратору.", 500
+
+
+def _get_media_duration_seconds(path):
+    try:
+        ffprobe = shutil.which('ffprobe') or 'ffprobe'
+        proc = subprocess.run([ffprobe, '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', path], capture_output=True, text=True, timeout=10)
+        if proc.returncode == 0 and proc.stdout:
+            try:
+                return float(proc.stdout.strip())
+            except Exception:
+                return None
+    except Exception as e:
+        logger.debug(f"ffprobe failed: {e}")
+    return None
+
+
+def _start_conversion_thread(job_id, infile, outfile, total_seconds=None, cmd=None, session_id=None):
+    def worker():
+        try:
+            conversion_jobs[job_id]['status'] = 'processing'
+            conversion_jobs[job_id]['progress'] = 0
+            if not cmd:
+                # Fallback simple ffmpeg call
+                cmd_local = [FFMPEG_PATH, '-y', '-i', infile, outfile]
+            else:
+                cmd_local = cmd
+
+            # Inject ffmpeg progress reporting to stdout
+            final_out = cmd_local[-1]
+            pre = cmd_local[:-1]
+            progress_cmd = pre + ['-progress', 'pipe:1', '-nostats', final_out]
+            proc = subprocess.Popen(progress_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+            import select
+
+            if total_seconds and total_seconds > 0:
+                last_pct = 0
+                while True:
+                    reads, _, _ = select.select([proc.stdout, proc.stderr], [], [], 0.15)
+                    if not reads:
+                        if proc.poll() is not None:
+                            break
+                        continue
+                    for r in reads:
+                        line = r.readline()
+                        if not line:
+                            continue
+                        line = line.strip()
+                        if line.startswith('out_time_ms='):
+                            try:
+                                out_ms = int(line.split('=', 1)[1])
+                                secs = out_ms / 1000.0
+                                pct = min(99, int((secs / total_seconds) * 100))
+                                if pct > last_pct:
+                                    conversion_jobs[job_id]['progress'] = pct
+                                    last_pct = pct
+                            except Exception:
+                                pass
+                        elif line.startswith('out_time='):
+                            try:
+                                tstr = line.split('=', 1)[1]
+                                parts = tstr.split(':')
+                                if len(parts) >= 3:
+                                    secs = float(parts[0]) * 3600 + float(parts[1]) * 60 + float(parts[2])
+                                    pct = min(99, int((secs / total_seconds) * 100))
+                                    if pct > last_pct:
+                                        conversion_jobs[job_id]['progress'] = pct
+                                        last_pct = pct
+                            except Exception:
+                                pass
+                        elif line.startswith('progress='):
+                            if line.split('=',1)[1] == 'end':
+                                conversion_jobs[job_id]['progress'] = 100
+                                break
+                        else:
+                            m = re.search(r'time=(\d{2}:\d{2}:\d{2}\.\d{2})', line)
+                            if m:
+                                try:
+                                    tstr = m.group(1)
+                                    parts = tstr.split(':')
+                                    secs = float(parts[0]) * 3600 + float(parts[1]) * 60 + float(parts[2])
+                                    pct = min(99, int((secs / total_seconds) * 100))
+                                    if pct > last_pct:
+                                        conversion_jobs[job_id]['progress'] = pct
+                                        last_pct = pct
+                                except Exception:
+                                    pass
+            else:
+                # no duration known: make sure user sees some moving progress
+                conversion_jobs[job_id]['progress'] = 5
+                while True:
+                    if proc.poll() is not None:
+                        break
+                    # gently increase progress until near completion
+                    current = conversion_jobs[job_id].get('progress', 5)
+                    if current < 90:
+                        conversion_jobs[job_id]['progress'] = min(90, current + 3)
+                    time.sleep(0.5)
+
+            ret = proc.poll()
+            if ret == 0:
+                conversion_jobs[job_id]['progress'] = 100
+                conversion_jobs[job_id]['status'] = 'done'
+                if session_id and outfile:
+                    conversion_jobs[job_id]['download_url'] = f"/serve_file/{session_id}/{os.path.basename(outfile)}"
+            else:
+                stderr = proc.stderr.read() if proc.stderr else ''
+                conversion_jobs[job_id]['status'] = 'error'
+                conversion_jobs[job_id]['message'] = 'Conversion failed.'
+                conversion_jobs[job_id]['error_code'] = 'conversion_failed'
+                conversion_jobs[job_id]['log'] = stderr
+        except Exception as e:
+            conversion_jobs[job_id]['status'] = 'error'
+            conversion_jobs[job_id]['message'] = str(e)
+
+    t = threading.Thread(target=worker, daemon=True)
+    t.start()
+
+
+@app.route('/converter')
+def converter_page():
+    try:
+        return render_template('converter-standalone.html')
+    except Exception as e:
+        logger.error(f"Ошибка при рендеринге converter-standalone.html: {e}.", exc_info=True)
+        return "Ошибка: Шаблон конвертера не найден.", 500
+
+
+@app.route('/api/convert', methods=['POST'])
+def api_convert():
+    if 'file' not in request.files:
+        return jsonify({'status': 'error', 'message': 'No file uploaded'}), 400
+
+    if not FFMPEG_IS_AVAILABLE:
+        return jsonify({'status': 'error', 'code': 'ffmpeg_missing', 'message': 'Server-side conversion is not available (FFmpeg missing).'}), 503
+
+    uploaded = request.files['file']
+    target = request.form.get('target')
+    if not uploaded or uploaded.filename == '':
+        return jsonify({'status': 'error', 'message': 'No file uploaded'}), 400
+
+    original_filename = uploaded.filename
+    name, ext = os.path.splitext(original_filename)
+    ext = ext.lower().lstrip('.')
+
+    allowed = {
+        'mp3': ['m4a','wav','ogg','aac','flac','opus','mp4'],
+        'm4a': ['mp3','wav','flac','aac','ogg','opus'],
+        'wav': ['mp3','m4a','flac','aac','ogg','opus'],
+        'mp4': ['mp3','m4a','wav','aac'],
+        'aac': ['mp3','m4a','wav','flac','opus'],
+        'ogg': ['mp3','wav','m4a','flac'],
+        'flac': ['mp3','wav','m4a'],
+        'webp': ['jpg','png','gif','bmp','tiff'],
+        'png': ['jpg','webp','gif','tiff'],
+        'jpg': ['png','webp','gif','tiff'],
+        'svg': ['png','jpg','webp'],
+        'tiff': ['png','jpg']
+    }
+
+    if not target:
+        return jsonify({'status': 'error', 'message': 'Target format not specified'}), 400
+
+    if ext not in allowed or target not in allowed[ext]:
+        return jsonify({'status': 'error', 'code': 'unsupported_conversion', 'message': 'Unsupported conversion requested'}), 400
+
+    job_id = uuid.uuid4().hex
+    session_id = uuid.uuid4().hex
+    session_path = os.path.join(USER_DOWNLOADS_DIR, session_id)
+    os.makedirs(session_path, exist_ok=True)
+
+    infile_path = os.path.join(session_path, normalize_title_for_filename(original_filename))
+    uploaded.save(infile_path)
+
+    # For audio/video, enforce 5 minute limit
+    if ext in ('mp3', 'mp4'):
+        dur = _get_media_duration_seconds(infile_path)
+        if dur is None:
+            pass
+        else:
+            if dur > 300:
+                try:
+                    os.remove(infile_path)
+                except Exception:
+                    pass
+                return jsonify({'status': 'error', 'code': 'too_long', 'message': 'Uploaded audio/video exceeds 5 minutes limit.'}), 400
+
+    base_out = normalize_title_for_filename(name)
+    out_ext = target.lower()
+    out_filename = ensure_unique_filename(session_path, f"{base_out}.{out_ext}")
+    out_path = os.path.join(session_path, out_filename)
+
+    conversion_jobs[job_id] = {'status': 'queued', 'progress': 0, 'message': '', 'session_id': session_id, 'error_code': None}
+
+    total_seconds = None
+    if ext in ('mp3', 'mp4'):
+        total_seconds = _get_media_duration_seconds(infile_path) or None
+
+    # Build robust ffmpeg commands for many conversions
+    if ext in ('mp3','m4a','wav','aac','ogg','flac','opus') and target in ('mp3','m4a','wav','aac','ogg','flac','opus'):
+        if target == 'mp3':
+            codec = ['-c:a', 'libmp3lame', '-b:a', '192k']
+        elif target == 'm4a' or target == 'aac':
+            codec = ['-c:a', 'aac', '-b:a', '192k']
+        elif target == 'wav':
+            codec = ['-c:a', 'pcm_s16le']
+        elif target == 'flac':
+            codec = ['-c:a', 'flac']
+        elif target == 'opus':
+            codec = ['-c:a', 'libopus', '-b:a', '128k']
+        elif target == 'ogg':
+            codec = ['-c:a', 'libvorbis', '-b:a', '128k']
+        else:
+            codec = []
+        cmd = [FFMPEG_PATH, '-y', '-i', infile_path] + codec + [out_path]
+    elif ext == 'mp4' and target == 'mp3':
+        cmd = [FFMPEG_PATH, '-y', '-i', infile_path, '-vn', '-c:a', 'libmp3lame', '-b:a', '192k', out_path]
+    elif ext in ('webp','png','jpg','svg','tiff') and target in ('jpg','png','gif','webp','bmp','tiff'):
+        cmd = [FFMPEG_PATH, '-y', '-i', infile_path, out_path]
+    else:
+        cmd = [FFMPEG_PATH, '-y', '-i', infile_path, out_path]
+
+    _start_conversion_thread(job_id, infile_path, out_path, total_seconds, cmd=cmd, session_id=session_id)
+
+    return jsonify({'status': 'queued', 'job_id': job_id, 'poll_url': f'/api/convert/status/{job_id}'}), 202
+
+
+@app.route('/api/convert/status/<job_id>')
+def api_convert_status(job_id):
+    job = conversion_jobs.get(job_id)
+    if not job:
+        return jsonify({'status': 'error', 'message': 'Job not found'}), 404
+    return jsonify(job)
 
 
 if __name__ == '__main__':
