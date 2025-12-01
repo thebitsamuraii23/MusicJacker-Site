@@ -3,3 +3,6 @@ yt-dlp
 python-dotenv
 gunicorn
 mutagen
+celery[redis]
+redis
+pydantic
