@@ -18,7 +18,7 @@ Lightweight Flask web app to grab audio/video from YouTube, YouTube Music, Sound
 Site is deployed and works on Render, some things can change.
 
 ## 📢 Updates & Community
-- Blog with release notes and news about the site and Telegram bot: https://youtubemusicdownloader.life
+- Blog with release notes and news about the site and Telegram bot: https://youtubemusicdownloader.life/miniblog
 - Converter: https://youtubemusicdownloader.life/converter
 - Telegram channel: https://t.me/ytdlpdeveloper  
 - Telegram bot: https://t.me/ytdlpload_bot
