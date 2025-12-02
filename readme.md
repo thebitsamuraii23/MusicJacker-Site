@@ -1,4 +1,5 @@
 # 🎧 Music Jacker — YouTube & SoundCloud Downloader
+https://youtubemusicdownloader.life or https://musicjacker-site.onrender.com
 
 Lightweight Flask web app to grab audio/video from YouTube, YouTube Music, SoundCloud and other supported sources. The UI is Tailwind-based, animated, responsive, multilingual, and ships with quick links to news and the Telegram bot.
 
@@ -22,6 +23,8 @@ Site is deployed and works on Render, some things can change.
 - Converter: https://youtubemusicdownloader.life/converter
 - Telegram channel: https://t.me/ytdlpdeveloper  
 - Telegram bot: https://t.me/ytdlpload_bot
+- Web-site: https://youtubemusicdownloader.life (domain)
+- Web-site: https://musicjacker-site.onrender.com (render default)
 
 ## ⚙️ Quick Start
 ```bash
